@@ -116,3 +116,4 @@ jobs:
             --format="value(status.url)")
           echo "✅ Deployed to: ${URL}"
           echo "url=${URL}" >> $GITHUB_OUTPUT
+          echo "url=${URL}" >> $GITHUB_OUTPUT
