@@ -1,0 +1,33 @@
+# Dependencies
+node_modules/
+.bun/
+
+# Build output
+dist/
+build/
+
+# Dev/test artifacts
+coverage/
+*.log
+*.local
+
+# Editor & OS files
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# Git
+.git/
+.gitignore
+
+# Docker itself
+Dockerfile
+.dockerignore
+docker-compose*.yml
+
+# CI/CD
+.github/
+cloudbuild.yaml
+deploy.sh
+

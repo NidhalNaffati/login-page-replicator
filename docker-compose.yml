@@ -1,0 +1,12 @@
+version: "3.9"
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: login-page-replicator
+    ports:
+      - "8080:80"
+    restart: unless-stopped
+
