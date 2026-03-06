@@ -57,16 +57,37 @@ jobs:
 
     permissions:
       contents: read
+      id-token: write    # Required for Workload Identity Federation
 
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
-      # ── Authenticate to GCP using Service Account JSON key ────────────────
+      # ── Verify secrets are present (safe: only shows length, never the value) ─
+      - name: Verify GCP secrets are set
+        run: |
+          if [ -z "${{ secrets.GCP_WORKLOAD_IDENTITY_PROVIDER }}" ]; then
+            echo "❌ GCP_WORKLOAD_IDENTITY_PROVIDER is EMPTY or NOT SET"
+            exit 1
+          else
+            echo "✅ GCP_WORKLOAD_IDENTITY_PROVIDER is set (length: ${#WIF})"
+          fi
+          if [ -z "${{ secrets.GCP_SERVICE_ACCOUNT }}" ]; then
+            echo "❌ GCP_SERVICE_ACCOUNT is EMPTY or NOT SET"
+            exit 1
+          else
+            echo "✅ GCP_SERVICE_ACCOUNT is set"
+          fi
+        env:
+          WIF: ${{ secrets.GCP_WORKLOAD_IDENTITY_PROVIDER }}
+
+      # ── Authenticate to GCP via Workload Identity Federation ─────────────
+      # No long-lived keys — uses GitHub's OIDC token instead
       - name: Authenticate to Google Cloud
         uses: google-github-actions/auth@v2
         with:
-          credentials_json: ${{ secrets.GCP_SA_KEY }}
+          workload_identity_provider: ${{ secrets.GCP_WORKLOAD_IDENTITY_PROVIDER }}
+          service_account: ${{ secrets.GCP_SERVICE_ACCOUNT }}
 
       # ── Set up gcloud CLI ─────────────────────────────────────────────────
       - name: Set up Cloud SDK
