@@ -1,0 +1,38 @@
+{
+  "uid": "cloudrun-overview",
+  "title": "Cloud Run Overview (Cloud Monitoring)",
+  "timezone": "browser",
+  "schemaVersion": 39,
+  "version": 1,
+  "refresh": "30s",
+  "panels": [
+    {
+      "type": "timeseries",
+      "title": "Request count (all services)",
+      "gridPos": { "h": 9, "w": 24, "x": 0, "y": 0 },
+      "datasource": { "type": "googlecloudmonitoring", "uid": "gcm" },
+      "targets": [
+        {
+          "refId": "A",
+          "queryType": "timeSeriesQuery",
+          "timeSeriesQuery": {
+            "projectName": "projects/${GCP_PROJECT}",
+            "filters": [
+              "metric.type=\"run.googleapis.com/request_count\""
+            ],
+            "groupBys": [
+              "resource.label.service_name"
+            ],
+            "perSeriesAligner": "ALIGN_RATE",
+            "alignmentPeriod": "60s",
+            "crossSeriesReducer": "REDUCE_SUM"
+          }
+        }
+      ],
+      "fieldConfig": { "defaults": { "unit": "reqps" }, "overrides": [] },
+      "options": { "legend": { "showLegend": true, "displayMode": "list" } }
+    }
+  ],
+  "time": { "from": "now-6h", "to": "now" }
+}
+

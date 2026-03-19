@@ -1,0 +1,14 @@
+apiVersion: 1
+
+datasources:
+  - name: Google Cloud Monitoring
+    uid: gcm
+    type: googlecloudmonitoring
+    access: proxy
+    isDefault: true
+    editable: false
+    jsonData:
+      # Use the Cloud Run service account via Application Default Credentials.
+      authenticationType: gce
+      defaultProject: ${GCP_PROJECT}
+

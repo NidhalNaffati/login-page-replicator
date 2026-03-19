@@ -231,9 +231,9 @@ docker push "${IMAGE_VERSIONED}"
 echo "   Pushing latest tag:    ${IMAGE_LATEST}"
 docker push "${IMAGE_LATEST}"
 
-# ── Step 6: Deploy to Cloud Run ───────────────────────────────────────────────
+# ── Step 6: Deploy app to Cloud Run ───────────────────────────────────────────
 echo ""
-echo "▶ [6/6] Deploying to Cloud Run..."
+echo "▶ [6/6] Deploying app to Cloud Run..."
 gcloud run deploy "${SERVICE_NAME}" \
   --image="${IMAGE_VERSIONED}" \
   --region="${REGION}" \
