@@ -3,10 +3,10 @@ FROM oven/bun:1 AS builder
 WORKDIR /app
 
 # Copy dependency files first for better layer caching
-COPY package.json bun.lockb ./
+COPY package.json bun.lock ./
 
 # Install dependencies (uses bun.lockb lockfile)
-RUN bun install --frozen-lockfile
+RUN bun install
 
 # Copy the rest of the source code
 COPY . .

@@ -14,6 +14,20 @@ export default {
     },
     extend: {
       colors: {
+        rosePine: {
+          base: "#191724", surface: "#1f1d2e", overlay: "#26233a",
+          muted: "#6e6a86", subtle: "#908caa", text: "#e0def4",
+          love: "#eb6f92", gold: "#f6c177", rose: "#ebbcba",
+          pine: "#31748f", foam: "#9ccfd8", iris: "#c4a7e7",
+          highlightLow: "#21202e", highlightMed: "#403d52", highlightHigh: "#524f67",
+        },
+        rosePineDawn: {
+          base: "#faf4ed", surface: "#fffaf3", overlay: "#f2e9e1",
+          muted: "#9893a5", subtle: "#797593", text: "#575279",
+          love: "#b4637a", gold: "#ea9d34", rose: "#d7827e",
+          pine: "#286983", foam: "#56949f", iris: "#907aa9",
+          highlightLow: "#f4ede8", highlightMed: "#dfdad9", highlightHigh: "#cecacd",
+        },
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",
         ring: "hsl(var(--ring))",
@@ -62,6 +76,13 @@ export default {
         lg: "var(--radius)",
         md: "calc(var(--radius) - 2px)",
         sm: "calc(var(--radius) - 4px)",
+      },
+      transitionTimingFunction: {
+        'authentic': 'cubic-bezier(0.25, 0.1, 0.25, 1)',
+      },
+      boxShadow: {
+        'surface': '0 0 0 1px rgba(0,0,0,.06), 0 1px 2px -1px rgba(0,0,0,.06), 0 2px 4px rgba(0,0,0,.04)',
+        'surface-hover': '0 0 0 1px rgba(0,0,0,.06), 0 4px 6px -1px rgba(0,0,0,.1), 0 2px 4px -1px rgba(0,0,0,.06)',
       },
       keyframes: {
         "accordion-down": {
