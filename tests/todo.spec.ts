@@ -2,8 +2,8 @@ import { test, expect } from '@playwright/test';
 
 test.describe('Todo App', () => {
   test.beforeEach(async ({ page }) => {
-    // Go to the app
-    await page.goto('http://localhost:8080');
+    // Use Playwright baseURL (local dev server or cluster service in CI)
+    await page.goto('/');
 
     // Login if necessary
     // Check if login form is present
