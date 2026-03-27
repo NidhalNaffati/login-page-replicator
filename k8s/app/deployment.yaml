@@ -19,7 +19,7 @@ spec:
       serviceAccountName: gke-app-sa
       containers:
         - name: app
-          image: europe-west1-docker.pkg.dev/pfe-esprit-489411/login-page-replicator-repo/login-page-replicator:latest
+          image: europe-west1-docker.pkg.dev/pfe-esprit-489411/login-page-replicator-repo/login-page-replicator:d8e569b
           ports:
             - containerPort: 80
           resources:
