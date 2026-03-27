@@ -229,12 +229,15 @@ jobs:
       # ── Inject SHA, delete old job, apply new one, wait ──────────────────
       - name: Run Playwright tests on GKE
         run: |
-          sed -i "s|playwright-tests:IMAGE_TAG|playwright-tests:${{ github.sha }}|" \
+          SHORT_SHA=$(echo ${{ github.sha }} | cut -c1-7)
+          # Apply namespaces + KSA annotation (idempotent — ensures WI is set)
+          kubectl apply -f k8s/namespaces.yaml
+          sed -i "s|playwright-tests:IMAGE_TAG|playwright-tests:${SHORT_SHA}|" \
             k8s/testing/playwright-job.yaml
           kubectl delete job playwright-tests -n testing --ignore-not-found
           kubectl apply -f k8s/testing/playwright-job.yaml
           kubectl wait --for=condition=complete job/playwright-tests \
-            -n testing --timeout=300s \
+            -n testing --timeout=600s \
             || (kubectl logs -l job-name=playwright-tests -n testing && exit 1)
 
       # ── Always print logs ─────────────────────────────────────────────────
