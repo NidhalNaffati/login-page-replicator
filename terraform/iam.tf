@@ -24,12 +24,12 @@ resource "google_service_account_iam_member" "wi_binding" {
   depends_on = [google_container_cluster.main]
 }
 
-# Workload Identity binding: `testing/default` KSA → same GCP SA
+# Workload Identity binding: `testing/playwright-runner` KSA → same GCP SA
 # Needed so Playwright Jobs in the `testing` namespace can pull from Artifact Registry.
 resource "google_service_account_iam_member" "wi_binding_testing" {
   service_account_id = google_service_account.gke_app.name
   role               = "roles/iam.workloadIdentityUser"
-  member             = "serviceAccount:${var.project_id}.svc.id.goog[testing/default]"
+  member             = "serviceAccount:${var.project_id}.svc.id.goog[testing/playwright-runner]"
 
   depends_on = [google_container_cluster.main]
 }

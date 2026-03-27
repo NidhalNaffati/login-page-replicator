@@ -213,10 +213,11 @@ jobs:
       # ── Build & push Playwright test image ────────────────────────────────
       - name: Build Playwright image
         run: |
+          SHORT_SHA=$(echo ${{ github.sha }} | cut -c1-7)
           docker build \
-            -t ${{ env.PW_IMAGE }}:${{ github.sha }} \
+            -t ${{ env.PW_IMAGE }}:${SHORT_SHA} \
             -f tests/Dockerfile .
-          docker push ${{ env.PW_IMAGE }}:${{ github.sha }}
+          docker push ${{ env.PW_IMAGE }}:${SHORT_SHA}
 
       # ── Get GKE credentials ───────────────────────────────────────────────
       - name: Get GKE credentials
@@ -230,8 +231,9 @@ jobs:
       - name: Run Playwright tests on GKE
         run: |
           SHORT_SHA=$(echo ${{ github.sha }} | cut -c1-7)
-          # Apply namespaces + KSA annotation (idempotent — ensures WI is set)
+          # Apply namespaces and Playwright KSA (idempotent — ensures WI is set)
           kubectl apply -f k8s/namespaces.yaml
+          kubectl apply -f k8s/testing/serviceaccount.yaml
           sed -i "s|playwright-tests:IMAGE_TAG|playwright-tests:${SHORT_SHA}|" \
             k8s/testing/playwright-job.yaml
           kubectl delete job playwright-tests -n testing --ignore-not-found
