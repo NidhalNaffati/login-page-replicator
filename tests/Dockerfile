@@ -1,8 +1,9 @@
 # Use the official Playwright image — includes all browser binaries.
 # We install Bun manually because the project uses bun.lock (not package-lock.json).
-FROM mcr.microsoft.com/playwright:v1.44.0-jammy
+FROM mcr.microsoft.com/playwright:v1.57.0-jammy
 
-# Install Bun
+# Install Bun (requires unzip, which is not in the base image)
+RUN apt-get update && apt-get install -y --no-install-recommends unzip && rm -rf /var/lib/apt/lists/*
 RUN curl -fsSL https://bun.sh/install | bash
 ENV PATH="/root/.bun/bin:${PATH}"
 
