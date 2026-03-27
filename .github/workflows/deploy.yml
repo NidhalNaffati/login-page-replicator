@@ -142,8 +142,9 @@ jobs:
       # ── Deploy to Cloud Run (keeps existing Cloud Run service live) ────────
       - name: Deploy to Cloud Run
         run: |
+          SHORT_SHA=$(echo ${{ github.sha }} | cut -c1-7)
           gcloud run deploy ${{ env.SERVICE_NAME }} \
-            --image=${{ env.IMAGE_BASE }}:${{ github.sha }} \
+            --image=${{ env.IMAGE_BASE }}:${SHORT_SHA} \
             --region=${{ env.REGION }} \
             --project=${{ env.PROJECT_ID }} \
             --platform=managed \
