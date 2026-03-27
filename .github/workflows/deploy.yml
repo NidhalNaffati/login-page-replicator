@@ -1,4 +1,4 @@
-name: CI/CD → Artifact Registry → Cloud Run
+name: CI/CD → Artifact Registry → Cloud Run + GKE
 
 on:
   push:
@@ -26,6 +26,7 @@ env:
   REPO_NAME:    login-page-replicator-repo
   SERVICE_NAME: login-page-replicator
   IMAGE_BASE:   europe-west1-docker.pkg.dev/pfe-esprit-489411/login-page-replicator-repo/login-page-replicator
+  PW_IMAGE:     europe-west1-docker.pkg.dev/pfe-esprit-489411/login-page-replicator-repo/playwright-tests
 
 jobs:
   # ────────────────────────────────────────────────────────────────────────────
@@ -50,19 +51,19 @@ jobs:
       - name: Lint
         run: bun run lint || true   # non-blocking — remove "|| true" to enforce
 
-      - name: Run tests
+      - name: Run unit tests
         run: bun run test
 
       - name: Build (type-check + vite build)
         run: bun run build
 
   # ────────────────────────────────────────────────────────────────────────────
-  # JOB 2 — Docker Build → Artifact Registry → Cloud Run
+  # JOB 2 — Docker Build → Artifact Registry → Cloud Run + GKE manifest update
   # Runs on: push to main/master, manual dispatch with deploy=true
   # Skipped on: pull_requests, manual dispatch with deploy=false
   # ────────────────────────────────────────────────────────────────────────────
-  deploy:
-    name: 🚀 Deploy to Cloud Run
+  build-push:
+    name: 🐳 Build & Push Image
     runs-on: ubuntu-latest
     needs: build-test
     if: |
@@ -70,8 +71,8 @@ jobs:
       (github.event_name == 'workflow_dispatch' && github.event.inputs.deploy == 'true')
 
     permissions:
-      contents: read
-      id-token: write   # Required for Workload Identity Federation
+      contents: write      # needed to commit the updated image tag back to the repo
+      id-token: write      # needed for Workload Identity Federation
 
     steps:
       - name: Checkout
@@ -100,8 +101,8 @@ jobs:
             echo ""
             echo "👉 Go to: https://github.com/${{ github.repository }}/settings/secrets/actions"
             echo "   and add both secrets:"
-            echo "   - GCP_WORKLOAD_IDENTITY_PROVIDER"
-            echo "   - GCP_SERVICE_ACCOUNT"
+            echo "   - GCP_WORKLOAD_IDENTITY_PROVIDER  (from: terraform output workload_identity_provider)"
+            echo "   - GCP_SERVICE_ACCOUNT             (from: terraform output github_actions_sa_email)"
             exit 1
           fi
 
@@ -124,19 +125,21 @@ jobs:
       # ── Build Docker image ────────────────────────────────────────────────
       - name: Build Docker image
         run: |
+          SHORT_SHA=$(echo ${{ github.sha }} | cut -c1-7)
           docker build \
             --cache-from ${{ env.IMAGE_BASE }}:latest \
-            -t ${{ env.IMAGE_BASE }}:${{ github.sha }} \
+            -t ${{ env.IMAGE_BASE }}:${SHORT_SHA} \
             -t ${{ env.IMAGE_BASE }}:latest \
             .
 
       # ── Push both tags to Artifact Registry ───────────────────────────────
       - name: Push to Artifact Registry
         run: |
-          docker push ${{ env.IMAGE_BASE }}:${{ github.sha }}
+          SHORT_SHA=$(echo ${{ github.sha }} | cut -c1-7)
+          docker push ${{ env.IMAGE_BASE }}:${SHORT_SHA}
           docker push ${{ env.IMAGE_BASE }}:latest
 
-      # ── Deploy to Cloud Run ───────────────────────────────────────────────
+      # ── Deploy to Cloud Run (keeps existing Cloud Run service live) ────────
       - name: Deploy to Cloud Run
         run: |
           gcloud run deploy ${{ env.SERVICE_NAME }} \
@@ -152,17 +155,88 @@ jobs:
             --max-instances=10 \
             --quiet
 
-      # ── Print the live URL ────────────────────────────────────────────────
-      - name: Get Service URL
-        id: service-url
+      # ── Print the live Cloud Run URL ──────────────────────────────────────
+      - name: Get Cloud Run Service URL
         run: |
           URL=$(gcloud run services describe ${{ env.SERVICE_NAME }} \
             --region=${{ env.REGION }} \
             --project=${{ env.PROJECT_ID }} \
             --format="value(status.url)")
-          echo "url=${URL}" >> $GITHUB_OUTPUT
           echo ""
           echo "╔══════════════════════════════════════════════════════╗"
-          echo "║  ✅ Deployment complete!                              ║"
+          echo "║  ✅ Cloud Run deployment complete!                    ║"
           echo "║  🌐 Live URL: ${URL}"
           echo "╚══════════════════════════════════════════════════════╝"
+
+      # ── Update image tag in GKE manifest and push — Argo CD picks it up ──
+      - name: Update image tag in k8s manifest
+        run: |
+          SHORT_SHA=$(echo ${{ github.sha }} | cut -c1-7)
+          sed -i "s|${{ env.SERVICE_NAME }}:.*|${{ env.SERVICE_NAME }}:${SHORT_SHA}|" k8s/app/deployment.yaml
+          git config user.email "ci@github.com"
+          git config user.name "GitHub Actions"
+          git add k8s/app/deployment.yaml
+          git diff --cached --quiet || \
+            (git commit -m "ci: update image tag to ${SHORT_SHA}" && git push)
+
+  # ────────────────────────────────────────────────────────────────────────────
+  # JOB 3 — Playwright e2e tests inside GKE
+  # Runs after build-push so the new image is already in Artifact Registry.
+  # ────────────────────────────────────────────────────────────────────────────
+  e2e-tests:
+    name: 🎭 Playwright e2e (GKE)
+    runs-on: ubuntu-latest
+    needs: build-push
+
+    permissions:
+      contents: read
+      id-token: write      # needed for Workload Identity Federation
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      # ── Authenticate to GCP ───────────────────────────────────────────────
+      - name: Authenticate to Google Cloud
+        uses: google-github-actions/auth@v2
+        with:
+          workload_identity_provider: ${{ secrets.GCP_WORKLOAD_IDENTITY_PROVIDER }}
+          service_account: ${{ secrets.GCP_SERVICE_ACCOUNT }}
+
+      - name: Set up Cloud SDK
+        uses: google-github-actions/setup-gcloud@v2
+
+      - name: Configure Docker auth
+        run: gcloud auth configure-docker ${{ env.REGION }}-docker.pkg.dev --quiet
+
+      # ── Build & push Playwright test image ────────────────────────────────
+      - name: Build Playwright image
+        run: |
+          docker build \
+            -t ${{ env.PW_IMAGE }}:${{ github.sha }} \
+            -f tests/Dockerfile .
+          docker push ${{ env.PW_IMAGE }}:${{ github.sha }}
+
+      # ── Get GKE credentials ───────────────────────────────────────────────
+      - name: Get GKE credentials
+        uses: google-github-actions/get-gke-credentials@v2
+        with:
+          cluster_name: devops-cluster
+          location: ${{ env.REGION }}
+          project_id: ${{ env.PROJECT_ID }}
+
+      # ── Inject SHA, delete old job, apply new one, wait ──────────────────
+      - name: Run Playwright tests on GKE
+        run: |
+          sed -i "s|playwright-tests:IMAGE_TAG|playwright-tests:${{ github.sha }}|" \
+            k8s/testing/playwright-job.yaml
+          kubectl delete job playwright-tests -n testing --ignore-not-found
+          kubectl apply -f k8s/testing/playwright-job.yaml
+          kubectl wait --for=condition=complete job/playwright-tests \
+            -n testing --timeout=300s \
+            || (kubectl logs -l job-name=playwright-tests -n testing && exit 1)
+
+      # ── Always print logs ─────────────────────────────────────────────────
+      - name: Print test logs
+        if: always()
+        run: kubectl logs -l job-name=playwright-tests -n testing --ignore-errors || true

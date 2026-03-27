@@ -1,0 +1,19 @@
+# Allow egress from observability namespace to Kubernetes API endpoints.
+# In GKE Autopilot, control-plane endpoints may not always sit in the
+# in-cluster Service CIDR, so allow TCP/443 broadly for observability pods.
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-apiserver-egress
+  namespace: observability
+spec:
+  podSelector: {}
+  policyTypes:
+    - Egress
+  egress:
+    - to:
+        - ipBlock:
+            cidr: 0.0.0.0/0
+      ports:
+        - port: 443
+          protocol: TCP

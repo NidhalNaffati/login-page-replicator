@@ -1,0 +1,108 @@
+# values-autopilot.yaml
+
+# Disable everything that touches kube-system or needs host access
+nodeExporter:
+  enabled: false
+
+prometheus-node-exporter:
+  enabled: false
+
+# This is the one still creating services in kube-system
+kubelet:
+  enabled: false
+
+kubeControllerManager:
+  enabled: false
+
+kubeScheduler:
+  enabled: false
+
+kubeEtcd:
+  enabled: false
+
+kubeProxy:
+  enabled: false
+
+# GKE Autopilot managed namespace guard: do not create kube-system DNS scrape Service.
+coreDns:
+  enabled: false
+
+# Disable the kube-system scrape rules that reference disabled components
+defaultRules:
+  rules:
+    kubeControllerManager: false
+    kubeSchedulerAlerting: false
+    kubeSchedulerRecording: false
+    kubeProxy: false
+    etcd: false
+
+# Disable admission webhooks (cause timeout on Autopilot cold starts)
+prometheusOperator:
+  admissionWebhooks:
+    enabled: false
+    patch:
+      enabled: false
+  tls:
+    enabled: false
+  # Autopilot-friendly sizing + slower probes to avoid cold-start churn.
+  resources:
+    requests:
+      cpu: 100m
+      memory: 256Mi
+    limits:
+      cpu: 300m
+      memory: 512Mi
+  livenessProbe:
+    initialDelaySeconds: 30
+    timeoutSeconds: 5
+    periodSeconds: 15
+    failureThreshold: 6
+  readinessProbe:
+    initialDelaySeconds: 20
+    timeoutSeconds: 5
+    periodSeconds: 10
+    failureThreshold: 6
+  # Avoid creating kube-system kubelet Service managed by the operator.
+  kubeletService:
+    enabled: false
+
+kube-state-metrics:
+  resources:
+    requests:
+      cpu: 100m
+      memory: 256Mi
+    limits:
+      cpu: 300m
+      memory: 512Mi
+  livenessProbe:
+    initialDelaySeconds: 30
+    timeoutSeconds: 5
+    periodSeconds: 15
+    failureThreshold: 6
+  readinessProbe:
+    initialDelaySeconds: 20
+    timeoutSeconds: 5
+    periodSeconds: 10
+    failureThreshold: 6
+
+# Your settings
+grafana:
+  adminPassword: DevOps2025!
+  resources:
+    requests:
+      cpu: 100m
+      memory: 256Mi
+    limits:
+      cpu: 300m
+      memory: 512Mi
+
+prometheus:
+  prometheusSpec:
+    serviceMonitorSelectorNilUsesHelmValues: false
+    resources:
+      requests:
+        cpu: 200m
+        memory: 512Mi
+      limits:
+        cpu: 500m
+        memory: 1Gi

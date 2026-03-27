@@ -1,0 +1,30 @@
+# GKE managed Ingress — provisions a GCP L7 HTTP(S) Load Balancer.
+# Exposes the login-page-replicator Service externally on port 80.
+# For HTTPS, add a google.cloud.kubernetes.io/managed-certificates annotation
+# with a ManagedCertificate resource pointing to your domain.
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: login-page-replicator
+  namespace: app
+  annotations:
+    # Use GKE's built-in L7 load balancer controller
+    kubernetes.io/ingress.class: "gce"
+    # Redirect all HTTP traffic to HTTPS (uncomment when cert is ready)
+    # kubernetes.io/ingress.allow-http: "false"
+spec:
+  defaultBackend:
+    service:
+      name: login-page-replicator
+      port:
+        number: 80
+  rules:
+    - http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: login-page-replicator
+                port:
+                  number: 80

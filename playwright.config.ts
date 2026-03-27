@@ -8,7 +8,9 @@ export default defineConfig({
   workers: process.env.CI ? 1 : undefined,
   reporter: 'html',
   use: {
-    baseURL: 'http://localhost:8080',
+    // In CI (Kubernetes Job), BASE_URL points to the ClusterIP service.
+    // Locally, falls back to the vite dev server.
+    baseURL: process.env.BASE_URL || 'http://localhost:8080',
     trace: 'on-first-retry',
   },
   projects: [
@@ -17,10 +19,11 @@ export default defineConfig({
       use: { ...devices['Desktop Chrome'] },
     },
   ],
-  webServer: {
+  // Only spin up the dev server when running locally (not in CI/cluster).
+  webServer: process.env.CI ? undefined : {
     command: 'bun run dev',
     url: 'http://localhost:8080',
-    reuseExistingServer: !process.env.CI,
+    reuseExistingServer: true,
     timeout: 120 * 1000,
   },
 });

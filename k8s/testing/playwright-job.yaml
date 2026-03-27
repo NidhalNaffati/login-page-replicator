@@ -1,0 +1,27 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: playwright-tests
+  namespace: testing
+spec:
+  backoffLimit: 0
+  ttlSecondsAfterFinished: 300
+  template:
+    spec:
+      restartPolicy: Never
+      containers:
+        - name: playwright
+          # IMAGE_TAG is replaced by GitHub Actions before kubectl apply
+          image: europe-west1-docker.pkg.dev/pfe-esprit-489411/login-page-replicator-repo/playwright-tests:IMAGE_TAG
+          env:
+            - name: BASE_URL
+              value: http://login-page-replicator.app.svc.cluster.local
+            - name: CI
+              value: "true"
+          resources:
+            requests:
+              cpu: 500m
+              memory: 1Gi
+            limits:
+              cpu: "1"
+              memory: 2Gi
