@@ -246,6 +246,14 @@ jobs:
       - name: Run Playwright tests on GKE
         run: |
           SHORT_SHA=$(echo ${{ github.sha }} | cut -c1-7)
+          sed -i "s|${{ env.SERVICE_NAME }}:.*|${{ env.SERVICE_NAME }}:${SHORT_SHA}|" \
+            k8s/app/deployment.yaml
+          kubectl apply -f k8s/app/serviceaccount.yaml
+          kubectl apply -f k8s/app/service.yaml
+          kubectl apply -f k8s/app/deployment.yaml
+          kubectl rollout status deployment/${{ env.SERVICE_NAME }} -n app --timeout=300s
+          kubectl wait --for=jsonpath='{.subsets[0].addresses[0].ip}' endpoints/${{ env.SERVICE_NAME }} \
+            -n app --timeout=120s
           sed -i "s|playwright-tests:IMAGE_TAG|playwright-tests:${SHORT_SHA}|" \
             k8s/testing/playwright-job.yaml
           kubectl delete job playwright-tests -n testing --ignore-not-found
