@@ -15,6 +15,24 @@ resource "google_project_iam_member" "artifact_reader" {
   member  = "serviceAccount:${google_service_account.gke_app.email}"
 }
 
+data "google_project" "current" {
+  project_id = var.project_id
+}
+
+# GKE image pulls are performed by cluster runtime identities, not pod workload identity.
+# Autopilot commonly uses these service accounts to fetch Artifact Registry tokens.
+resource "google_project_iam_member" "artifact_reader_node_sa" {
+  project = var.project_id
+  role    = "roles/artifactregistry.reader"
+  member  = "serviceAccount:${data.google_project.current.number}-compute@developer.gserviceaccount.com"
+}
+
+resource "google_project_iam_member" "artifact_reader_gke_service_agent" {
+  project = var.project_id
+  role    = "roles/artifactregistry.reader"
+  member  = "serviceAccount:service-${data.google_project.current.number}@container-engine-robot.iam.gserviceaccount.com"
+}
+
 # Workload Identity binding: pod SA `app/gke-app-sa` → GCP SA `gke-app-sa`
 resource "google_service_account_iam_member" "wi_binding" {
   service_account_id = google_service_account.gke_app.name

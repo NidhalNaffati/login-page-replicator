@@ -10,6 +10,8 @@ spec:
     spec:
       serviceAccountName: playwright-runner
       restartPolicy: Never
+      imagePullSecrets:
+        - name: ar-pull-secret
       containers:
         - name: playwright
           # IMAGE_TAG is replaced by GitHub Actions before kubectl apply

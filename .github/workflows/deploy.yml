@@ -227,13 +227,25 @@ jobs:
           location: ${{ env.REGION }}
           project_id: ${{ env.PROJECT_ID }}
 
+      # ── Create image-pull secret from live GCP token ─────────────────────
+      # Gives the kubelet credentials to pull from Artifact Registry.
+      # Uses the already-authenticated GitHub Actions SA token (has AR writer → can pull).
+      # --dry-run=client -o yaml | apply makes it idempotent across re-runs.
+      - name: Create AR image-pull secret
+        run: |
+          kubectl apply -f k8s/namespaces.yaml
+          kubectl apply -f k8s/testing/serviceaccount.yaml
+          kubectl create secret docker-registry ar-pull-secret \
+            --docker-server=europe-west1-docker.pkg.dev \
+            --docker-username=oauth2accesstoken \
+            --docker-password="$(gcloud auth print-access-token)" \
+            --namespace=testing \
+            --dry-run=client -o yaml | kubectl apply -f -
+
       # ── Inject SHA, delete old job, apply new one, wait ──────────────────
       - name: Run Playwright tests on GKE
         run: |
           SHORT_SHA=$(echo ${{ github.sha }} | cut -c1-7)
-          # Apply namespaces and Playwright KSA (idempotent — ensures WI is set)
-          kubectl apply -f k8s/namespaces.yaml
-          kubectl apply -f k8s/testing/serviceaccount.yaml
           sed -i "s|playwright-tests:IMAGE_TAG|playwright-tests:${SHORT_SHA}|" \
             k8s/testing/playwright-job.yaml
           kubectl delete job playwright-tests -n testing --ignore-not-found
