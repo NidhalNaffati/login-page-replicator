@@ -7,7 +7,8 @@ spec:
   project: default
   source:
     repoURL: https://github.com/NidhalNaffati/login-page-replicator
-    targetRevision: main
+    # Track the repo default branch to avoid main/master mismatches.
+    targetRevision: HEAD
     path: k8s/app
   destination:
     server: https://kubernetes.default.svc
