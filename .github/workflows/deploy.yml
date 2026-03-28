@@ -1,4 +1,4 @@
-name: CI/CD → Artifact Registry → Cloud Run + GKE
+name: CI (GitHub Actions) + CD (Argo CD) + Playwright Reports
 
 on:
   push:
@@ -12,7 +12,7 @@ on:
   workflow_dispatch:
     inputs:
       deploy:
-        description: 'Deploy to Cloud Run after build?'
+        description: 'Run image push + GitOps manifest update (Argo CD deploy)?'
         required: true
         default: 'true'
         type: choice
@@ -58,7 +58,7 @@ jobs:
         run: bun run build
 
   # ────────────────────────────────────────────────────────────────────────────
-  # JOB 2 — Docker Build → Artifact Registry → Cloud Run + GKE manifest update
+  # JOB 2 — Build image, push, and update GitOps manifest
   # Runs on: push to main/master, manual dispatch with deploy=true
   # Skipped on: pull_requests, manual dispatch with deploy=false
   # ────────────────────────────────────────────────────────────────────────────
@@ -139,37 +139,7 @@ jobs:
           docker push ${{ env.IMAGE_BASE }}:${SHORT_SHA}
           docker push ${{ env.IMAGE_BASE }}:latest
 
-      # ── Deploy to Cloud Run (keeps existing Cloud Run service live) ────────
-      - name: Deploy to Cloud Run
-        run: |
-          SHORT_SHA=$(echo ${{ github.sha }} | cut -c1-7)
-          gcloud run deploy ${{ env.SERVICE_NAME }} \
-            --image=${{ env.IMAGE_BASE }}:${SHORT_SHA} \
-            --region=${{ env.REGION }} \
-            --project=${{ env.PROJECT_ID }} \
-            --platform=managed \
-            --allow-unauthenticated \
-            --port=80 \
-            --memory=256Mi \
-            --cpu=1 \
-            --min-instances=0 \
-            --max-instances=10 \
-            --quiet
-
-      # ── Print the live Cloud Run URL ──────────────────────────────────────
-      - name: Get Cloud Run Service URL
-        run: |
-          URL=$(gcloud run services describe ${{ env.SERVICE_NAME }} \
-            --region=${{ env.REGION }} \
-            --project=${{ env.PROJECT_ID }} \
-            --format="value(status.url)")
-          echo ""
-          echo "╔══════════════════════════════════════════════════════╗"
-          echo "║  ✅ Cloud Run deployment complete!                    ║"
-          echo "║  🌐 Live URL: ${URL}"
-          echo "╚══════════════════════════════════════════════════════╝"
-
-      # ── Update image tag in GKE manifest and push — Argo CD picks it up ──
+      # ── Update image tag in GitOps manifest and push — Argo CD picks it up ──
       - name: Update image tag in k8s manifest
         run: |
           SHORT_SHA=$(echo ${{ github.sha }} | cut -c1-7)
@@ -182,7 +152,7 @@ jobs:
 
   # ────────────────────────────────────────────────────────────────────────────
   # JOB 3 — Playwright e2e tests inside GKE
-  # Runs after build-push so the new image is already in Artifact Registry.
+  # Runs after build-push and waits for Argo CD-delivered image rollout.
   # ────────────────────────────────────────────────────────────────────────────
   e2e-tests:
     name: 🎭 Playwright e2e (GKE)
@@ -192,6 +162,7 @@ jobs:
     permissions:
       contents: read
       id-token: write      # needed for Workload Identity Federation
+      checks: write        # publish JUnit summary as a GitHub check
 
     steps:
       - name: Checkout
@@ -242,19 +213,37 @@ jobs:
             --namespace=testing \
             --dry-run=client -o yaml | kubectl apply -f -
 
-      # ── Inject SHA, delete old job, apply new one, wait ──────────────────
-      - name: Run Playwright tests on GKE
+      # ── Wait until Argo CD has rolled out the new app image ───────────────
+      - name: Wait for Argo-managed rollout
         run: |
           SHORT_SHA=$(echo ${{ github.sha }} | cut -c1-7)
-          sed -i "s|${{ env.SERVICE_NAME }}:.*|${{ env.SERVICE_NAME }}:${SHORT_SHA}|" \
-            k8s/app/deployment.yaml
-          kubectl apply -f k8s/app/serviceaccount.yaml
-          kubectl apply -f k8s/app/service.yaml
-          kubectl apply -f k8s/app/deployment.yaml
+          echo "Waiting for deployment/${{ env.SERVICE_NAME }} image tag ${SHORT_SHA}..."
+          FOUND=0
+          for _ in {1..60}; do
+            DEPLOYED_IMAGE=$(kubectl get deployment ${{ env.SERVICE_NAME }} -n app -o jsonpath='{.spec.template.spec.containers[?(@.name=="app")].image}' 2>/dev/null || true)
+            if echo "${DEPLOYED_IMAGE}" | grep -q ":${SHORT_SHA}$"; then
+              FOUND=1
+              break
+            fi
+            sleep 10
+          done
+
+          if [ "${FOUND}" -ne 1 ]; then
+            echo "Timed out waiting for Argo CD to apply image tag ${SHORT_SHA}."
+            kubectl get deployment ${{ env.SERVICE_NAME }} -n app -o yaml || true
+            exit 1
+          fi
+
+          kubectl apply -f k8s/namespaces.yaml
           kubectl apply -f k8s/security/allow-testing-to-app.yaml
           kubectl rollout status deployment/${{ env.SERVICE_NAME }} -n app --timeout=300s
           kubectl wait --for=jsonpath='{.subsets[0].addresses[0].ip}' endpoints/${{ env.SERVICE_NAME }} \
             -n app --timeout=120s
+
+      # ── Inject SHA, delete old job, apply new one, wait ──────────────────
+      - name: Run Playwright tests on GKE
+        run: |
+          SHORT_SHA=$(echo ${{ github.sha }} | cut -c1-7)
           sed -i "s|playwright-tests:IMAGE_TAG|playwright-tests:${SHORT_SHA}|" \
             k8s/testing/playwright-job.yaml
           kubectl delete job playwright-tests -n testing --ignore-not-found
@@ -267,3 +256,40 @@ jobs:
       - name: Print test logs
         if: always()
         run: kubectl logs -l job-name=playwright-tests -n testing --ignore-errors || true
+
+      # ── Always collect Playwright report assets from the pod ─────────────
+      - name: Collect Playwright artifacts
+        if: always()
+        run: |
+          mkdir -p artifacts
+          POD_NAME=$(kubectl get pods -n testing -l job-name=playwright-tests -o jsonpath='{.items[0].metadata.name}' 2>/dev/null || true)
+
+          if [ -z "${POD_NAME}" ]; then
+            echo "No playwright pod found; skipping artifact copy."
+            exit 0
+          fi
+
+          kubectl cp "testing/${POD_NAME}:/tests/playwright-report" "artifacts/playwright-report" || true
+          kubectl cp "testing/${POD_NAME}:/tests/test-results" "artifacts/test-results" || true
+
+      - name: Upload Playwright artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-e2e-${{ github.run_id }}
+          path: |
+            artifacts/playwright-report
+            artifacts/test-results
+          if-no-files-found: warn
+          retention-days: 14
+
+      - name: Publish JUnit report
+        if: always()
+        uses: mikepenz/action-junit-report@v5
+        with:
+          report_paths: artifacts/test-results/junit.xml
+          check_name: Playwright E2E Results
+          detailed_summary: true
+          fail_on_failure: true
+          require_tests: false
+

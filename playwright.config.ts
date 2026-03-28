@@ -6,7 +6,15 @@ export default defineConfig({
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 2 : 0,
   workers: process.env.CI ? 1 : undefined,
-  reporter: 'html',
+  outputDir: 'test-results',
+  reporter: process.env.CI
+    ? [
+        ['line'],
+        ['html', { outputFolder: 'playwright-report', open: 'never' }],
+        ['junit', { outputFile: 'test-results/junit.xml' }],
+        ['json', { outputFile: 'test-results/results.json' }],
+      ]
+    : [['html', { outputFolder: 'playwright-report', open: 'never' }]],
   use: {
     // In CI (Kubernetes Job), BASE_URL points to the ClusterIP service.
     // Locally, falls back to the vite dev server.

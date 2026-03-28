@@ -23,4 +23,4 @@ COPY tests/ ./tests/
 ENV BASE_URL=http://login-page-replicator.app.svc.cluster.local
 ENV CI=true
 
-CMD ["bun", "x", "playwright", "test", "--reporter=line"]
+CMD ["bun", "x", "playwright", "test"]
