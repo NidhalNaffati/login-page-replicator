@@ -5,11 +5,13 @@ metadata:
   namespace: app
 spec:
   podSelector: {}
+  policyTypes:
+    - Ingress
   ingress:
     - from:
         - namespaceSelector:
             matchLabels:
-              name: observability
+              kubernetes.io/metadata.name: observability
       ports:
         - port: 9113
 

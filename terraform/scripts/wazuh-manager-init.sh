@@ -1,15 +1,25 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# Minimal startup bootstrap for the Wazuh manager VM.
-# Full Wazuh install is done in Phase 6 using the official installer.
+# Bootstrap script for the Wazuh manager VM.
+# Automatically installs Wazuh 4.14.x (manager + indexer + dashboard).
+
 apt-get update -y
 apt-get install -y curl ca-certificates
 
-cat >/etc/motd <<'EOF'
-Wazuh manager VM ready.
-Run the Phase 6 installer:
-  curl -sO https://packages.wazuh.com/4.7/wazuh-install.sh
-  bash wazuh-install.sh -a
-EOF
+# Download and run the official Wazuh installer
+curl -sO https://packages.wazuh.com/4.14/wazuh-install.sh
+bash wazuh-install.sh -a 2>&1 | tee /var/log/wazuh-install.log
 
+# Print credentials to MOTD for easy retrieval after SSH
+PASS=$(grep "Password:" /var/log/wazuh-install.log | tail -1 | awk '{print $NF}')
+
+cat >/etc/motd <<EOF
+Wazuh 4.14 installed successfully.
+Dashboard: https://$(curl -s ifconfig.me)
+User:       admin
+Password:   ${PASS}
+
+Full install log: /var/log/wazuh-install.log
+Credentials:      ~/wazuh-install-files.tar
+EOF

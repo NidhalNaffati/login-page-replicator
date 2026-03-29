@@ -14,4 +14,8 @@ spec:
   egress:
     - to:
         - podSelector: {}
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: app
 

@@ -1,0 +1,75 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: wazuh-agent-config
+  namespace: security
+data:
+  ossec.conf: |
+    <ossec_config>
+      <client>
+        <server>
+          <address>10.10.0.2</address>
+          <port>1514</port>
+          <protocol>tcp</protocol>
+        </server>
+        <auto_restart>yes</auto_restart>
+      </client>
+      <wodle name="syscollector">
+        <disabled>no</disabled>
+        <interval>1h</interval>
+        <os>yes</os>
+        <network>yes</network>
+        <packages>no</packages>
+        <hardware>no</hardware>
+        <ports>yes</ports>
+      </wodle>
+      <localfile>
+        <log_format>syslog</log_format>
+        <location>/var/log/containers/*.log</location>
+      </localfile>
+      <localfile>
+        <log_format>syslog</log_format>
+        <location>/var/log/pods/*/*/*.log</location>
+      </localfile>
+    </ossec_config>
+---
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: wazuh-agent
+  namespace: security
+spec:
+  selector:
+    matchLabels:
+      app: wazuh-agent
+  template:
+    metadata:
+      labels:
+        app: wazuh-agent
+    spec:
+      containers:
+        - name: wazuh-agent
+          image: wazuh/wazuh-agent:4.14.4
+          volumeMounts:
+            - name: wazuh-config
+              mountPath: /wazuh-config-mount/etc/ossec.conf
+              subPath: ossec.conf
+            - name: varlog
+              mountPath: /var/log
+              readOnly: true
+          resources:
+            requests:
+              cpu: "100m"
+              memory: "128Mi"
+            limits:
+              cpu: "200m"
+              memory: "256Mi"
+      volumes:
+        - name: wazuh-config
+          configMap:
+            name: wazuh-agent-config
+        - name: varlog
+          hostPath:
+            path: /var/log
+      tolerations:
+        - operator: Exists

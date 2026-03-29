@@ -24,7 +24,8 @@ resource "google_compute_instance" "wazuh_manager" {
   ]
 }
 
-resource "google_compute_firewall" "wazuh_in" {
+# Agent communication — nodes CIDR + pods CIDR
+resource "google_compute_firewall" "wazuh_agents" {
   name    = "allow-wazuh-agents"
   network = google_compute_network.vpc.name
 
@@ -33,7 +34,36 @@ resource "google_compute_firewall" "wazuh_in" {
     ports    = ["1514", "1515", "55000"]
   }
 
-  source_ranges = ["10.10.0.0/20"]
+  # 10.10.0.0/20 = node subnet, 10.20.0.0/16 = pods CIDR
+  source_ranges = ["10.10.0.0/20", "10.20.0.0/16"]
   target_tags   = ["wazuh-manager"]
 }
 
+# Dashboard access — restrict to your IP in production
+resource "google_compute_firewall" "wazuh_dashboard" {
+  name    = "allow-wazuh-dashboard"
+  network = google_compute_network.vpc.name
+
+  allow {
+    protocol = "tcp"
+    ports    = ["443"]
+  }
+
+  source_ranges = ["0.0.0.0/0"] # restrict to your IP for production
+  target_tags   = ["wazuh-manager"]
+}
+
+# SSH access via IAP
+resource "google_compute_firewall" "wazuh_ssh" {
+  name    = "allow-ssh-wazuh"
+  network = google_compute_network.vpc.name
+
+  allow {
+    protocol = "tcp"
+    ports    = ["22"]
+  }
+
+  # IAP range — allows gcloud compute ssh without exposing port 22 publicly
+  source_ranges = ["35.235.240.0/20"]
+  target_tags   = ["wazuh-manager"]
+}

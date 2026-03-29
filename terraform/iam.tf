@@ -27,6 +27,13 @@ resource "google_project_iam_member" "artifact_reader_node_sa" {
   member  = "serviceAccount:${data.google_project.current.number}-compute@developer.gserviceaccount.com"
 }
 
+# Required for non-degraded GKE node operations when using the default node SA.
+resource "google_project_iam_member" "gke_default_node_sa" {
+  project = var.project_id
+  role    = "roles/container.defaultNodeServiceAccount"
+  member  = "serviceAccount:${data.google_project.current.number}-compute@developer.gserviceaccount.com"
+}
+
 resource "google_project_iam_member" "artifact_reader_gke_service_agent" {
   project = var.project_id
   role    = "roles/artifactregistry.reader"
