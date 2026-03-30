@@ -1,0 +1,13 @@
+apiVersion: kustomization.yaml
+resources:
+  - allow-apiserver-egress.yaml
+  - allow-dns-egress.yaml
+  - allow-kubelet-probes-observability.yaml
+  - allow-kubelet-probes-app.yaml
+  - allow-observability-internal.yaml
+  - allow-observability-to-app-metrics.yaml
+  - allow-prometheus-scrape.yaml
+  - allow-testing-to-app.yaml
+  - allow-wazuh-egress.yaml
+  - default-deny.yaml
+  - wazuh-agent-daemonset.yaml
