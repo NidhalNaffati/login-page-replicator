@@ -299,34 +299,66 @@ jobs:
           kubectl delete job playwright-tests -n testing --ignore-not-found
           kubectl apply -f k8s/testing/playwright-job.yaml
 
-      # ── Wait for job to finish; collect logs immediately before pod GC ────
-      - name: Wait for job & collect artifacts
+      # ── Wait for job to finish; extract artifacts from pod logs ─────────
+      # kubectl cp / exec are blocked on completed pods, so the container
+      # emits a base64-encoded tarball on stdout between sentinel markers.
+      # We grab it via kubectl logs (works on completed pods) and unpack it.
+      - name: Wait for job & extract artifacts from logs
         run: |
-          # Wait up to 10 min for the job to complete (pass or fail)
+          # Poll until job reaches a terminal state (Complete OR Failed)
+          echo "Waiting for playwright-tests job to finish..."
+          TIMEOUT=600
+          ELAPSED=0
           JOB_STATUS=0
-          kubectl wait --for=condition=complete job/playwright-tests \
-            -n testing --timeout=600s || JOB_STATUS=$?
+          while [ $ELAPSED -lt $TIMEOUT ]; do
+            COMPLETE=$(kubectl get job playwright-tests -n testing \
+              -o jsonpath='{.status.conditions[?(@.type=="Complete")].status}' 2>/dev/null || true)
+            FAILED=$(kubectl get job playwright-tests -n testing \
+              -o jsonpath='{.status.conditions[?(@.type=="Failed")].status}' 2>/dev/null || true)
 
-          # Print logs regardless of outcome
-          echo "=== Playwright pod logs ==="
-          kubectl logs -l job-name=playwright-tests -n testing --prefix=true || true
+            if [ "${COMPLETE}" = "True" ]; then
+              echo "✅ Job completed successfully."
+              break
+            elif [ "${FAILED}" = "True" ]; then
+              echo "❌ Job failed."
+              JOB_STATUS=1
+              break
+            fi
 
-          # Copy artifacts from the pod NOW (pod is still alive within ttlSecondsAfterFinished=300)
-          mkdir -p artifacts/playwright-report artifacts/test-results
-          POD_NAME=$(kubectl get pods -n testing -l job-name=playwright-tests \
-            -o jsonpath='{.items[0].metadata.name}' 2>/dev/null || true)
+            sleep 5
+            ELAPSED=$((ELAPSED + 5))
+          done
 
-          if [ -n "${POD_NAME}" ]; then
-            echo "Copying artifacts from pod ${POD_NAME}..."
-            kubectl cp "testing/${POD_NAME}:/tests/playwright-report/." "artifacts/playwright-report/" || true
-            kubectl cp "testing/${POD_NAME}:/tests/test-results/."      "artifacts/test-results/"      || true
+          if [ $ELAPSED -ge $TIMEOUT ] && [ "${COMPLETE}" != "True" ]; then
+            echo "⏰ Timed out waiting for job after ${TIMEOUT}s."
+            JOB_STATUS=1
+          fi
+
+          # Fetch full pod logs (available even after pod completes)
+          echo "=== Fetching pod logs ==="
+          POD_LOGS=$(kubectl logs -l job-name=playwright-tests -n testing --prefix=false 2>/dev/null || true)
+
+          # Print readable portion (everything before the sentinel)
+          echo "${POD_LOGS}" | sed '/---PLAYWRIGHT-ARTIFACTS-START---/,$d'
+
+          # Extract and unpack the base64 artifact tarball
+          mkdir -p artifacts
+          B64=$(echo "${POD_LOGS}" \
+            | sed -n '/---PLAYWRIGHT-ARTIFACTS-START---/,/---PLAYWRIGHT-ARTIFACTS-END---/p' \
+            | grep -v '^---PLAYWRIGHT-ARTIFACTS')
+
+          if [ -n "${B64}" ]; then
+            echo "Extracting artifact tarball..."
+            echo "${B64}" | base64 -d | tar -xzf - -C artifacts/ || true
+            echo "Artifact contents:"
+            find artifacts/ -type f | head -40
           else
-            echo "⚠️  No playwright pod found; cannot copy artifacts."
+            echo "⚠️  No artifact tarball found in pod logs."
           fi
 
           # Fail the step if the job itself failed
           if [ "${JOB_STATUS}" -ne 0 ]; then
-            echo "❌ Playwright job failed (see logs above)."
+            echo "❌ Playwright job failed — see test output above."
             exit 1
           fi
 

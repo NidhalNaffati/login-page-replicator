@@ -23,4 +23,15 @@ COPY tests/ ./tests/
 ENV BASE_URL=http://login-page-replicator.app.svc.cluster.local
 ENV CI=true
 
-CMD ["bun", "x", "playwright", "test"]
+# Run tests, then emit a base64-encoded tarball of all artifacts on a clearly-marked
+# line in stdout so GitHub Actions can extract them from `kubectl logs` without
+# needing `kubectl exec` (which is blocked on completed pods).
+CMD ["/bin/bash", "-c", "\
+  EXIT=0; \
+  bun x playwright test || EXIT=$?; \
+  echo '---PLAYWRIGHT-ARTIFACTS-START---'; \
+  tar -czf - -C /tests playwright-report test-results 2>/dev/null | base64 -w 0; \
+  echo; \
+  echo '---PLAYWRIGHT-ARTIFACTS-END---'; \
+  exit $EXIT \
+"]
