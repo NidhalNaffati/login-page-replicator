@@ -27,11 +27,14 @@ export default defineConfig({
       use: { ...devices['Desktop Chrome'] },
     },
   ],
-  // Only spin up the dev server when running locally (not in CI/cluster).
-  webServer: process.env.CI ? undefined : {
-    command: 'bun run dev',
-    url: 'http://localhost:8080',
-    reuseExistingServer: true,
-    timeout: 120 * 1000,
-  },
+  // Spin up the dev server when the target is localhost (local dev OR GitHub Actions runner).
+  // Skip it when pointing at a real cluster service (BASE_URL set to a non-localhost address).
+  webServer: process.env.BASE_URL && !process.env.BASE_URL.includes('localhost')
+    ? undefined
+    : {
+        command: 'bun run dev',
+        url: 'http://localhost:8080',
+        reuseExistingServer: !process.env.CI,
+        timeout: 120 * 1000,
+      },
 });

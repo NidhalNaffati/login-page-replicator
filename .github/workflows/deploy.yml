@@ -56,6 +56,61 @@ jobs:
         run: bun run build
 
   # ────────────────────────────────────────────────────────────────────────────
+  # JOB 1b — Playwright e2e (local runner, no GKE) — runs on every push & PR
+  # Spins up the Vite dev server, runs all tests, and publishes JUnit results.
+  # ────────────────────────────────────────────────────────────────────────────
+  e2e-local:
+    name: 🎭 Playwright e2e (local)
+    runs-on: ubuntu-latest
+    needs: build-test
+
+    permissions:
+      contents: read
+      checks: write        # publish JUnit summary as a GitHub check
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - name: Install dependencies
+        run: bun install --frozen-lockfile
+
+      - name: Install Playwright browsers
+        run: bun x playwright install --with-deps chromium
+
+      - name: Run Playwright e2e tests
+        run: bun x playwright test
+        env:
+          CI: "true"
+          BASE_URL: "http://localhost:8080"
+
+      - name: Upload Playwright HTML report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-local-report-${{ github.run_id }}
+          path: |
+            playwright-report/
+            test-results/
+          if-no-files-found: warn
+          retention-days: 14
+
+      - name: Publish JUnit report
+        if: always()
+        uses: mikepenz/action-junit-report@v5
+        with:
+          report_paths: test-results/junit.xml
+          check_name: Playwright E2E Results
+          detailed_summary: true
+          fail_on_failure: true
+          require_tests: true
+
+  # ────────────────────────────────────────────────────────────────────────────
   # JOB 2 — Build image, push, and update GitOps manifest
   # Runs on: push to main/master, manual dispatch with deploy=true
   # Skipped on: pull_requests, manual dispatch with deploy=false
@@ -197,9 +252,6 @@ jobs:
           project_id: ${{ env.PROJECT_ID }}
 
       # ── Create image-pull secret from live GCP token ─────────────────────
-      # Gives the kubelet credentials to pull from Artifact Registry.
-      # Uses the already-authenticated GitHub Actions SA token (has AR writer → can pull).
-      # --dry-run=client -o yaml | apply makes it idempotent across re-runs.
       - name: Create AR image-pull secret
         run: |
           kubectl apply -f k8s/namespaces.yaml
@@ -238,56 +290,66 @@ jobs:
           kubectl wait --for=jsonpath='{.subsets[0].addresses[0].ip}' endpoints/${{ env.SERVICE_NAME }} \
             -n app --timeout=120s
 
-      # ── Inject SHA, delete old job, apply new one, wait ──────────────────
-      - name: Run Playwright tests on GKE
+      # ── Inject SHA, delete old job, apply new one ─────────────────────────
+      - name: Launch Playwright job on GKE
         run: |
           SHORT_SHA=$(echo ${{ github.sha }} | cut -c1-7)
           sed -i "s|playwright-tests:IMAGE_TAG|playwright-tests:${SHORT_SHA}|" \
             k8s/testing/playwright-job.yaml
           kubectl delete job playwright-tests -n testing --ignore-not-found
           kubectl apply -f k8s/testing/playwright-job.yaml
-          kubectl wait --for=condition=complete job/playwright-tests \
-            -n testing --timeout=600s \
-            || (kubectl logs -l job-name=playwright-tests -n testing && exit 1)
 
-      # ── Always print logs ─────────────────────────────────────────────────
-      - name: Print test logs
-        if: always()
-        run: kubectl logs -l job-name=playwright-tests -n testing --ignore-errors || true
-
-      # ── Always collect Playwright report assets from the pod ─────────────
-      - name: Collect Playwright artifacts
-        if: always()
+      # ── Wait for job to finish; collect logs immediately before pod GC ────
+      - name: Wait for job & collect artifacts
         run: |
-          mkdir -p artifacts
-          POD_NAME=$(kubectl get pods -n testing -l job-name=playwright-tests -o jsonpath='{.items[0].metadata.name}' 2>/dev/null || true)
+          # Wait up to 10 min for the job to complete (pass or fail)
+          JOB_STATUS=0
+          kubectl wait --for=condition=complete job/playwright-tests \
+            -n testing --timeout=600s || JOB_STATUS=$?
 
-          if [ -z "${POD_NAME}" ]; then
-            echo "No playwright pod found; skipping artifact copy."
-            exit 0
+          # Print logs regardless of outcome
+          echo "=== Playwright pod logs ==="
+          kubectl logs -l job-name=playwright-tests -n testing --prefix=true || true
+
+          # Copy artifacts from the pod NOW (pod is still alive within ttlSecondsAfterFinished=300)
+          mkdir -p artifacts/playwright-report artifacts/test-results
+          POD_NAME=$(kubectl get pods -n testing -l job-name=playwright-tests \
+            -o jsonpath='{.items[0].metadata.name}' 2>/dev/null || true)
+
+          if [ -n "${POD_NAME}" ]; then
+            echo "Copying artifacts from pod ${POD_NAME}..."
+            kubectl cp "testing/${POD_NAME}:/tests/playwright-report/." "artifacts/playwright-report/" || true
+            kubectl cp "testing/${POD_NAME}:/tests/test-results/."      "artifacts/test-results/"      || true
+          else
+            echo "⚠️  No playwright pod found; cannot copy artifacts."
           fi
 
-          kubectl cp "testing/${POD_NAME}:/tests/playwright-report" "artifacts/playwright-report" || true
-          kubectl cp "testing/${POD_NAME}:/tests/test-results" "artifacts/test-results" || true
+          # Fail the step if the job itself failed
+          if [ "${JOB_STATUS}" -ne 0 ]; then
+            echo "❌ Playwright job failed (see logs above)."
+            exit 1
+          fi
 
+      # ── Always upload raw artifact bundle ─────────────────────────────────
       - name: Upload Playwright artifacts
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: playwright-e2e-${{ github.run_id }}
+          name: playwright-gke-${{ github.run_id }}
           path: |
-            artifacts/playwright-report
-            artifacts/test-results
+            artifacts/playwright-report/
+            artifacts/test-results/
           if-no-files-found: warn
           retention-days: 14
 
+      # ── Publish JUnit check — requires actual test results ────────────────
       - name: Publish JUnit report
         if: always()
         uses: mikepenz/action-junit-report@v5
         with:
           report_paths: artifacts/test-results/junit.xml
-          check_name: Playwright E2E Results
+          check_name: Playwright E2E Results (GKE)
           detailed_summary: true
           fail_on_failure: true
-          require_tests: false
+          require_tests: true
 
