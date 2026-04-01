@@ -1,81 +1,97 @@
-import { test, expect } from '@playwright/test';
+import { test, expect, type Page } from '@playwright/test';
+
+async function login(page: Page) {
+  await page.getByPlaceholder('TNEEIN').fill('TNEEIN');
+  await page.getByPlaceholder('••••••••').fill('4YOU');
+  await page.getByRole('button', { name: 'Sign In' }).click();
+  await expect(page.getByText('My Tasks')).toBeVisible();
+}
+
+async function addTodo(page: Page, text: string) {
+  await page.getByPlaceholder('Add a new task...').fill(text);
+  await page.getByPlaceholder('Add a new task...').press('Enter');
+}
 
 test.describe('Todo App', () => {
   test.beforeEach(async ({ page }) => {
-    // Use Playwright baseURL (local dev server or cluster service in CI)
     await page.goto('/', { waitUntil: 'domcontentloaded', timeout: 15000 });
-
-    // Login if necessary
-    // Check if login form is present
-    const loginHeader = page.getByText('Welcome back');
-    if (await loginHeader.isVisible()) {
-      await page.fill('input[placeholder="TNEEIN"]', 'TNEEIN'); // using placeholder because input name/id not explicit
-      await page.fill('input[placeholder="••••••••"]', '4YOU'); // using placeholder from Login.tsx
-
-      // Wait for login to complete - maybe verify header is gone
-      // The form does not have a submit button, it seems?
-      // Wait, let me check Login.tsx again.
-    }
+    await page.evaluate(() => {
+      window.localStorage.clear();
+    });
+    await page.goto('/', { waitUntil: 'domcontentloaded', timeout: 15000 });
   });
 
-  test('should add, toggle, and delete a todo', async ({ page }) => {
-    // We need to ensure we are logged in.
-    // However, the Login component has an onLogin prop.
-    // The submit action is triggered on form submit.
-    // There is no submit button in Login.tsx!
-    // Wait, let me re-read Login.tsx.
+  test('shows an error for invalid credentials', async ({ page }) => {
+    await page.getByPlaceholder('TNEEIN').fill('wrong-user');
+    await page.getByPlaceholder('••••••••').fill('wrong-pass');
+    await page.getByRole('button', { name: 'Sign In' }).click();
 
-    // <form onSubmit={handleSubmit} className="space-y-4">
-    // ... inputs ...
-    // </form>
-    // There is no explicit submit button.
-    // So the user must press Enter in one of the inputs to submit the form.
-    // I should simulate pressing Enter.
+    await expect(page.getByText('Invalid credentials. Try again.')).toBeVisible();
+    await expect(page.getByText('Welcome back')).toBeVisible();
+  });
 
-    const loginHeader = page.getByText('Welcome back');
-    if (await loginHeader.isVisible()) {
-      await page.fill('input[placeholder="TNEEIN"]', 'TNEEIN');
-      await page.fill('input[placeholder="••••••••"]', '4YOU');
-      await page.press('input[placeholder="••••••••"]', 'Enter');
-    }
+  test('logs in successfully and shows the empty state', async ({ page }) => {
+    await login(page);
 
-    // Assert we are on the dashboard
+    await expect(page.getByText('0 pending')).toBeVisible();
+    await expect(page.getByText('No tasks found. Rest easy.')).toBeVisible();
+  });
+
+  test('allows logging out back to the login form', async ({ page }) => {
+    await login(page);
+
+    await page.getByRole('button', { name: 'Logout' }).click();
+
+    await expect(page.getByText('Welcome back')).toBeVisible();
+    await expect(page.getByRole('button', { name: 'Sign In' })).toBeVisible();
+  });
+
+  test('keeps the authenticated session after reload', async ({ page }) => {
+    await login(page);
+
+    await page.reload({ waitUntil: 'domcontentloaded' });
+
     await expect(page.getByText('My Tasks')).toBeVisible();
+    await expect(page.getByRole('button', { name: 'Logout' })).toBeVisible();
+  });
+
+  test('keeps todos after reload', async ({ page }) => {
+    await login(page);
+
+    const todoText = `Persistent Todo ${Date.now()}`;
+    await addTodo(page, todoText);
+
+    await expect(page.getByText(todoText)).toBeVisible();
+    await expect(page.getByText('1 pending')).toBeVisible();
+
+    await page.reload({ waitUntil: 'domcontentloaded' });
+
+    await expect(page.getByText(todoText)).toBeVisible();
+    await expect(page.getByText('1 pending')).toBeVisible();
+  });
+
+  test('adds, completes, and deletes a todo', async ({ page }) => {
+    await login(page);
 
     const todoText = `Test Todo ${Date.now()}`;
+    await addTodo(page, todoText);
 
-    // Add Todo
-    await page.fill('input[placeholder="Add a new task..."]', todoText);
-    await page.press('input[placeholder="Add a new task..."]', 'Enter');
-
-    // Verify Todo appears
     const todoItem = page.getByText(todoText);
     await expect(todoItem).toBeVisible();
+    await expect(page.getByText('1 pending')).toBeVisible();
 
-    // Toggle Todo
-    // The toggle button is the first button in the todo item container.
-    // I can scope locator to the item text container.
-    // The text element is a span. The parent div contains the buttons.
     const todoRow = page.locator('.group', { has: page.getByText(todoText) });
+    await todoRow.locator('button').first().click();
 
-    // Find the toggle button (first button)
-    const toggleButton = todoRow.locator('button').first();
-    await toggleButton.click();
-
-    // Verify it is completed (line-through class on the text span)
     const todoTextSpan = todoRow.locator('span', { hasText: todoText });
     await expect(todoTextSpan).toHaveClass(/line-through/);
+    await expect(page.getByText('0 pending')).toBeVisible();
 
-    // Delete Todo
-    // The delete button is the second button
-    // It is shown on hover mostly (opacity-0 group-hover:opacity-100), but Playwright can click it even if hidden sometimes, or force click.
-    // I should hover first to be safe and mimic user behavior.
     await todoRow.hover();
-    const deleteButton = todoRow.locator('button').nth(1);
-    await deleteButton.click();
+    await todoRow.locator('button').nth(1).click();
 
-    // Verify Todo is gone
     await expect(todoItem).not.toBeVisible();
+    await expect(page.getByText('No tasks found. Rest easy.')).toBeVisible();
   });
 });
 
