@@ -8,6 +8,7 @@ resources:
   - allow-observability-to-app-metrics.yaml
   - allow-prometheus-scrape.yaml
   - allow-testing-to-app.yaml
+  - allow-playwright-hook.yaml
   - allow-wazuh-egress.yaml
   - default-deny.yaml
   - wazuh-agent-daemonset.yaml

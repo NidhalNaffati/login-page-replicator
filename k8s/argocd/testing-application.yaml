@@ -8,21 +8,17 @@ spec:
   source:
     repoURL: https://github.com/NidhalNaffati/login-page-replicator
     targetRevision: HEAD
+    # Manages the testing namespace ServiceAccount only.
+    # The Playwright e2e job is now a PostSync hook inside k8s/app/playwright-hook.yaml
+    # and is run automatically by Argo CD after every app sync — visible in the Argo CD UI.
     path: k8s/testing
   destination:
     server: https://kubernetes.default.svc
     namespace: testing
-  # The Playwright job image tag is injected by GitHub Actions before `kubectl apply`.
-  # Ignore that one field so Argo CD can still show the Job without constantly flagging
-  # the CI-injected SHA tag as drift.
-  ignoreDifferences:
-    - group: batch
-      kind: Job
-      name: playwright-tests
-      namespace: testing
-      jsonPointers:
-        - /spec/template/spec/containers/0/image
   syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
     syncOptions:
       - CreateNamespace=false
 

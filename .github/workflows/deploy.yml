@@ -111,25 +111,41 @@ jobs:
           require_tests: true
 
   # ────────────────────────────────────────────────────────────────────────────
-  # JOB 2 — Build image, push, and update GitOps manifest
-  # Runs on: push to main/master, manual dispatch with deploy=true
+  # JOB 2 — Build images, push to Artifact Registry, update GitOps manifests
+  # Runs on: push to master, manual dispatch with deploy=true
   # Skipped on: pull_requests, manual dispatch with deploy=false
+  #
+  # ✨ GitOps flow:
+  #   1. Build + push app image        → updates k8s/app/deployment.yaml
+  #   2. Build + push Playwright image → updates k8s/app/playwright-hook.yaml
+  #   3. Commit + push both files to Git
+  #   4. Argo CD auto-syncs the app, then runs the PostSync hook job
+  #   5. The hook job is visible in Argo CD UI (under login-page-replicator app)
   # ────────────────────────────────────────────────────────────────────────────
   build-push:
-    name: 🐳 Build & Push Image
+    name: 🐳 Build & Push Images + Update GitOps Manifests
     runs-on: ubuntu-latest
     needs: build-test
     if: |
       github.event_name == 'push' ||
       (github.event_name == 'workflow_dispatch' && github.event.inputs.deploy == 'true')
 
+    outputs:
+      short_sha: ${{ steps.sha.outputs.short_sha }}
+
     permissions:
-      contents: write      # needed to commit the updated image tag back to the repo
+      contents: write      # needed to commit the updated image tags back to the repo
       id-token: write      # needed for Workload Identity Federation
 
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Compute short SHA
+        id: sha
+        run: echo "short_sha=$(echo ${{ github.sha }} | cut -c1-7)" >> $GITHUB_OUTPUT
 
       # ── Verify secrets are injected ───────────────────────────────────────
       - name: Verify GCP secrets are set
@@ -175,40 +191,75 @@ jobs:
       - name: Configure Docker auth
         run: gcloud auth configure-docker ${{ env.REGION }}-docker.pkg.dev --quiet
 
-      # ── Build Docker image ────────────────────────────────────────────────
-      - name: Build Docker image
+      # ── Build + push app Docker image ─────────────────────────────────────
+      - name: Build app Docker image
         run: |
-          SHORT_SHA=$(echo ${{ github.sha }} | cut -c1-7)
           docker build \
             --cache-from ${{ env.IMAGE_BASE }}:latest \
-            -t ${{ env.IMAGE_BASE }}:${SHORT_SHA} \
+            -t ${{ env.IMAGE_BASE }}:${{ steps.sha.outputs.short_sha }} \
             -t ${{ env.IMAGE_BASE }}:latest \
             .
 
-      # ── Push both tags to Artifact Registry ───────────────────────────────
-      - name: Push to Artifact Registry
+      - name: Push app image to Artifact Registry
         run: |
-          SHORT_SHA=$(echo ${{ github.sha }} | cut -c1-7)
-          docker push ${{ env.IMAGE_BASE }}:${SHORT_SHA}
+          docker push ${{ env.IMAGE_BASE }}:${{ steps.sha.outputs.short_sha }}
           docker push ${{ env.IMAGE_BASE }}:latest
 
-      # ── Update image tag in GitOps manifest and push — Argo CD picks it up ──
-      - name: Update image tag in k8s manifest
+      # ── Build + push Playwright test image ────────────────────────────────
+      - name: Build Playwright Docker image
         run: |
-          SHORT_SHA=$(echo ${{ github.sha }} | cut -c1-7)
-          sed -i "s|${{ env.SERVICE_NAME }}:.*|${{ env.SERVICE_NAME }}:${SHORT_SHA}|" k8s/app/deployment.yaml
+          docker build \
+            -f tests/Dockerfile \
+            -t ${{ env.PW_IMAGE }}:${{ steps.sha.outputs.short_sha }} \
+            -t ${{ env.PW_IMAGE }}:latest \
+            .
+
+      - name: Push Playwright image to Artifact Registry
+        run: |
+          docker push ${{ env.PW_IMAGE }}:${{ steps.sha.outputs.short_sha }}
+          docker push ${{ env.PW_IMAGE }}:latest
+
+      # ── Update GitOps manifests — Argo CD picks these up and auto-syncs ───
+      # After the app sync, Argo CD runs playwright-hook.yaml as a PostSync
+      # hook job (visible in the Argo CD UI under login-page-replicator app).
+      - name: Update image tags in k8s manifests
+        run: |
+          SHORT_SHA=${{ steps.sha.outputs.short_sha }}
+
+          # Update app deployment image tag
+          sed -i "s|${{ env.IMAGE_BASE }}:[^ ]*|${{ env.IMAGE_BASE }}:${SHORT_SHA}|g" \
+            k8s/app/deployment.yaml
+
+          # Update Playwright PostSync hook image tag
+          sed -i "s|${{ env.PW_IMAGE }}:[^ ]*|${{ env.PW_IMAGE }}:${SHORT_SHA}|g" \
+            k8s/app/playwright-hook.yaml
+
+          echo "--- Updated deployment.yaml ---"
+          grep "image:" k8s/app/deployment.yaml
+
+          echo "--- Updated playwright-hook.yaml ---"
+          grep "image:" k8s/app/playwright-hook.yaml
+
+      - name: Commit and push updated manifests
+        run: |
           git config user.email "ci@github.com"
           git config user.name "GitHub Actions"
-          git add k8s/app/deployment.yaml
+          git add k8s/app/deployment.yaml k8s/app/playwright-hook.yaml
           git diff --cached --quiet || \
-            (git commit -m "ci: update image tag to ${SHORT_SHA}" && git push)
+            (git commit -m "ci: update image tags to ${{ steps.sha.outputs.short_sha }}" && git push)
 
   # ────────────────────────────────────────────────────────────────────────────
-  # JOB 3 — Playwright e2e tests inside GKE
-  # Runs after build-push and waits for Argo CD-delivered image rollout.
+  # JOB 3 — Wait for the Argo CD PostSync hook job & collect results
+  #
+  # Argo CD automatically creates "playwright-e2e-tests" in the app namespace
+  # after every sync (PostSync hook in k8s/app/playwright-hook.yaml).
+  # This job waits for it to finish, then uploads the HTML report + JUnit XML.
+  #
+  # ✅ You can also see the job pass/fail directly in the Argo CD UI under
+  #    the "login-page-replicator" application resource tree.
   # ────────────────────────────────────────────────────────────────────────────
   e2e-tests:
-    name: 🎭 Playwright e2e (GKE)
+    name: 🎭 Playwright e2e (GKE via Argo CD hook)
     runs-on: ubuntu-latest
     needs: build-push
 
@@ -234,15 +285,6 @@ jobs:
       - name: Configure Docker auth
         run: gcloud auth configure-docker ${{ env.REGION }}-docker.pkg.dev --quiet
 
-      # ── Build & push Playwright test image ────────────────────────────────
-      - name: Build Playwright image
-        run: |
-          SHORT_SHA=$(echo ${{ github.sha }} | cut -c1-7)
-          docker build \
-            -t ${{ env.PW_IMAGE }}:${SHORT_SHA} \
-            -f tests/Dockerfile .
-          docker push ${{ env.PW_IMAGE }}:${SHORT_SHA}
-
       # ── Get GKE credentials ───────────────────────────────────────────────
       - name: Get GKE credentials
         uses: google-github-actions/get-gke-credentials@v2
@@ -251,69 +293,80 @@ jobs:
           location: ${{ env.REGION }}
           project_id: ${{ env.PROJECT_ID }}
 
-      # ── Create image-pull secret from live GCP token ─────────────────────
-      - name: Create AR image-pull secret
+      # ── Apply cluster prerequisites ───────────────────────────────────────
+      - name: Apply cluster prerequisites
         run: |
           kubectl apply -f k8s/namespaces.yaml
           kubectl apply -f k8s/testing/serviceaccount.yaml
-          kubectl create secret docker-registry ar-pull-secret \
-            --docker-server=europe-west1-docker.pkg.dev \
-            --docker-username=oauth2accesstoken \
-            --docker-password="$(gcloud auth print-access-token)" \
-            --namespace=testing \
-            --dry-run=client -o yaml | kubectl apply -f -
+          kubectl apply -f k8s/security/allow-testing-to-app.yaml
+          kubectl apply -f k8s/security/allow-playwright-hook.yaml
 
-      # ── Wait until Argo CD has rolled out the new app image ───────────────
-      - name: Wait for Argo-managed rollout
+          # Refresh image-pull secret in both app and testing namespaces
+          for NS in app testing; do
+            kubectl create secret docker-registry ar-pull-secret \
+              --docker-server=europe-west1-docker.pkg.dev \
+              --docker-username=oauth2accesstoken \
+              --docker-password="$(gcloud auth print-access-token)" \
+              --namespace=${NS} \
+              --dry-run=client -o yaml | kubectl apply -f -
+          done
+
+      # ── Wait for Argo CD to roll out the new app image ────────────────────
+      - name: Wait for Argo CD rollout
         run: |
-          SHORT_SHA=$(echo ${{ github.sha }} | cut -c1-7)
-          echo "Waiting for deployment/${{ env.SERVICE_NAME }} image tag ${SHORT_SHA}..."
+          SHORT_SHA=${{ needs.build-push.outputs.short_sha }}
+          echo "Waiting for Argo CD to deploy image tag: ${SHORT_SHA}"
           FOUND=0
-          for _ in {1..60}; do
-            DEPLOYED_IMAGE=$(kubectl get deployment ${{ env.SERVICE_NAME }} -n app -o jsonpath='{.spec.template.spec.containers[?(@.name=="app")].image}' 2>/dev/null || true)
-            if echo "${DEPLOYED_IMAGE}" | grep -q ":${SHORT_SHA}$"; then
+          for i in {1..60}; do
+            DEPLOYED=$(kubectl get deployment ${{ env.SERVICE_NAME }} -n app \
+              -o jsonpath='{.spec.template.spec.containers[?(@.name=="app")].image}' 2>/dev/null || true)
+            if echo "${DEPLOYED}" | grep -q ":${SHORT_SHA}$"; then
               FOUND=1
               break
             fi
+            echo "Attempt ${i}/60 — current image: ${DEPLOYED:-<not found>}"
             sleep 10
           done
 
           if [ "${FOUND}" -ne 1 ]; then
-            echo "Timed out waiting for Argo CD to apply image tag ${SHORT_SHA}."
+            echo "❌ Timed out — Argo CD did not apply tag ${SHORT_SHA} within 10 minutes."
             kubectl get deployment ${{ env.SERVICE_NAME }} -n app -o yaml || true
             exit 1
           fi
 
-          kubectl apply -f k8s/namespaces.yaml
-          kubectl apply -f k8s/security/allow-testing-to-app.yaml
+          echo "✅ Argo CD deployed ${SHORT_SHA}. Waiting for rollout to complete..."
           kubectl rollout status deployment/${{ env.SERVICE_NAME }} -n app --timeout=300s
-          kubectl wait --for=jsonpath='{.subsets[0].addresses[0].ip}' endpoints/${{ env.SERVICE_NAME }} \
-            -n app --timeout=120s
+          kubectl wait --for=jsonpath='{.subsets[0].addresses[0].ip}' \
+            endpoints/${{ env.SERVICE_NAME }} -n app --timeout=120s
 
-      # ── Inject SHA, delete old job, apply new one ─────────────────────────
-      - name: Launch Playwright job on GKE
+      # ── Wait for Argo CD PostSync hook job to appear and finish ───────────
+      # Argo CD creates "playwright-e2e-tests" in the app namespace automatically
+      # after the sync completes (argocd.argoproj.io/hook: PostSync).
+      # We just wait here and collect the results from pod logs.
+      - name: Wait for Argo CD PostSync hook job
         run: |
-          SHORT_SHA=$(echo ${{ github.sha }} | cut -c1-7)
-          sed -i "s|playwright-tests:IMAGE_TAG|playwright-tests:${SHORT_SHA}|" \
-            k8s/testing/playwright-job.yaml
-          kubectl delete job playwright-tests -n testing --ignore-not-found
-          kubectl apply -f k8s/testing/playwright-job.yaml
+          echo "Waiting for Argo CD to create playwright-e2e-tests PostSync hook..."
+          for i in {1..60}; do
+            if kubectl get job playwright-e2e-tests -n app &>/dev/null; then
+              echo "✅ Job playwright-e2e-tests found in app namespace."
+              break
+            fi
+            echo "Attempt ${i}/60 — job not yet created by Argo CD..."
+            sleep 5
+          done
 
-      # ── Wait for job to finish; extract artifacts from pod logs ─────────
-      # kubectl cp / exec are blocked on completed pods, so the container
-      # emits a base64-encoded tarball on stdout between sentinel markers.
-      # We grab it via kubectl logs (works on completed pods) and unpack it.
-      - name: Wait for job & extract artifacts from logs
-        run: |
-          # Poll until job reaches a terminal state (Complete OR Failed)
-          echo "Waiting for playwright-tests job to finish..."
+          kubectl get job playwright-e2e-tests -n app || \
+            { echo "❌ Job never appeared. Is Argo CD running and syncing?"; exit 1; }
+
+          # Poll until job reaches a terminal state (Complete or Failed)
+          echo "Waiting for playwright-e2e-tests job to finish..."
           TIMEOUT=600
           ELAPSED=0
           JOB_STATUS=0
           while [ $ELAPSED -lt $TIMEOUT ]; do
-            COMPLETE=$(kubectl get job playwright-tests -n testing \
+            COMPLETE=$(kubectl get job playwright-e2e-tests -n app \
               -o jsonpath='{.status.conditions[?(@.type=="Complete")].status}' 2>/dev/null || true)
-            FAILED=$(kubectl get job playwright-tests -n testing \
+            FAILED=$(kubectl get job playwright-e2e-tests -n app \
               -o jsonpath='{.status.conditions[?(@.type=="Failed")].status}' 2>/dev/null || true)
 
             if [ "${COMPLETE}" = "True" ]; then
@@ -334,14 +387,15 @@ jobs:
             JOB_STATUS=1
           fi
 
-          # Fetch full pod logs (available even after pod completes)
+          # Fetch pod logs — available even after pod completes (kubectl logs works on completed pods)
           echo "=== Fetching pod logs ==="
-          POD_LOGS=$(kubectl logs -l job-name=playwright-tests -n testing --prefix=false 2>/dev/null || true)
+          POD_LOGS=$(kubectl logs -l job-name=playwright-e2e-tests -n app \
+            --prefix=false --tail=-1 2>/dev/null || true)
 
-          # Print readable portion (everything before the sentinel)
+          # Print readable portion (before the artifact sentinel line)
           echo "${POD_LOGS}" | sed '/---PLAYWRIGHT-ARTIFACTS-START---/,$d'
 
-          # Extract and unpack the base64 artifact tarball
+          # Extract and unpack the base64-encoded artifact tarball from logs
           mkdir -p artifacts
           B64=$(echo "${POD_LOGS}" \
             | sed -n '/---PLAYWRIGHT-ARTIFACTS-START---/,/---PLAYWRIGHT-ARTIFACTS-END---/p' \
@@ -356,11 +410,7 @@ jobs:
             echo "⚠️  No artifact tarball found in pod logs."
           fi
 
-          # Fail the step if the job itself failed
-          if [ "${JOB_STATUS}" -ne 0 ]; then
-            echo "❌ Playwright job failed — see test output above."
-            exit 1
-          fi
+          [ "${JOB_STATUS}" -ne 0 ] && exit 1 || true
 
       # ── Always upload raw artifact bundle ─────────────────────────────────
       - name: Upload Playwright artifacts

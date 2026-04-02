@@ -1,0 +1,51 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: playwright-e2e-tests
+  namespace: app
+  annotations:
+    # Run this Job AFTER the app sync completes (PostSync hook).
+    # Argo CD will create it automatically every time the app is synced.
+    argocd.argoproj.io/hook: PostSync
+    # Delete any previous run of this hook before creating a new one.
+    # This prevents "job already exists" errors on re-sync.
+    argocd.argoproj.io/hook-delete-policy: BeforeHookCreation
+  labels:
+    app.kubernetes.io/name: playwright-e2e-tests
+    app.kubernetes.io/part-of: login-page-replicator
+spec:
+  backoffLimit: 0
+  # Keep the completed job visible in Argo CD for 24 hours so you can
+  # inspect pod logs and see pass/fail without looking at GitHub Actions.
+  ttlSecondsAfterFinished: 86400
+  template:
+    metadata:
+      labels:
+        # Must match the NetworkPolicy podSelector in allow-playwright-hook.yaml
+        app.kubernetes.io/name: playwright-e2e-tests
+    spec:
+      serviceAccountName: gke-app-sa
+      restartPolicy: Never
+      imagePullSecrets:
+        - name: ar-pull-secret
+      containers:
+        - name: playwright
+          # This image tag is updated by GitHub Actions via `sed` before pushing to Git.
+          # Argo CD picks up the new tag from Git and re-syncs automatically.
+          image: europe-west1-docker.pkg.dev/pfe-esprit-489411/login-page-replicator-repo/playwright-tests:IMAGE_TAG
+          env:
+            - name: BASE_URL
+              # The hook runs in the same namespace as the app, so the short
+              # service name resolves correctly (no FQDN needed).
+              value: http://login-page-replicator
+            - name: CI
+              value: "true"
+          resources:
+            requests:
+              cpu: 500m
+              memory: 1Gi
+            limits:
+              cpu: "1"
+              memory: 2Gi
+
+

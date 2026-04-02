@@ -1,0 +1,55 @@
+# Allow the Playwright PostSync hook pod (running in the app namespace)
+# to reach the login-page-replicator service on port 80 for e2e testing.
+#
+# The hook pod is labeled: app.kubernetes.io/name=playwright-e2e-tests
+# The app pods are labeled: app=login-page-replicator
+
+# ── Egress: playwright hook → app service ─────────────────────────────────────
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-playwright-hook-egress
+  namespace: app
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: playwright-e2e-tests
+  policyTypes:
+    - Egress
+  egress:
+    # Reach the app service on port 80
+    - to:
+        - podSelector:
+            matchLabels:
+              app: login-page-replicator
+      ports:
+        - protocol: TCP
+          port: 80
+    # DNS egress (supplements the namespace-wide allow-dns-egress policy)
+    - ports:
+        - port: 53
+          protocol: UDP
+        - port: 53
+          protocol: TCP
+---
+# ── Ingress: app pods accept traffic from the playwright hook pod ──────────────
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-playwright-hook-to-app
+  namespace: app
+spec:
+  podSelector:
+    matchLabels:
+      app: login-page-replicator
+  policyTypes:
+    - Ingress
+  ingress:
+    - from:
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/name: playwright-e2e-tests
+      ports:
+        - protocol: TCP
+          port: 80
+
