@@ -219,6 +219,34 @@ jobs:
           docker push ${{ env.PW_IMAGE }}:${{ steps.sha.outputs.short_sha }}
           docker push ${{ env.PW_IMAGE }}:latest
 
+      # ── Prepare cluster BEFORE committing to Git ──────────────────────────
+      # The ar-pull-secret and network policies must exist in the app namespace
+      # BEFORE we push the Git commit that triggers Argo CD sync + PostSync hook.
+      # If we do this after the commit, Argo may start the hook pod before the
+      # secret exists, causing ImagePullBackOff.
+      - name: Get GKE credentials
+        uses: google-github-actions/get-gke-credentials@v2
+        with:
+          cluster_name: devops-cluster
+          location: ${{ env.REGION }}
+          project_id: ${{ env.PROJECT_ID }}
+
+      - name: Pre-create ar-pull-secret and apply network policies
+        run: |
+          kubectl apply -f k8s/namespaces.yaml
+          kubectl apply -f k8s/security/allow-playwright-hook.yaml
+
+          # Refresh image-pull secret in both namespaces so the PostSync hook
+          # pod can pull the Playwright image from Artifact Registry
+          for NS in app testing; do
+            kubectl create secret docker-registry ar-pull-secret \
+              --docker-server=europe-west1-docker.pkg.dev \
+              --docker-username=oauth2accesstoken \
+              --docker-password="$(gcloud auth print-access-token)" \
+              --namespace=${NS} \
+              --dry-run=client -o yaml | kubectl apply -f -
+          done
+
       # ── Update GitOps manifests — Argo CD picks these up and auto-syncs ───
       # After the app sync, Argo CD runs playwright-hook.yaml as a PostSync
       # hook job (visible in the Argo CD UI under login-page-replicator app).
@@ -294,22 +322,14 @@ jobs:
           project_id: ${{ env.PROJECT_ID }}
 
       # ── Apply cluster prerequisites ───────────────────────────────────────
+      # Note: ar-pull-secret was already created in build-push (before the Git
+      # commit) so the PostSync hook pod can pull its image immediately.
       - name: Apply cluster prerequisites
         run: |
           kubectl apply -f k8s/namespaces.yaml
           kubectl apply -f k8s/testing/serviceaccount.yaml
           kubectl apply -f k8s/security/allow-testing-to-app.yaml
           kubectl apply -f k8s/security/allow-playwright-hook.yaml
-
-          # Refresh image-pull secret in both app and testing namespaces
-          for NS in app testing; do
-            kubectl create secret docker-registry ar-pull-secret \
-              --docker-server=europe-west1-docker.pkg.dev \
-              --docker-username=oauth2accesstoken \
-              --docker-password="$(gcloud auth print-access-token)" \
-              --namespace=${NS} \
-              --dry-run=client -o yaml | kubectl apply -f -
-          done
 
       # ── Wait for Argo CD to roll out the new app image ────────────────────
       - name: Wait for Argo CD rollout
@@ -387,23 +407,25 @@ jobs:
             JOB_STATUS=1
           fi
 
-          # Fetch pod logs — available even after pod completes (kubectl logs works on completed pods)
+          # Fetch pod logs to a file — using a file avoids bash $() stripping
+          # trailing newlines which would corrupt the base64 tarball.
           echo "=== Fetching pod logs ==="
-          POD_LOGS=$(kubectl logs -l job-name=playwright-e2e-tests -n app \
-            --prefix=false --tail=-1 2>/dev/null || true)
+          mkdir -p artifacts
+          kubectl logs -l job-name=playwright-e2e-tests -n app \
+            --prefix=false 2>/dev/null > /tmp/pod-logs.txt || true
 
           # Print readable portion (before the artifact sentinel line)
-          echo "${POD_LOGS}" | sed '/---PLAYWRIGHT-ARTIFACTS-START---/,$d'
+          sed '/---PLAYWRIGHT-ARTIFACTS-START---/,$d' /tmp/pod-logs.txt
 
-          # Extract and unpack the base64-encoded artifact tarball from logs
-          mkdir -p artifacts
-          B64=$(echo "${POD_LOGS}" \
-            | sed -n '/---PLAYWRIGHT-ARTIFACTS-START---/,/---PLAYWRIGHT-ARTIFACTS-END---/p' \
-            | grep -v '^---PLAYWRIGHT-ARTIFACTS')
+          # Extract the base64 block between the sentinel markers into its own file
+          sed -n '/---PLAYWRIGHT-ARTIFACTS-START---/,/---PLAYWRIGHT-ARTIFACTS-END---/p' \
+            /tmp/pod-logs.txt \
+            | grep -v '^---PLAYWRIGHT-ARTIFACTS' \
+            > /tmp/artifacts.b64
 
-          if [ -n "${B64}" ]; then
+          if [ -s /tmp/artifacts.b64 ]; then
             echo "Extracting artifact tarball..."
-            echo "${B64}" | base64 -d | tar -xzf - -C artifacts/ || true
+            base64 -d /tmp/artifacts.b64 | tar -xzf - -C artifacts/ || true
             echo "Artifact contents:"
             find artifacts/ -type f | head -40
           else
