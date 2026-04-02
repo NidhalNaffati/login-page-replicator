@@ -1,0 +1,28 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: login-page-replicator-testing
+  namespace: argocd
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/NidhalNaffati/login-page-replicator
+    targetRevision: HEAD
+    path: k8s/testing
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: testing
+  # The Playwright job image tag is injected by GitHub Actions before `kubectl apply`.
+  # Ignore that one field so Argo CD can still show the Job without constantly flagging
+  # the CI-injected SHA tag as drift.
+  ignoreDifferences:
+    - group: batch
+      kind: Job
+      name: playwright-tests
+      namespace: testing
+      jsonPointers:
+        - /spec/template/spec/containers/0/image
+  syncPolicy:
+    syncOptions:
+      - CreateNamespace=false
+

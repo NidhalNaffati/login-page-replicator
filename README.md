@@ -85,6 +85,35 @@ A full workflow file is not present in this workspace, but the observed pipeline
 3. Replace `IMAGE_TAG` in `k8s/testing/playwright-job.yaml` with short SHA.
 4. Apply testing job and wait for completion.
 
+### Why GitHub Actions shows Playwright results but Argo CD does not
+
+The current setup splits responsibilities:
+
+- **Argo CD** tracks only `k8s/app` through `k8s/argocd/app-application.yaml`.
+- **GitHub Actions** creates the Playwright `Job` separately from `k8s/testing/playwright-job.yaml` after replacing `IMAGE_TAG` with the current SHA.
+- **Playwright reports** are extracted from the finished test pod and uploaded as GitHub Actions artifacts.
+
+That means:
+
+1. Argo CD can show the deployed app resources, because they are inside its tracked path.
+2. Argo CD does **not** automatically show Playwright jobs today, because `k8s/testing` is outside the tracked app path.
+3. Argo CD does **not** render Playwright HTML/JUnit/JSON reports. Those reports live in GitHub Actions artifacts unless you publish them to persistent storage yourself.
+
+An optional Argo CD app manifest is now provided at `k8s/argocd/testing-application.yaml` so Argo CD can also see the `testing` resources.
+
+Important notes about that optional testing app:
+
+- It is intended for **visibility**, not for replacing the current GitHub Actions execution flow.
+- It ignores the Playwright job image field drift because CI injects the real SHA tag before applying the Job.
+- The Playwright job TTL was increased to `86400` seconds so completed jobs remain visible for longer.
+
+If you want Argo-based execution instead of GitHub Actions-based execution, the next step is to move test runs to:
+
+- an **Argo CD hook Job** (`PostSync`), or
+- **Argo Workflows** / **Argo Rollouts AnalysisRun**,
+
+and store reports in a durable location such as **GCS**, **S3**, or a **PVC-backed web endpoint**.
+
 Observed failure progression and fixes:
 
 1. **`ImagePullBackOff` with 403 Forbidden from Artifact Registry**
@@ -122,6 +151,12 @@ kubectl apply -f k8s/namespaces.yaml
 kubectl apply -f k8s/app/
 kubectl apply -f k8s/testing/serviceaccount.yaml
 kubectl apply -f k8s/security/
+```
+
+Optional: register the testing resources in Argo CD too:
+
+```bash
+kubectl apply -f k8s/argocd/testing-application.yaml
 ```
 
 Then create the Playwright job with a real image tag (short SHA or full SHA):

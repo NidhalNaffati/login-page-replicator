@@ -3,9 +3,14 @@ kind: Job
 metadata:
   name: playwright-tests
   namespace: testing
+  labels:
+    app.kubernetes.io/name: playwright-tests
+    app.kubernetes.io/part-of: login-page-replicator
 spec:
   backoffLimit: 0
-  ttlSecondsAfterFinished: 300
+  # Keep completed jobs around long enough to inspect them from the cluster
+  # and from Argo CD when the optional testing Application is enabled.
+  ttlSecondsAfterFinished: 86400
   template:
     spec:
       serviceAccountName: playwright-runner
