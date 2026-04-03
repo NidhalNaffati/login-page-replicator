@@ -70,42 +70,51 @@ docker run --rm \
 - In-cluster app URL expected by e2e job:
   - `http://login-page-replicator.app.svc.cluster.local`
 
-The Playwright job manifest is `k8s/testing/playwright-job.yaml` and uses:
+The in-cluster Playwright hooks are defined in `k8s/app/playwright-hook.yaml` and use:
 
-- service account: `playwright-runner`
-- image: `.../playwright-tests:IMAGE_TAG` (placeholder replaced in CI before apply)
-- env: `BASE_URL=http://login-page-replicator.app.svc.cluster.local`
+- service account: `gke-app-sa`
+- image: `.../playwright-tests:<short_sha>` (updated by CI in GitOps manifests)
+- env: `BASE_URL=http://login-page-replicator`
+- env: `PW_GREP=@t1..@t6` so each test runs in its own isolated Job
 
 ## CI/CD and GitHub Actions notes (from troubleshooting)
 
-A full workflow file is not present in this workspace, but the observed pipeline behavior was:
+The workflow file is present at `.github/workflows/deploy.yml`. Current pipeline behavior:
 
 1. Build + push app/test images to Artifact Registry.
 2. Fetch GKE credentials.
-3. Replace `IMAGE_TAG` in `k8s/testing/playwright-job.yaml` with short SHA.
-4. Apply testing job and wait for completion.
+3. Update short SHA image tags in `k8s/app/deployment.yaml` and `k8s/app/playwright-hook.yaml`, then commit back to Git.
+4. Argo CD auto-syncs `k8s/app` and creates 6 PostSync Playwright Jobs (`playwright-e2e-tests-t1` ... `playwright-e2e-tests-t6`).
+5. GitHub Actions waits for each hook job in a matrix and publishes isolated artifacts/checks per test.
+
+Per-test isolation model:
+
+- `tests/todo.spec.ts` uses markers `@t1` to `@t6`.
+- Local e2e CI (`e2e-local`) runs one marker per matrix job using `--grep`.
+- In-cluster e2e (`e2e-tests`) waits for one Argo PostSync hook job per marker.
 
 ### Why GitHub Actions shows Playwright results but Argo CD does not
 
 The current setup splits responsibilities:
 
 - **Argo CD** tracks only `k8s/app` through `k8s/argocd/app-application.yaml`.
-- **GitHub Actions** creates the Playwright `Job` separately from `k8s/testing/playwright-job.yaml` after replacing `IMAGE_TAG` with the current SHA.
+- **GitHub Actions** updates image tags in Git and Argo CD creates the PostSync Playwright jobs from `k8s/app/playwright-hook.yaml`.
 - **Playwright reports** are extracted from the finished test pod and uploaded as GitHub Actions artifacts.
 
 That means:
 
 1. Argo CD can show the deployed app resources, because they are inside its tracked path.
-2. Argo CD does **not** automatically show Playwright jobs today, because `k8s/testing` is outside the tracked app path.
+2. Argo CD does **not** automatically show resources from `k8s/testing` by default, because the main Argo CD app tracks only `k8s/app`.
 3. Argo CD does **not** render Playwright HTML/JUnit/JSON reports. Those reports live in GitHub Actions artifacts unless you publish them to persistent storage yourself.
 
-An optional Argo CD app manifest is now provided at `k8s/argocd/testing-application.yaml` so Argo CD can also see the `testing` resources.
+An optional Argo CD app manifest is provided at `k8s/argocd/testing-application.yaml`.
+Registering it lets Argo CD also sync and display `k8s/testing` resources.
 
 Important notes about that optional testing app:
 
 - It is intended for **visibility**, not for replacing the current GitHub Actions execution flow.
-- It ignores the Playwright job image field drift because CI injects the real SHA tag before applying the Job.
-- The Playwright job TTL was increased to `86400` seconds so completed jobs remain visible for longer.
+- It does not control the PostSync hook jobs in `k8s/app/playwright-hook.yaml`; those belong to the main app Argo Application.
+- Hook job TTL is `86400` seconds so completed jobs remain visible for longer.
 
 If you want Argo-based execution instead of GitHub Actions-based execution, the next step is to move test runs to:
 
@@ -216,4 +225,4 @@ Verify the pod image tag is real (not `IMAGE_TAG`) and that IAM/Workload Identit
 
 ## Current known gap
 
-- No `.github/workflows/*.yml` file is present in this repository snapshot, so CI behavior documented above is based on observed pipeline logs and commands.
+- Argo CD only syncs what each `Application` tracks. The main app (`k8s/argocd/app-application.yaml`) tracks `k8s/app`; add `k8s/argocd/testing-application.yaml` if you want Argo CD visibility/sync for `k8s/testing` too.

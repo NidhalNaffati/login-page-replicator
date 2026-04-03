@@ -22,13 +22,18 @@ COPY tests/ ./tests/
 # BASE_URL is overridden at runtime by the k8s Job env var
 ENV BASE_URL=http://login-page-replicator.app.svc.cluster.local
 ENV CI=true
+ENV PW_GREP=
 
 # Run tests, then emit a base64-encoded tarball of all artifacts on a clearly-marked
 # line in stdout so GitHub Actions can extract them from `kubectl logs` without
 # needing `kubectl exec` (which is blocked on completed pods).
 CMD ["/bin/bash", "-c", "\
   EXIT=0; \
-  bun x playwright test || EXIT=$?; \
+  if [ -n \"$PW_GREP\" ]; then \
+    bun x playwright test --grep \"$PW_GREP\" || EXIT=$?; \
+  else \
+    bun x playwright test || EXIT=$?; \
+  fi; \
   echo '---PLAYWRIGHT-ARTIFACTS-START---'; \
   tar -czf - -C /tests playwright-report test-results 2>/dev/null | base64 -w 0; \
   echo; \

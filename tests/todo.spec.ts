@@ -21,7 +21,7 @@ test.describe('Todo App', () => {
     await page.goto('/', { waitUntil: 'domcontentloaded', timeout: 15000 });
   });
 
-  test('shows an error for invalid credentials', async ({ page }) => {
+  test('shows an error for invalid credentials @t1', async ({ page }) => {
     await page.getByPlaceholder('TNEEIN').fill('wrong-user');
     await page.getByPlaceholder('••••••••').fill('wrong-pass');
     await page.getByRole('button', { name: 'Sign In' }).click();
@@ -30,14 +30,14 @@ test.describe('Todo App', () => {
     await expect(page.getByText('Welcome back')).toBeVisible();
   });
 
-  test('logs in successfully and shows the empty state', async ({ page }) => {
+  test('logs in successfully and shows the empty state @t2', async ({ page }) => {
     await login(page);
 
     await expect(page.getByText('0 pending')).toBeVisible();
     await expect(page.getByText('No tasks found. Rest easy.')).toBeVisible();
   });
 
-  test('allows logging out back to the login form', async ({ page }) => {
+  test('allows logging out back to the login form @t3', async ({ page }) => {
     await login(page);
 
     await page.getByRole('button', { name: 'Logout' }).click();
@@ -46,7 +46,7 @@ test.describe('Todo App', () => {
     await expect(page.getByRole('button', { name: 'Sign In' })).toBeVisible();
   });
 
-  test('keeps the authenticated session after reload', async ({ page }) => {
+  test('keeps the authenticated session after reload @t4', async ({ page }) => {
     await login(page);
 
     await page.reload({ waitUntil: 'domcontentloaded' });
@@ -55,7 +55,7 @@ test.describe('Todo App', () => {
     await expect(page.getByRole('button', { name: 'Logout' })).toBeVisible();
   });
 
-  test('keeps todos after reload', async ({ page }) => {
+  test('keeps todos after reload @t5', async ({ page }) => {
     await login(page);
 
     const todoText = `Persistent Todo ${Date.now()}`;
@@ -70,7 +70,7 @@ test.describe('Todo App', () => {
     await expect(page.getByText('1 pending')).toBeVisible();
   });
 
-  test('adds, completes, and deletes a todo', async ({ page }) => {
+  test('adds, completes, and deletes a todo @t6', async ({ page }) => {
     await login(page);
 
     const todoText = `Test Todo ${Date.now()}`;
@@ -94,4 +94,3 @@ test.describe('Todo App', () => {
     await expect(page.getByText('No tasks found. Rest easy.')).toBeVisible();
   });
 });
-

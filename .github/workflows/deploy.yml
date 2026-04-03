@@ -57,12 +57,28 @@ jobs:
 
   # ────────────────────────────────────────────────────────────────────────────
   # JOB 1b — Playwright e2e (local runner, no GKE) — runs on every push & PR
-  # Spins up the Vite dev server, runs all tests, and publishes JUnit results.
+  # Runs each tagged test in an isolated matrix job for faster, independent feedback.
   # ────────────────────────────────────────────────────────────────────────────
   e2e-local:
-    name: 🎭 Playwright e2e (local)
+    name: 🎭 Playwright e2e (local) — ${{ matrix.test_id }}
     runs-on: ubuntu-latest
     needs: build-test
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - test_id: t1
+            grep: "@t1"
+          - test_id: t2
+            grep: "@t2"
+          - test_id: t3
+            grep: "@t3"
+          - test_id: t4
+            grep: "@t4"
+          - test_id: t5
+            grep: "@t5"
+          - test_id: t6
+            grep: "@t6"
 
     permissions:
       contents: read
@@ -83,8 +99,8 @@ jobs:
       - name: Install Playwright browsers
         run: bun x playwright install --with-deps chromium
 
-      - name: Run Playwright e2e tests
-        run: bun x playwright test
+      - name: Run isolated Playwright test
+        run: bun x playwright test --grep "${{ matrix.grep }}"
         env:
           CI: "true"
           BASE_URL: "http://localhost:8080"
@@ -93,7 +109,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: playwright-local-report-${{ github.run_id }}
+          name: playwright-local-${{ matrix.test_id }}-${{ github.run_id }}
           path: |
             playwright-report/
             test-results/
@@ -105,7 +121,7 @@ jobs:
         uses: mikepenz/action-junit-report@v5
         with:
           report_paths: test-results/junit.xml
-          check_name: Playwright E2E Results
+          check_name: Playwright E2E Results (local ${{ matrix.test_id }})
           detailed_summary: true
           fail_on_failure: true
           require_tests: true
@@ -277,19 +293,35 @@ jobs:
             (git commit -m "ci: update image tags to ${{ steps.sha.outputs.short_sha }}" && git push)
 
   # ────────────────────────────────────────────────────────────────────────────
-  # JOB 3 — Wait for the Argo CD PostSync hook job & collect results
+  # JOB 3 — Wait for Argo CD PostSync hook jobs (isolated per test) & collect results
   #
-  # Argo CD automatically creates "playwright-e2e-tests" in the app namespace
-  # after every sync (PostSync hook in k8s/app/playwright-hook.yaml).
-  # This job waits for it to finish, then uploads the HTML report + JUnit XML.
+  # Argo CD automatically creates one PostSync job per test marker in the app namespace
+  # (playwright-e2e-tests-t1 ... playwright-e2e-tests-t6).
+  # Each matrix run waits for one job, then uploads HTML/JUnit artifacts.
   #
   # ✅ You can also see the job pass/fail directly in the Argo CD UI under
   #    the "login-page-replicator" application resource tree.
   # ────────────────────────────────────────────────────────────────────────────
   e2e-tests:
-    name: 🎭 Playwright e2e (GKE via Argo CD hook)
+    name: 🎭 Playwright e2e (GKE via Argo CD hook) — ${{ matrix.test_id }}
     runs-on: ubuntu-latest
     needs: build-push
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - test_id: t1
+            job_name: playwright-e2e-tests-t1
+          - test_id: t2
+            job_name: playwright-e2e-tests-t2
+          - test_id: t3
+            job_name: playwright-e2e-tests-t3
+          - test_id: t4
+            job_name: playwright-e2e-tests-t4
+          - test_id: t5
+            job_name: playwright-e2e-tests-t5
+          - test_id: t6
+            job_name: playwright-e2e-tests-t6
 
     permissions:
       contents: read
@@ -360,33 +392,33 @@ jobs:
             endpoints/${{ env.SERVICE_NAME }} -n app --timeout=120s
 
       # ── Wait for Argo CD PostSync hook job to appear and finish ───────────
-      # Argo CD creates "playwright-e2e-tests" in the app namespace automatically
-      # after the sync completes (argocd.argoproj.io/hook: PostSync).
-      # We just wait here and collect the results from pod logs.
+      # Argo CD creates one hook job per test marker; this matrix run waits for
+      # its assigned job only and collects that job's artifacts.
       - name: Wait for Argo CD PostSync hook job
         run: |
-          echo "Waiting for Argo CD to create playwright-e2e-tests PostSync hook..."
+          JOB_NAME="${{ matrix.job_name }}"
+          echo "Waiting for Argo CD to create ${JOB_NAME} PostSync hook..."
           for i in {1..60}; do
-            if kubectl get job playwright-e2e-tests -n app &>/dev/null; then
-              echo "✅ Job playwright-e2e-tests found in app namespace."
+            if kubectl get job "${JOB_NAME}" -n app &>/dev/null; then
+              echo "✅ Job ${JOB_NAME} found in app namespace."
               break
             fi
             echo "Attempt ${i}/60 — job not yet created by Argo CD..."
             sleep 5
           done
 
-          kubectl get job playwright-e2e-tests -n app || \
+          kubectl get job "${JOB_NAME}" -n app || \
             { echo "❌ Job never appeared. Is Argo CD running and syncing?"; exit 1; }
 
           # Poll until job reaches a terminal state (Complete or Failed)
-          echo "Waiting for playwright-e2e-tests job to finish..."
+          echo "Waiting for ${JOB_NAME} job to finish..."
           TIMEOUT=600
           ELAPSED=0
           JOB_STATUS=0
           while [ $ELAPSED -lt $TIMEOUT ]; do
-            COMPLETE=$(kubectl get job playwright-e2e-tests -n app \
+            COMPLETE=$(kubectl get job "${JOB_NAME}" -n app \
               -o jsonpath='{.status.conditions[?(@.type=="Complete")].status}' 2>/dev/null || true)
-            FAILED=$(kubectl get job playwright-e2e-tests -n app \
+            FAILED=$(kubectl get job "${JOB_NAME}" -n app \
               -o jsonpath='{.status.conditions[?(@.type=="Failed")].status}' 2>/dev/null || true)
 
             if [ "${COMPLETE}" = "True" ]; then
@@ -411,7 +443,7 @@ jobs:
           # trailing newlines which would corrupt the base64 tarball.
           echo "=== Fetching pod logs ==="
           mkdir -p artifacts
-          kubectl logs -l job-name=playwright-e2e-tests -n app \
+          kubectl logs -l job-name="${JOB_NAME}" -n app \
             --prefix=false 2>/dev/null > /tmp/pod-logs.txt || true
 
           # Print readable portion (before the artifact sentinel line)
@@ -439,7 +471,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: playwright-gke-${{ github.run_id }}
+          name: playwright-gke-${{ matrix.test_id }}-${{ github.run_id }}
           path: |
             artifacts/playwright-report/
             artifacts/test-results/
@@ -452,7 +484,7 @@ jobs:
         uses: mikepenz/action-junit-report@v5
         with:
           report_paths: artifacts/test-results/junit.xml
-          check_name: Playwright E2E Results (GKE)
+          check_name: Playwright E2E Results (GKE ${{ matrix.test_id }})
           detailed_summary: true
           fail_on_failure: true
           require_tests: true
