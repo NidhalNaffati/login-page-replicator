@@ -203,6 +203,27 @@ jobs:
       - name: Set up Cloud SDK
         uses: google-github-actions/setup-gcloud@v2
 
+      - name: Enable required GCP APIs
+        run: |
+          gcloud services enable \
+            artifactregistry.googleapis.com \
+            run.googleapis.com \
+            cloudbuild.googleapis.com \
+            --quiet
+
+      - name: Ensure Artifact Registry repository exists
+        run: |
+          if ! gcloud artifacts repositories describe "${{ env.REPO_NAME }}" \
+              --location="${{ env.REGION }}" --quiet 2>/dev/null; then
+            echo "Repository not found. Creating ${REPO_NAME}..."
+            gcloud artifacts repositories create "${{ env.REPO_NAME }}" \
+              --repository-format=docker \
+              --location="${{ env.REGION }}" \
+              --description="Docker images for ${{ env.SERVICE_NAME }}"
+          else
+            echo "Repository ${REPO_NAME} already exists."
+          fi
+
       # ── Configure Docker to push to Artifact Registry ─────────────────────
       - name: Configure Docker auth
         run: gcloud auth configure-docker ${{ env.REGION }}-docker.pkg.dev --quiet
@@ -220,6 +241,28 @@ jobs:
         run: |
           docker push ${{ env.IMAGE_BASE }}:${{ steps.sha.outputs.short_sha }}
           docker push ${{ env.IMAGE_BASE }}:latest
+
+      - name: Deploy app image to Cloud Run
+        run: |
+          gcloud run deploy "${{ env.SERVICE_NAME }}" \
+            --image="${{ env.IMAGE_BASE }}:${{ steps.sha.outputs.short_sha }}" \
+            --region="${{ env.REGION }}" \
+            --platform=managed \
+            --allow-unauthenticated \
+            --port=80 \
+            --memory=256Mi \
+            --cpu=1 \
+            --min-instances=0 \
+            --max-instances=10 \
+            --quiet
+
+      - name: Show Cloud Run URL
+        run: |
+          CLOUD_RUN_URL=$(gcloud run services describe "${{ env.SERVICE_NAME }}" \
+            --region="${{ env.REGION }}" \
+            --format='value(status.url)')
+          echo "Cloud Run URL: ${CLOUD_RUN_URL}"
+          echo "Set GitHub variable DAST_TARGET_URL to this URL once for ZAP scans."
 
       # ── Build + push Playwright test image ────────────────────────────────
       - name: Build Playwright Docker image
