@@ -33,7 +33,7 @@ spec:
         - name: playwright
           # This image tag is updated by GitHub Actions via `sed` before pushing to Git.
           # Argo CD picks up the new tag from Git and re-syncs automatically.
-          image: europe-west1-docker.pkg.dev/pfe-esprit-489411/login-page-replicator-repo/playwright-tests:e1efd94
+          image: europe-west1-docker.pkg.dev/pfe-esprit-489411/login-page-replicator-repo/playwright-tests:001ee3e
           env:
             - name: BASE_URL
               # The hook runs in the same namespace as the app, so the short
@@ -86,7 +86,7 @@ spec:
         - name: playwright
           # This image tag is updated by GitHub Actions via `sed` before pushing to Git.
           # Argo CD picks up the new tag from Git and re-syncs automatically.
-          image: europe-west1-docker.pkg.dev/pfe-esprit-489411/login-page-replicator-repo/playwright-tests:e1efd94
+          image: europe-west1-docker.pkg.dev/pfe-esprit-489411/login-page-replicator-repo/playwright-tests:001ee3e
           env:
             - name: BASE_URL
               # The hook runs in the same namespace as the app, so the short
@@ -139,7 +139,7 @@ spec:
         - name: playwright
           # This image tag is updated by GitHub Actions via `sed` before pushing to Git.
           # Argo CD picks up the new tag from Git and re-syncs automatically.
-          image: europe-west1-docker.pkg.dev/pfe-esprit-489411/login-page-replicator-repo/playwright-tests:e1efd94
+          image: europe-west1-docker.pkg.dev/pfe-esprit-489411/login-page-replicator-repo/playwright-tests:001ee3e
           env:
             - name: BASE_URL
               # The hook runs in the same namespace as the app, so the short
@@ -192,7 +192,7 @@ spec:
         - name: playwright
           # This image tag is updated by GitHub Actions via `sed` before pushing to Git.
           # Argo CD picks up the new tag from Git and re-syncs automatically.
-          image: europe-west1-docker.pkg.dev/pfe-esprit-489411/login-page-replicator-repo/playwright-tests:e1efd94
+          image: europe-west1-docker.pkg.dev/pfe-esprit-489411/login-page-replicator-repo/playwright-tests:001ee3e
           env:
             - name: BASE_URL
               # The hook runs in the same namespace as the app, so the short
@@ -245,7 +245,7 @@ spec:
         - name: playwright
           # This image tag is updated by GitHub Actions via `sed` before pushing to Git.
           # Argo CD picks up the new tag from Git and re-syncs automatically.
-          image: europe-west1-docker.pkg.dev/pfe-esprit-489411/login-page-replicator-repo/playwright-tests:e1efd94
+          image: europe-west1-docker.pkg.dev/pfe-esprit-489411/login-page-replicator-repo/playwright-tests:001ee3e
           env:
             - name: BASE_URL
               # The hook runs in the same namespace as the app, so the short
@@ -298,7 +298,7 @@ spec:
         - name: playwright
           # This image tag is updated by GitHub Actions via `sed` before pushing to Git.
           # Argo CD picks up the new tag from Git and re-syncs automatically.
-          image: europe-west1-docker.pkg.dev/pfe-esprit-489411/login-page-replicator-repo/playwright-tests:e1efd94
+          image: europe-west1-docker.pkg.dev/pfe-esprit-489411/login-page-replicator-repo/playwright-tests:001ee3e
           env:
             - name: BASE_URL
               # The hook runs in the same namespace as the app, so the short
