@@ -109,6 +109,15 @@ The in-cluster Playwright hooks are defined in `k8s/app/playwright-hook.yaml` an
 
 The workflow file is present at `.github/workflows/deploy.yml`. Current pipeline behavior:
 
+```text
+build-test
+  └─ prepare-release-infra
+      ├─ app-release        (build app -> push AR -> deploy Cloud Run)
+      └─ playwright-release (build Playwright image -> push AR)
+             └─ update-k8s-tags (update k8s image tags and commit)
+                    └─ e2e-tests (wait for Argo CD hooks and collect reports)
+```
+
 1. Build + push app/test images to Artifact Registry.
 2. Ensure Artifact Registry repository exists (created automatically if missing).
 3. Deploy app image to Cloud Run (`login-page-replicator`) on push to `master`.
