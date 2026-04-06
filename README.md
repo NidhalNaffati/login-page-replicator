@@ -112,10 +112,11 @@ The workflow file is present at `.github/workflows/deploy.yml`. Current pipeline
 ```text
 build-test
   └─ prepare-release-infra
-      ├─ app-release        (build app -> push AR -> deploy Cloud Run)
-      └─ playwright-release (build Playwright image -> push AR)
-             └─ update-k8s-tags (update k8s image tags and commit)
-                    └─ e2e-tests (wait for Argo CD hooks and collect reports)
+      ├─ app-image-release  (build app -> push AR) ─┐
+      │    └─ cloud-run-deploy (deploy app image to Cloud Run)
+      └─ playwright-release (build Playwright image -> push AR) ─┤
+                                                                   └─ update-k8s-tags (update k8s image tags and commit)
+                                                                         └─ e2e-tests (wait for Argo CD hooks and collect reports)
 ```
 
 1. Build + push app/test images to Artifact Registry.
