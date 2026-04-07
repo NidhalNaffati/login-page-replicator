@@ -43,6 +43,34 @@ bun run test
 bun run test:e2e
 ```
 
+## DAST (OWASP ZAP)
+
+This repository includes a dedicated GitHub Actions workflow at
+`.github/workflows/dast-zap.yml` to run an OWASP ZAP baseline scan.
+
+- Trigger types:
+  - Manual (`workflow_dispatch`)
+  - Weekly schedule (Monday 03:00 UTC)
+- Reports uploaded as artifacts:
+  - `zap-report.html`
+  - `zap-report.md`
+  - `zap-report.json`
+
+Target URL resolution (in order):
+
+1. Manual workflow input: `target_url`
+2. Repository variable: `DAST_TARGET_URL`
+
+Rule tuning lives in `.zap/rules.tsv`.
+
+Recommended setup:
+
+1. Add repository variable `DAST_TARGET_URL` pointing to a staging or test URL.
+2. Run the workflow manually once and review artifacts before enforcing stricter fail conditions.
+
+If you deploy via GitHub Actions to Cloud Run, use the URL printed in
+`deploy.yml` step `Show Cloud Run URL` as the value of `DAST_TARGET_URL`.
+
 ## Docker
 
 ### Build and run the app image
@@ -81,11 +109,23 @@ The in-cluster Playwright hooks are defined in `k8s/app/playwright-hook.yaml` an
 
 The workflow file is present at `.github/workflows/deploy.yml`. Current pipeline behavior:
 
+```text
+build-test
+  └─ prepare-release-infra
+      ├─ app-image-release  (build app -> push AR) ─┐
+      │    └─ cloud-run-deploy (deploy app image to Cloud Run)
+      └─ playwright-release (build Playwright image -> push AR) ─┤
+                                                                   └─ update-k8s-tags (update k8s image tags and commit)
+                                                                         └─ e2e-tests (wait for Argo CD hooks and collect reports)
+```
+
 1. Build + push app/test images to Artifact Registry.
-2. Fetch GKE credentials.
-3. Update short SHA image tags in `k8s/app/deployment.yaml` and `k8s/app/playwright-hook.yaml`, then commit back to Git.
-4. Argo CD auto-syncs `k8s/app` and creates 6 PostSync Playwright Jobs (`playwright-e2e-tests-t1` ... `playwright-e2e-tests-t6`).
-5. GitHub Actions waits for each hook job in a matrix and publishes isolated artifacts/checks per test.
+2. Ensure Artifact Registry repository exists (created automatically if missing).
+3. Deploy app image to Cloud Run (`login-page-replicator`) on push to `master`.
+4. Fetch GKE credentials.
+5. Update short SHA image tags in `k8s/app/deployment.yaml` and `k8s/app/playwright-hook.yaml`, then commit back to Git.
+6. Argo CD auto-syncs `k8s/app` and creates 6 PostSync Playwright Jobs (`playwright-e2e-tests-t1` ... `playwright-e2e-tests-t6`).
+7. GitHub Actions waits for each hook job in a matrix and publishes isolated artifacts/checks per test.
 
 Per-test isolation model:
 
