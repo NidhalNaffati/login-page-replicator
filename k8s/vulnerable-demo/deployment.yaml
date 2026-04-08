@@ -1,0 +1,66 @@
+# ⚠️  SECURITY DEMO — INTENTIONALLY VULNERABLE (for Trivy IaC scan showcase) ⚠️
+#
+# This file is NOT synced by Argo CD (which only watches k8s/app/).
+# It exists solely so that Trivy's filesystem-based IaC/config scanner
+# detects the maximum number of Kubernetes misconfigurations.
+#
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: login-page-replicator-vulnerable-demo
+  namespace: app
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: login-page-replicator-vulnerable-demo
+  template:
+    metadata:
+      labels:
+        app: login-page-replicator-vulnerable-demo
+    spec:
+      # VULN: Use host network namespace (Trivy: KSV023)
+      hostNetwork: true
+      # VULN: Use host PID namespace (Trivy: KSV024)
+      hostPID: true
+      # VULN: Automount SA token even though it's not needed (Trivy: KSV036)
+      automountServiceAccountToken: true
+      containers:
+        - name: app
+          image: europe-west1-docker.pkg.dev/pfe-esprit-489411/login-page-replicator-repo/login-page-replicator:latest
+          ports:
+            - containerPort: 80
+          # VULN: Privileged container running as root
+          # (Trivy: KSV001, KSV003, KSV005, KSV006, KSV012, KSV014, KSV017, KSV020, KSV021)
+          securityContext:
+            runAsNonRoot: false
+            runAsUser: 0
+            privileged: true
+            allowPrivilegeEscalation: true
+            readOnlyRootFilesystem: false
+            capabilities:
+              add:
+                - NET_ADMIN
+                - SYS_ADMIN
+                - ALL
+          # VULN: No resource requests or limits (Trivy: KSV011)
+          # VULN: No readiness/liveness probe
+        - name: nginx-exporter
+          image: nginx/nginx-prometheus-exporter:1.1.0
+          args:
+            - -nginx.scrape-uri=http://127.0.0.1/stub_status
+          ports:
+            - containerPort: 9113
+              name: metrics
+          # VULN: Privileged exporter sidecar
+          securityContext:
+            runAsNonRoot: false
+            runAsUser: 0
+            privileged: true
+            allowPrivilegeEscalation: true
+            readOnlyRootFilesystem: false
+            capabilities:
+              add:
+                - NET_ADMIN
+                - SYS_ADMIN
+

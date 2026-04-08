@@ -1,4 +1,6 @@
-# ⚠️  SECURITY DEMO — INTENTIONALLY VULNERABLE (for Trivy IaC scan showcase) ⚠️
+# ⚠️  SECURITY DEMO — INTENTIONALLY WEAKENED (for Trivy IaC scan showcase) ⚠️
+# Note: extreme misconfigs (privileged, hostNetwork, SYS_ADMIN) are in
+#       k8s/vulnerable-demo/deployment.yaml — GKE Autopilot rejects them here.
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -18,8 +20,6 @@ spec:
         prometheus.io/port: "9113"
     spec:
       serviceAccountName: gke-app-sa
-      # VULN: Use host network namespace (Trivy: KSV023)
-      hostNetwork: true
       # VULN: Automount SA token even though it's not needed (Trivy: KSV036)
       automountServiceAccountToken: true
       containers:
@@ -27,19 +27,14 @@ spec:
           image: europe-west1-docker.pkg.dev/pfe-esprit-489411/login-page-replicator-repo/login-page-replicator:8eac0bb
           ports:
             - containerPort: 80
-          # VULN: Privileged container running as root (Trivy: KSV001, KSV012, KSV017)
-          securityContext:
-            runAsNonRoot: false
-            runAsUser: 0
-            privileged: true
-            allowPrivilegeEscalation: true
-            readOnlyRootFilesystem: false
-            capabilities:
-              add:
-                - NET_ADMIN
-                - SYS_ADMIN
-          # VULN: No resource limits (Trivy: KSV011)
-          # VULN: No readiness/liveness probe
+          # VULN: No resource limits defined (Trivy: KSV011)
+          resources:
+            requests:
+              cpu: 100m
+              memory: 128Mi
+          # VULN: No readiness/liveness probe defined
+          # VULN: No securityContext → defaults to root, writable rootfs, etc.
+          #       (Trivy: KSV012 runAsNonRoot not set, KSV014 readOnlyRootFilesystem not set)
         - name: nginx-exporter
           image: nginx/nginx-prometheus-exporter:1.1.0
           args:
@@ -47,9 +42,11 @@ spec:
           ports:
             - containerPort: 9113
               name: metrics
-          # VULN: Privileged exporter sidecar too
-          securityContext:
-            runAsNonRoot: false
-            privileged: true
-            allowPrivilegeEscalation: true
+          resources:
+            requests:
+              cpu: 10m
+              memory: 32Mi
+            limits:
+              cpu: 50m
+              memory: 64Mi
 
