@@ -285,6 +285,12 @@ jobs:
       - name: Configure Docker auth (so Trivy can pull from Artifact Registry)
         run: gcloud auth configure-docker ${{ env.REGION }}-docker.pkg.dev --quiet
 
+      # ── Install Trivy CLI (needed for HTML template output) ───────────────
+      - name: Install Trivy
+        run: |
+          curl -sfL https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/install.sh \
+            | sh -s -- -b /usr/local/bin
+
       # ── SARIF upload → GitHub Security tab ───────────────────────────────
       - name: Trivy image scan (SARIF)
         uses: aquasecurity/trivy-action@v0.35.0
@@ -305,6 +311,20 @@ jobs:
           sarif_file: trivy-app-image.sarif
           category: trivy-app-image
 
+      # ── HTML report ───────────────────────────────────────────────────────
+      - name: Trivy image scan (HTML report)
+        if: always()
+        run: |
+          trivy image \
+            --scanners vuln,secret \
+            --severity CRITICAL,HIGH,MEDIUM \
+            --ignore-unfixed \
+            --ignorefile .trivyignore \
+            --format template \
+            --template "@/usr/local/share/trivy/templates/html.tpl" \
+            --output trivy-app-image-report.html \
+            ${{ env.IMAGE_BASE }}:${{ steps.sha.outputs.short_sha }} || true
+
       # ── Table summary + gate: fail on CRITICAL ────────────────────────────
       - name: Trivy image scan (blocking on CRITICAL)
         uses: aquasecurity/trivy-action@v0.35.0
@@ -317,6 +337,18 @@ jobs:
           ignore-unfixed: true
           trivyignores: .trivyignore
           exit-code: "1"
+
+      # ── Upload HTML + SARIF as artifact ───────────────────────────────────
+      - name: Upload Trivy app image reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: trivy-app-image-report-${{ github.run_id }}
+          path: |
+            trivy-app-image-report.html
+            trivy-app-image.sarif
+          if-no-files-found: warn
+          retention-days: 30
 
   # ────────────────────────────────────────────────────────────────────────────
   # JOB 3E — Trivy image scan (Playwright test image)
@@ -349,6 +381,12 @@ jobs:
       - name: Configure Docker auth
         run: gcloud auth configure-docker ${{ env.REGION }}-docker.pkg.dev --quiet
 
+      # ── Install Trivy CLI (needed for HTML template output) ───────────────
+      - name: Install Trivy
+        run: |
+          curl -sfL https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/install.sh \
+            | sh -s -- -b /usr/local/bin
+
       - name: Trivy image scan (SARIF)
         uses: aquasecurity/trivy-action@v0.35.0
         with:
@@ -368,6 +406,20 @@ jobs:
           sarif_file: trivy-pw-image.sarif
           category: trivy-playwright-image
 
+      # ── HTML report ───────────────────────────────────────────────────────
+      - name: Trivy image scan (HTML report)
+        if: always()
+        run: |
+          trivy image \
+            --scanners vuln,secret \
+            --severity CRITICAL,HIGH,MEDIUM \
+            --ignore-unfixed \
+            --ignorefile .trivyignore \
+            --format template \
+            --template "@/usr/local/share/trivy/templates/html.tpl" \
+            --output trivy-pw-image-report.html \
+            ${{ env.PW_IMAGE }}:${{ steps.sha.outputs.short_sha }} || true
+
       - name: Trivy image scan (table — informational only)
         uses: aquasecurity/trivy-action@v0.35.0
         with:
@@ -379,6 +431,18 @@ jobs:
           ignore-unfixed: true
           trivyignores: .trivyignore
           exit-code: "0"   # non-blocking — Playwright image has more surface area
+
+      # ── Upload HTML + SARIF as artifact ───────────────────────────────────
+      - name: Upload Trivy playwright image reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: trivy-pw-image-report-${{ github.run_id }}
+          path: |
+            trivy-pw-image-report.html
+            trivy-pw-image.sarif
+          if-no-files-found: warn
+          retention-days: 30
 
   # ────────────────────────────────────────────────────────────────────────────
   # JOB 3C — Deploy to Cloud Run (separate graph node)
