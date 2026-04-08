@@ -253,12 +253,143 @@ jobs:
           docker push ${{ env.IMAGE_BASE }}:latest
 
   # ────────────────────────────────────────────────────────────────────────────
+  # JOB 3D — Trivy image scan (app image)
+  # Runs after the app image is pushed so Trivy can pull it from Artifact Registry.
+  # Blocks the deploy pipeline on CRITICAL vulnerabilities.
+  # ────────────────────────────────────────────────────────────────────────────
+  trivy-image-app:
+    name: 🔒 Trivy Image Scan (app)
+    runs-on: ubuntu-latest
+    needs: app-image-release
+    permissions:
+      id-token: write
+      security-events: write   # upload SARIF to GitHub Security tab
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Compute short SHA
+        id: sha
+        run: echo "short_sha=$(echo ${{ github.sha }} | cut -c1-7)" >> $GITHUB_OUTPUT
+
+      - name: Authenticate to Google Cloud
+        uses: google-github-actions/auth@v2
+        with:
+          workload_identity_provider: ${{ secrets.GCP_WORKLOAD_IDENTITY_PROVIDER }}
+          service_account: ${{ secrets.GCP_SERVICE_ACCOUNT }}
+
+      - name: Set up Cloud SDK
+        uses: google-github-actions/setup-gcloud@v2
+
+      - name: Configure Docker auth (so Trivy can pull from Artifact Registry)
+        run: gcloud auth configure-docker ${{ env.REGION }}-docker.pkg.dev --quiet
+
+      # ── SARIF upload → GitHub Security tab ───────────────────────────────
+      - name: Trivy image scan (SARIF)
+        uses: aquasecurity/trivy-action@0.30.0
+        with:
+          scan-type: image
+          image-ref: ${{ env.IMAGE_BASE }}:${{ steps.sha.outputs.short_sha }}
+          scanners: vuln,secret
+          format: sarif
+          output: trivy-app-image.sarif
+          severity: CRITICAL,HIGH,MEDIUM
+          ignore-unfixed: true
+          trivyignores: .trivyignore
+
+      - name: Upload SARIF to GitHub Security tab
+        if: always()
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: trivy-app-image.sarif
+          category: trivy-app-image
+
+      # ── Table summary + gate: fail on CRITICAL ────────────────────────────
+      - name: Trivy image scan (blocking on CRITICAL)
+        uses: aquasecurity/trivy-action@0.30.0
+        with:
+          scan-type: image
+          image-ref: ${{ env.IMAGE_BASE }}:${{ steps.sha.outputs.short_sha }}
+          scanners: vuln
+          format: table
+          severity: CRITICAL
+          ignore-unfixed: true
+          trivyignores: .trivyignore
+          exit-code: "1"
+
+  # ────────────────────────────────────────────────────────────────────────────
+  # JOB 3E — Trivy image scan (Playwright test image)
+  # ────────────────────────────────────────────────────────────────────────────
+  trivy-image-playwright:
+    name: 🔒 Trivy Image Scan (playwright)
+    runs-on: ubuntu-latest
+    needs: playwright-release
+    permissions:
+      id-token: write
+      security-events: write
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Compute short SHA
+        id: sha
+        run: echo "short_sha=$(echo ${{ github.sha }} | cut -c1-7)" >> $GITHUB_OUTPUT
+
+      - name: Authenticate to Google Cloud
+        uses: google-github-actions/auth@v2
+        with:
+          workload_identity_provider: ${{ secrets.GCP_WORKLOAD_IDENTITY_PROVIDER }}
+          service_account: ${{ secrets.GCP_SERVICE_ACCOUNT }}
+
+      - name: Set up Cloud SDK
+        uses: google-github-actions/setup-gcloud@v2
+
+      - name: Configure Docker auth
+        run: gcloud auth configure-docker ${{ env.REGION }}-docker.pkg.dev --quiet
+
+      - name: Trivy image scan (SARIF)
+        uses: aquasecurity/trivy-action@0.30.0
+        with:
+          scan-type: image
+          image-ref: ${{ env.PW_IMAGE }}:${{ steps.sha.outputs.short_sha }}
+          scanners: vuln,secret
+          format: sarif
+          output: trivy-pw-image.sarif
+          severity: CRITICAL,HIGH,MEDIUM
+          ignore-unfixed: true
+          trivyignores: .trivyignore
+
+      - name: Upload SARIF to GitHub Security tab
+        if: always()
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: trivy-pw-image.sarif
+          category: trivy-playwright-image
+
+      - name: Trivy image scan (table — informational only)
+        uses: aquasecurity/trivy-action@0.30.0
+        with:
+          scan-type: image
+          image-ref: ${{ env.PW_IMAGE }}:${{ steps.sha.outputs.short_sha }}
+          scanners: vuln
+          format: table
+          severity: CRITICAL,HIGH
+          ignore-unfixed: true
+          trivyignores: .trivyignore
+          exit-code: "0"   # non-blocking — Playwright image has more surface area
+
+  # ────────────────────────────────────────────────────────────────────────────
   # JOB 3C — Deploy to Cloud Run (separate graph node)
+  # Now depends on trivy-image-app passing (no CRITICAL CVEs in app image)
   # ────────────────────────────────────────────────────────────────────────────
   cloud-run-deploy:
     name: ☁️ Cloud Run Deploy
     runs-on: ubuntu-latest
-    needs: app-image-release
+    needs:
+      - app-image-release
+      - trivy-image-app     # only deploy if image passes the CRITICAL CVE gate
     permissions:
       id-token: write
 
@@ -354,6 +485,8 @@ jobs:
     needs:
       - app-image-release
       - playwright-release
+      - trivy-image-app        # block GitOps push if app image has CRITICAL CVEs
+      - trivy-image-playwright # wait for playwright scan (informational)
     outputs:
       short_sha: ${{ steps.sha.outputs.short_sha }}
     permissions:

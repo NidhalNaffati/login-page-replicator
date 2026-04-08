@@ -1,0 +1,107 @@
+name: 🔒 Trivy Security Scans
+
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+    branches:
+      - master
+  schedule:
+    # Run a full scan every Monday at 02:00 UTC
+    - cron: "0 2 * * 1"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  security-events: write   # upload SARIF to GitHub Security tab
+
+jobs:
+  # ────────────────────────────────────────────────────────────────────────────
+  # JOB 1 — Filesystem / dependency scan
+  # Scans the source tree for:
+  #   • Known CVEs in package.json dependencies
+  #   • Secrets / hard-coded credentials
+  #   • Misconfigured IaC files (Dockerfile, k8s YAML, Terraform)
+  # ────────────────────────────────────────────────────────────────────────────
+  trivy-fs:
+    name: 📁 Trivy Filesystem Scan
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      # ── Full filesystem scan → SARIF (uploaded to Security tab) ──────────
+      - name: Trivy filesystem scan (SARIF)
+        uses: aquasecurity/trivy-action@0.30.0
+        with:
+          scan-type: fs
+          scan-ref: .
+          scanners: vuln,secret,misconfig
+          format: sarif
+          output: trivy-fs.sarif
+          severity: CRITICAL,HIGH,MEDIUM
+          ignore-unfixed: true
+          trivyignores: .trivyignore
+
+      - name: Upload SARIF to GitHub Security tab
+        if: always()
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: trivy-fs.sarif
+          category: trivy-filesystem
+
+      # ── Table summary printed to the workflow log ─────────────────────────
+      - name: Trivy filesystem scan (table summary)
+        uses: aquasecurity/trivy-action@0.30.0
+        with:
+          scan-type: fs
+          scan-ref: .
+          scanners: vuln,secret,misconfig
+          format: table
+          severity: CRITICAL,HIGH
+          ignore-unfixed: true
+          trivyignores: .trivyignore
+          exit-code: "1"   # fail the job on CRITICAL or HIGH findings
+
+  # ────────────────────────────────────────────────────────────────────────────
+  # JOB 2 — Dockerfile / IaC misconfiguration scan only
+  # Checks Dockerfiles and k8s manifests for security best-practice violations
+  # (runs even on PRs where we haven't built an image yet).
+  # ────────────────────────────────────────────────────────────────────────────
+  trivy-config:
+    name: 🛠️ Trivy IaC / Config Scan
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Trivy config scan (SARIF)
+        uses: aquasecurity/trivy-action@0.30.0
+        with:
+          scan-type: config
+          scan-ref: .
+          format: sarif
+          output: trivy-config.sarif
+          severity: CRITICAL,HIGH,MEDIUM
+          trivyignores: .trivyignore
+
+      - name: Upload SARIF to GitHub Security tab
+        if: always()
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: trivy-config.sarif
+          category: trivy-config
+
+      - name: Trivy config scan (table summary)
+        uses: aquasecurity/trivy-action@0.30.0
+        with:
+          scan-type: config
+          scan-ref: .
+          format: table
+          severity: CRITICAL,HIGH
+          trivyignores: .trivyignore
+          exit-code: "0"   # informational — does not block the PR
+
