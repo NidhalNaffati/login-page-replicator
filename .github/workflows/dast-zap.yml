@@ -1,4 +1,7 @@
-name: DAST - OWASP ZAP Baseline
+name: DAST - OWASP ZAP Baseline (Manual / Scheduled)
+
+# This workflow runs ZAP on-demand or weekly.
+# For automatic DAST after every deploy, see the zap-baseline job in deploy.yml.
 
 on:
   workflow_dispatch:
