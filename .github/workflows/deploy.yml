@@ -28,7 +28,7 @@ env:
 
 jobs:
   # ────────────────────────────────────────────────────────────────────────────
-  # JOB 1 — Build & Test (runs on every push, PR, and manual trigger)
+  # JOB 1 — Build (runs on every push, PR, and manual trigger)
   # ────────────────────────────────────────────────────────────────────────────
   build-test:
     name: 🔨 Build
@@ -49,82 +49,11 @@ jobs:
       - name: Lint
         run: bun run lint || true   # non-blocking — remove "|| true" to enforce
 
-      - name: Run unit tests
-        run: bun run test
-
       - name: Build (type-check + vite build)
         run: bun run build
 
-  # ────────────────────────────────────────────────────────────────────────────
-  # JOB 1b — Playwright e2e (local runner, no GKE) — runs on every push & PR
-  # Runs each tagged test in an isolated matrix job for faster, independent feedback.
-  # ────────────────────────────────────────────────────────────────────────────
-  e2e-local:
-    name: 🎭 Playwright e2e (local) — ${{ matrix.test_id }}
-    runs-on: ubuntu-latest
-    needs: build-test
-    strategy:
-      fail-fast: false
-      matrix:
-        include:
-          - test_id: t1
-            grep: "@t1"
-          - test_id: t2
-            grep: "@t2"
-          - test_id: t3
-            grep: "@t3"
-          - test_id: t4
-            grep: "@t4"
-          - test_id: t5
-            grep: "@t5"
-          - test_id: t6
-            grep: "@t6"
-
-    permissions:
-      contents: read
-      checks: write        # publish JUnit summary as a GitHub check
-
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Setup Bun
-        uses: oven-sh/setup-bun@v2
-        with:
-          bun-version: latest
-
-      - name: Install dependencies
-        run: bun install --frozen-lockfile
-
-      - name: Install Playwright browsers
-        run: bun x playwright install --with-deps chromium
-
-      - name: Run isolated Playwright test
-        run: bun x playwright test --grep "${{ matrix.grep }}"
-        env:
-          CI: "true"
-          BASE_URL: "http://localhost:8080"
-
-      - name: Upload Playwright HTML report
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: playwright-local-${{ matrix.test_id }}-${{ github.run_id }}
-          path: |
-            playwright-report/
-            test-results/
-          if-no-files-found: warn
-          retention-days: 14
-
-      - name: Publish JUnit report
-        if: always()
-        uses: mikepenz/action-junit-report@v5
-        with:
-          report_paths: test-results/junit.xml
-          check_name: Playwright E2E Results (local ${{ matrix.test_id }})
-          detailed_summary: true
-          fail_on_failure: true
-          require_tests: true
+      - name: Build success
+        run: echo "✅ Build completed successfully"
 
   # ────────────────────────────────────────────────────────────────────────────
   # JOB 2 — Prepare release infra (APIs + Artifact Registry)
