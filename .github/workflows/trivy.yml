@@ -14,15 +14,12 @@ on:
 
 permissions:
   contents: read
-  security-events: write   # upload SARIF to GitHub Security tab
+  security-events: write
 
 jobs:
   # ────────────────────────────────────────────────────────────────────────────
   # JOB 1 — Filesystem / dependency scan
-  # Scans the source tree for:
-  #   • Known CVEs in package.json dependencies
-  #   • Secrets / hard-coded credentials
-  #   • Misconfigured IaC files (Dockerfile, k8s YAML, Terraform)
+  # Scans for CVEs in npm deps, secrets, and IaC misconfigs.
   # Outputs: SARIF (→ Security tab) + HTML report (→ artifact) + table (log)
   # ────────────────────────────────────────────────────────────────────────────
   trivy-fs:
@@ -33,14 +30,31 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      # ── Install Trivy CLI ─────────────────────────────────────────────────
-      - name: Install Trivy
+      # ── Download the official HTML template from the Trivy repo ──────────
+      # We fetch it once so all trivy-action steps can reference it by path.
+      - name: Download Trivy HTML template
         run: |
-          curl -sfL https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/install.sh \
-            | sh -s -- -b /usr/local/bin
+          mkdir -p .trivy-templates
+          curl -sfL https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/html.tpl \
+            -o .trivy-templates/html.tpl
+
+      # ── HTML report (generated first so it always exists for upload) ──────
+      - name: Trivy filesystem scan (HTML report)
+        uses: aquasecurity/trivy-action@v0.35.0
+        with:
+          scan-type: fs
+          scan-ref: .
+          scanners: vuln,secret,misconfig
+          format: template
+          template: "@.trivy-templates/html.tpl"
+          output: trivy-fs-report.html
+          severity: CRITICAL,HIGH,MEDIUM
+          ignore-unfixed: true
+          trivyignores: .trivyignore
 
       # ── SARIF → GitHub Security tab ───────────────────────────────────────
       - name: Trivy filesystem scan (SARIF)
+        if: always()
         uses: aquasecurity/trivy-action@v0.35.0
         with:
           scan-type: fs
@@ -59,20 +73,19 @@ jobs:
           sarif_file: trivy-fs.sarif
           category: trivy-filesystem
 
-      # ── HTML report ───────────────────────────────────────────────────────
-      - name: Trivy filesystem scan (HTML report)
+      # ── Upload HTML + SARIF artifact ──────────────────────────────────────
+      - name: Upload Trivy filesystem reports
         if: always()
-        run: |
-          trivy fs . \
-            --scanners vuln,secret,misconfig \
-            --severity CRITICAL,HIGH,MEDIUM \
-            --ignore-unfixed \
-            --ignorefile .trivyignore \
-            --format template \
-            --template "@/usr/local/share/trivy/templates/html.tpl" \
-            --output trivy-fs-report.html || true
+        uses: actions/upload-artifact@v4
+        with:
+          name: trivy-fs-report-${{ github.run_id }}
+          path: |
+            trivy-fs-report.html
+            trivy-fs.sarif
+          if-no-files-found: warn
+          retention-days: 30
 
-      # ── Table summary + gate: fail on CRITICAL/HIGH ───────────────────────
+      # ── Table summary + gate: fail on CRITICAL/HIGH (runs last) ──────────
       - name: Trivy filesystem scan (table — blocking on CRITICAL/HIGH)
         uses: aquasecurity/trivy-action@v0.35.0
         with:
@@ -85,21 +98,8 @@ jobs:
           trivyignores: .trivyignore
           exit-code: "1"
 
-      # ── Upload all reports as a single artifact ───────────────────────────
-      - name: Upload Trivy filesystem reports
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: trivy-fs-report-${{ github.run_id }}
-          path: |
-            trivy-fs-report.html
-            trivy-fs.sarif
-          if-no-files-found: warn
-          retention-days: 30
-
   # ────────────────────────────────────────────────────────────────────────────
   # JOB 2 — Dockerfile / IaC misconfiguration scan
-  # Checks Dockerfiles and k8s manifests for security best-practice violations.
   # Outputs: SARIF (→ Security tab) + HTML report (→ artifact) + table (log)
   # ────────────────────────────────────────────────────────────────────────────
   trivy-config:
@@ -110,14 +110,28 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      # ── Install Trivy CLI ─────────────────────────────────────────────────
-      - name: Install Trivy
+      # ── Download the official HTML template ───────────────────────────────
+      - name: Download Trivy HTML template
         run: |
-          curl -sfL https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/install.sh \
-            | sh -s -- -b /usr/local/bin
+          mkdir -p .trivy-templates
+          curl -sfL https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/html.tpl \
+            -o .trivy-templates/html.tpl
+
+      # ── HTML report ───────────────────────────────────────────────────────
+      - name: Trivy config scan (HTML report)
+        uses: aquasecurity/trivy-action@v0.35.0
+        with:
+          scan-type: config
+          scan-ref: .
+          format: template
+          template: "@.trivy-templates/html.tpl"
+          output: trivy-config-report.html
+          severity: CRITICAL,HIGH,MEDIUM
+          trivyignores: .trivyignore
 
       # ── SARIF → GitHub Security tab ───────────────────────────────────────
       - name: Trivy config scan (SARIF)
+        if: always()
         uses: aquasecurity/trivy-action@v0.35.0
         with:
           scan-type: config
@@ -134,16 +148,17 @@ jobs:
           sarif_file: trivy-config.sarif
           category: trivy-config
 
-      # ── HTML report ───────────────────────────────────────────────────────
-      - name: Trivy config scan (HTML report)
+      # ── Upload HTML + SARIF artifact ──────────────────────────────────────
+      - name: Upload Trivy config reports
         if: always()
-        run: |
-          trivy config . \
-            --severity CRITICAL,HIGH,MEDIUM \
-            --ignorefile .trivyignore \
-            --format template \
-            --template "@/usr/local/share/trivy/templates/html.tpl" \
-            --output trivy-config-report.html || true
+        uses: actions/upload-artifact@v4
+        with:
+          name: trivy-config-report-${{ github.run_id }}
+          path: |
+            trivy-config-report.html
+            trivy-config.sarif
+          if-no-files-found: warn
+          retention-days: 30
 
       # ── Table summary (informational — does not block) ────────────────────
       - name: Trivy config scan (table summary)
@@ -156,14 +171,3 @@ jobs:
           trivyignores: .trivyignore
           exit-code: "0"
 
-      # ── Upload all reports as a single artifact ───────────────────────────
-      - name: Upload Trivy config reports
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: trivy-config-report-${{ github.run_id }}
-          path: |
-            trivy-config-report.html
-            trivy-config.sarif
-          if-no-files-found: warn
-          retention-days: 30
