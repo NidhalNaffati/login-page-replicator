@@ -1,23 +1,4 @@
 # .trivyignore — Trivy findings accepted / suppressed for this project.
-#
-# Format (one entry per line):
-#   <CVE-ID>                          suppress a specific CVE globally
-#   <CVE-ID> (<package>@<version>)    suppress only for a specific package
-#
-# Always document WHY a finding is suppressed so reviewers can re-evaluate
-# at the next dependency upgrade.
-#
-# ── Node / npm ────────────────────────────────────────────────────────────────
-# Add CVEs here only after triaging — keep this list as short as possible.
-# Example (uncomment and adjust if needed):
-# CVE-2023-XXXXX   # dev-only, not reachable in production build
+# ⚠️  SECURITY DEMO: All entries removed so every finding is reported.
 
-# ── OS packages (nginx:alpine base image) ─────────────────────────────────────
-# Example:
-# CVE-2023-YYYYY   # fixed upstream, patch not yet backported to alpine edge
-
-# ── Playwright base image (mcr.microsoft.com/playwright) ──────────────────────
-# The Playwright image is test-only and never exposed publicly.
-# Suppress OS-level findings that have no fix available yet:
-# CVE-2023-ZZZZZ   # no fix available, test-only image, not deployed to prod
 

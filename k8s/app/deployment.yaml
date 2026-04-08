@@ -1,3 +1,4 @@
+# ⚠️  SECURITY DEMO — INTENTIONALLY VULNERABLE (for Trivy IaC scan showcase) ⚠️
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -17,24 +18,28 @@ spec:
         prometheus.io/port: "9113"
     spec:
       serviceAccountName: gke-app-sa
+      # VULN: Use host network namespace (Trivy: KSV023)
+      hostNetwork: true
+      # VULN: Automount SA token even though it's not needed (Trivy: KSV036)
+      automountServiceAccountToken: true
       containers:
         - name: app
           image: europe-west1-docker.pkg.dev/pfe-esprit-489411/login-page-replicator-repo/login-page-replicator:b229abf
           ports:
             - containerPort: 80
-          resources:
-            requests:
-              cpu: 100m
-              memory: 128Mi
-            limits:
-              cpu: 500m
-              memory: 256Mi
-          readinessProbe:
-            httpGet:
-              path: /
-              port: 80
-            initialDelaySeconds: 5
-            periodSeconds: 10
+          # VULN: Privileged container running as root (Trivy: KSV001, KSV012, KSV017)
+          securityContext:
+            runAsNonRoot: false
+            runAsUser: 0
+            privileged: true
+            allowPrivilegeEscalation: true
+            readOnlyRootFilesystem: false
+            capabilities:
+              add:
+                - NET_ADMIN
+                - SYS_ADMIN
+          # VULN: No resource limits (Trivy: KSV011)
+          # VULN: No readiness/liveness probe
         - name: nginx-exporter
           image: nginx/nginx-prometheus-exporter:1.1.0
           args:
@@ -42,11 +47,9 @@ spec:
           ports:
             - containerPort: 9113
               name: metrics
-          resources:
-            requests:
-              cpu: 10m
-              memory: 32Mi
-            limits:
-              cpu: 50m
-              memory: 64Mi
+          # VULN: Privileged exporter sidecar too
+          securityContext:
+            runAsNonRoot: false
+            privileged: true
+            allowPrivilegeEscalation: true
 

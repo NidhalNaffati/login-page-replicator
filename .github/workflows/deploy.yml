@@ -231,8 +231,7 @@ jobs:
           format: template
           template: "@.trivy-templates/html.tpl"
           output: trivy-app-image-report.html
-          severity: CRITICAL,HIGH,MEDIUM
-          ignore-unfixed: true
+          severity: CRITICAL,HIGH,MEDIUM,LOW
           trivyignores: .trivyignore
 
       # ── SARIF → GitHub Security tab ───────────────────────────────────────
@@ -245,8 +244,7 @@ jobs:
           scanners: vuln,secret
           format: sarif
           output: trivy-app-image.sarif
-          severity: CRITICAL,HIGH,MEDIUM
-          ignore-unfixed: true
+          severity: CRITICAL,HIGH,MEDIUM,LOW
           trivyignores: .trivyignore
 
       - name: Upload SARIF to GitHub Security tab
@@ -268,18 +266,17 @@ jobs:
           if-no-files-found: warn
           retention-days: 30
 
-      # ── Table summary + gate: fail on CRITICAL (runs last) ────────────────
-      - name: Trivy image scan (blocking on CRITICAL)
+      # ── Table summary (informational — does not block for demo) ──────────
+      - name: Trivy image scan (table summary — non-blocking)
         uses: aquasecurity/trivy-action@v0.35.0
         with:
           scan-type: image
           image-ref: ${{ env.IMAGE_BASE }}:${{ steps.sha.outputs.short_sha }}
-          scanners: vuln
+          scanners: vuln,secret
           format: table
-          severity: CRITICAL
-          ignore-unfixed: true
+          severity: CRITICAL,HIGH,MEDIUM,LOW
           trivyignores: .trivyignore
-          exit-code: "1"
+          exit-code: "0"
 
 
   # ────────────────────────────────────────────────────────────────────────────
@@ -330,8 +327,7 @@ jobs:
           format: template
           template: "@.trivy-templates/html.tpl"
           output: trivy-pw-image-report.html
-          severity: CRITICAL,HIGH,MEDIUM
-          ignore-unfixed: true
+          severity: CRITICAL,HIGH,MEDIUM,LOW
           trivyignores: .trivyignore
 
       # ── SARIF → GitHub Security tab ───────────────────────────────────────
@@ -344,8 +340,7 @@ jobs:
           scanners: vuln,secret
           format: sarif
           output: trivy-pw-image.sarif
-          severity: CRITICAL,HIGH,MEDIUM
-          ignore-unfixed: true
+          severity: CRITICAL,HIGH,MEDIUM,LOW
           trivyignores: .trivyignore
 
       - name: Upload SARIF to GitHub Security tab
@@ -373,10 +368,9 @@ jobs:
         with:
           scan-type: image
           image-ref: ${{ env.PW_IMAGE }}:${{ steps.sha.outputs.short_sha }}
-          scanners: vuln
+          scanners: vuln,secret
           format: table
-          severity: CRITICAL,HIGH
-          ignore-unfixed: true
+          severity: CRITICAL,HIGH,MEDIUM,LOW
           trivyignores: .trivyignore
           exit-code: "0"
 

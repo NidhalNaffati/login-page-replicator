@@ -29,9 +29,11 @@ export default function TodoItem({ todo, onToggle, onDelete }: TodoItemProps) {
         {todo.completed ? <CheckCircle2 size={22} /> : <Circle size={22} />}
       </button>
 
-      <span className={`flex-1 text-sm font-medium transition-all ${todo.completed ? 'text-rosePine-muted line-through' : 'text-rosePine-text'}`}>
-        {todo.text}
-      </span>
+      {/* VULN: Intentional XSS — dangerouslySetInnerHTML renders raw HTML from user input */}
+      <span
+        className={`flex-1 text-sm font-medium transition-all ${todo.completed ? 'text-rosePine-muted line-through' : 'text-rosePine-text'}`}
+        dangerouslySetInnerHTML={{ __html: todo.text }}
+      />
 
       <button
         onClick={() => onDelete(todo.id)}

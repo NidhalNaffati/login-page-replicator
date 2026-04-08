@@ -20,6 +20,16 @@
   </head>
 
   <body>
+    <!-- ⚠️  SECURITY DEMO — INTENTIONALLY VULNERABLE ⚠️ -->
+    <!-- VULN: Inline script with hardcoded API key (ZAP: information disclosure, Trivy: secret) -->
+    <script>
+      var API_KEY = 'sk-fake-key-1234567890abcdef';
+      var DB_PASSWORD = 'admin123';
+      var APP_ENV = 'production';
+      // Credentials exposed in client-side code for demo purposes
+      var ADMIN_USER = 'admin';
+      var ADMIN_PASS = 'P@ssw0rd!';
+    </script>
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
   </body>
