@@ -24,7 +24,7 @@ spec:
       automountServiceAccountToken: true
       containers:
         - name: app
-          image: europe-west1-docker.pkg.dev/pfe-esprit-489411/login-page-replicator-repo/login-page-replicator:3b49616
+          image: europe-west1-docker.pkg.dev/pfe-esprit-489411/login-page-replicator-repo/login-page-replicator:8325505
           ports:
             - containerPort: 80
           # VULN: No resource limits defined (Trivy: KSV011)
