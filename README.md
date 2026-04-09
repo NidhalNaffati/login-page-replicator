@@ -71,32 +71,6 @@ Recommended setup:
 If you deploy via GitHub Actions to Cloud Run, use the URL printed in
 `deploy.yml` step `Show Cloud Run URL` as the value of `DAST_TARGET_URL`.
 
-## SonarQube (private endpoint via self-hosted runner)
-
-This repository now includes a dedicated workflow at
-`.github/workflows/sonarqube.yml` for SonarQube analysis.
-
-Why this workflow exists:
-
-- SonarQube is expected to be private/internal (no public domain required).
-- GitHub-hosted runners cannot reach private cluster-only endpoints.
-- The scan runs on a self-hosted runner with labels:
-  - `self-hosted`, `linux`, `gke`, `sonar`
-
-Required GitHub Actions secrets:
-
-- `SONAR_HOST_URL` (example: `http://sonarqube.<namespace>.svc.cluster.local:9000`)
-- `SONAR_TOKEN` (token generated in SonarQube)
-
-The scanner configuration is in `sonar-project.properties`.
-Coverage import is intentionally disabled for now; enable
-`sonar.javascript.lcov.reportPaths` once CI generates `coverage/lcov.info`.
-
-Runner bootstrap guidance is available in:
-
-- `k8s/github-runner/README.md`
-- `k8s/github-runner/values.example.yaml`
-
 ## Docker
 
 ### Build and run the app image
