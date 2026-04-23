@@ -2,10 +2,11 @@
 {\reset@font\mtcSSfont\mtc@string\contentsline{subsection}{\noexpand \leavevmode \numberline {\filterminitoc {1.}1.1}Sopra Steria}{\reset@font\mtcSSfont 4}{subsection.1.1.1}}
 {\reset@font\mtcSSfont\mtc@string\contentsline{subsection}{\noexpand \leavevmode \numberline {\filterminitoc {1.}1.2}Sopra HR Software}{\reset@font\mtcSSfont 4}{subsection.1.1.2}}
 {\reset@font\mtcSSfont\mtc@string\contentsline{subsection}{\noexpand \leavevmode \numberline {\filterminitoc {1.}1.3}Département d'Accueil}{\reset@font\mtcSSfont 5}{subsection.1.1.3}}
-{\reset@font\mtcSfont\mtc@string\contentsline{section}{\noexpand \leavevmode \numberline {\filterminitoc {1.}2}Le Modèle <<Deploy First, Secure Later>> et ses Limites}{\reset@font\mtcSfont 5}{section.1.2}}
-{\reset@font\mtcSfont\mtc@string\contentsline{section}{\noexpand \leavevmode \numberline {\filterminitoc {1.}3}Les Pressions Réglementaires et Industrielles}{\reset@font\mtcSfont 6}{section.1.3}}
-{\reset@font\mtcSfont\mtc@string\contentsline{section}{\noexpand \leavevmode \numberline {\filterminitoc {1.}4}Problématique Centrale}{\reset@font\mtcSfont 6}{section.1.4}}
-{\reset@font\mtcSfont\mtc@string\contentsline{section}{\noexpand \leavevmode \numberline {\filterminitoc {1.}5}Étude de l'Existant --- L'Approche Jenkins}{\reset@font\mtcSfont 6}{section.1.5}}
-{\reset@font\mtcSSfont\mtc@string\contentsline{subsection}{\noexpand \leavevmode \numberline {\filterminitoc {1.}5.1}Description de l'Ancienne Architecture}{\reset@font\mtcSSfont 6}{subsection.1.5.1}}
-{\reset@font\mtcSSfont\mtc@string\contentsline{subsection}{\noexpand \leavevmode \numberline {\filterminitoc {1.}5.2}Problèmes Identifiés}{\reset@font\mtcSSfont 8}{subsection.1.5.2}}
-{\reset@font\mtcSSfont\mtc@string\contentsline{subsection}{\noexpand \leavevmode \numberline {\filterminitoc {1.}5.3}Dette Technique et Sécuritaire Accumulée}{\reset@font\mtcSSfont 9}{subsection.1.5.3}}
+{\reset@font\mtcSfont\mtc@string\contentsline{section}{\noexpand \leavevmode \numberline {\filterminitoc {1.}2}La Mission~: Du Jenkins Basique à une Chaîne DevSecOps}{\reset@font\mtcSfont 6}{section.1.2}}
+{\reset@font\mtcSfont\mtc@string\contentsline{section}{\noexpand \leavevmode \numberline {\filterminitoc {1.}3}Le Modèle <<Deploy First, Secure Later>> et ses Limites}{\reset@font\mtcSfont 7}{section.1.3}}
+{\reset@font\mtcSfont\mtc@string\contentsline{section}{\noexpand \leavevmode \numberline {\filterminitoc {1.}4}Les Pressions Réglementaires et Industrielles}{\reset@font\mtcSfont 7}{section.1.4}}
+{\reset@font\mtcSfont\mtc@string\contentsline{section}{\noexpand \leavevmode \numberline {\filterminitoc {1.}5}Problématique Centrale}{\reset@font\mtcSfont 7}{section.1.5}}
+{\reset@font\mtcSfont\mtc@string\contentsline{section}{\noexpand \leavevmode \numberline {\filterminitoc {1.}6}Étude de l'Existant --- L'Approche Jenkins}{\reset@font\mtcSfont 8}{section.1.6}}
+{\reset@font\mtcSSfont\mtc@string\contentsline{subsection}{\noexpand \leavevmode \numberline {\filterminitoc {1.}6.1}Description de l'Ancienne Architecture}{\reset@font\mtcSSfont 8}{subsection.1.6.1}}
+{\reset@font\mtcSSfont\mtc@string\contentsline{subsection}{\noexpand \leavevmode \numberline {\filterminitoc {1.}6.2}Problèmes Identifiés}{\reset@font\mtcSSfont 9}{subsection.1.6.2}}
+{\reset@font\mtcSSfont\mtc@string\contentsline{subsection}{\noexpand \leavevmode \numberline {\filterminitoc {1.}6.3}Dette Technique et Sécuritaire Accumulée}{\reset@font\mtcSSfont 11}{subsection.1.6.3}}

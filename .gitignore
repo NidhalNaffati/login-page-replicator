@@ -31,3 +31,35 @@ test-results/
 coverage/
 .scannerwork/
 
+# LaTeX build artifacts - ignore temporary and generated files from TeX/LaTeX builds
+# If you want to keep the final PDF(s) in the repo, remove the *.pdf line below
+*.aux
+*.bbl
+*.blg
+*.brf
+*.log
+*.out
+*.toc
+*.lof
+*.lot
+*.fls
+*.fdb_latexmk
+*.synctex.gz
+*.run.xml
+*.ilg
+*.idx
+*.ind
+*.maf
+*.mtc*
+*.nav
+*.snm
+*.vrb
+*.pdf
+_minted*/*
+*.synctex
+
+# Common LaTeX build directories
+auxil/
+build/
+latex-build/
+
