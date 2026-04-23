@@ -68,10 +68,51 @@ plusieurs départements collaborent au sein de Sopra HR.
     \label{fig:sopra_hr_org_chart}
 \end{figure}
 
-Notre stage de fin d'études a été réalisé au sein de l'équipe internationale R\&D. Cette
-équipe a pour mission de rechercher, de développer et de proposer des solutions répondant
-à l'évolution des besoins des directeurs des ressources humaines, tout en anticipant les
-tendances et perspectives futures du domaine RH.
+Notre stage de fin d'études a été réalisé au sein de l'\textbf{équipe QA (Quality Assurance)
+internationale}. Cette équipe a pour mission de garantir la qualité des livrables logiciels
+produits par les équipes de développement, en concevant et en exécutant des campagnes de tests
+automatisés sur les solutions RH de Sopra HR (notamment HR Access et Pleiades).
+
+L'équipe QA s'appuie sur un framework interne de tests BDD (\textit{Behavior-Driven
+Development}) nommé \textbf{T4T} (\textit{Test for Teams}). Ce framework permet aux testeurs
+de rédiger des scénarios de test en langage naturel structuré (syntaxe Gherkin~:
+\texttt{Given/When/Then}) qui sont ensuite exécutés automatiquement contre les applications
+cibles. T4T est l'outil central de la stratégie de test de l'équipe.
+
+\begin{figure}[H]
+    \centering
+    \fbox{\parbox{0.85\textwidth}{\centering
+        \vspace{2.5cm}
+        Espace réservé pour la Figure~\ref{fig:t4t_overview}\\
+        \textbf{Vue d'ensemble du framework T4T et son intégration dans le workflow QA}\\[6pt]
+        \footnotesize Scénarios BDD (Gherkin) $\to$ T4T Engine $\to$ Exécution $\to$ Rapports
+        \vspace{2.5cm}
+    }}
+    \caption{Framework T4T~: vue d'ensemble du workflow de tests BDD}
+    \label{fig:t4t_overview}
+\end{figure}
+
+
+\section{La Mission~: Du Jenkins Basique à une Chaîne DevSecOps}
+
+Dans ce contexte d'équipe QA, la mission confiée pour ce projet de fin d'études est
+précisément définie en trois volets~:
+
+\begin{enumerate}
+    \item \textbf{Concevoir de nouveaux pipelines CI/CD}~: remplacer l'approche Jenkins
+    vieillissante par des pipelines modernes, automatisés et maintenables avec GitHub Actions~;
+    \item \textbf{Sécuriser la chaîne de livraison}~: intégrer des contrôles de sécurité
+    (SAST, SCA, DAST) à chaque étape du pipeline, selon le principe DevSecOps Shift-Left~;
+    \item \textbf{Générer des rapports d'analyse automatisés}~: chaque exécution du pipeline
+    doit produire des rapports de tests, de couverture, de vulnérabilités et de conformité,
+    auditables et archivés comme artefacts.
+\end{enumerate}
+
+Pour mener à bien cette mission, une \textbf{application web de démonstration} (Todo App
+React) a été développée comme support concret. Cette application permet de valider
+l'ensemble de la chaîne DevSecOps dans un contexte réaliste~: tests unitaires, tests E2E,
+scans de sécurité, déploiement sur Kubernetes, et monitoring --- le tout applicable ensuite
+aux projets réels de l'équipe QA utilisant T4T.
 
 
 \section{Le Modèle <<Deploy First, Secure Later>> et ses Limites}
@@ -126,9 +167,10 @@ En 2026, les exigences réglementaires renforcent la nécessité d'une sécurit�
 La problématique de ce projet se formule ainsi:
 
 \begin{infobox}
-    \textit{Comment transformer un pipeline CI/CD basique (Jenkins + tests unitaires) en une
-    chaîne DevSecOps complète qui intègre la sécurité à chaque étape, sans sacrifier la vélocité
-    de livraison, et avec des preuves auditables de conformité ?}
+    \textit{Comment concevoir de nouveaux pipelines CI/CD pour remplacer l'approche Jenkins
+    existante de l'équipe QA, en intégrant la sécurité à chaque étape selon une approche
+    DevSecOps, tout en produisant des rapports d'analyse automatisés et auditables, sans
+    sacrifier la vélocité de livraison~?}
 \end{infobox}
 
 Cette problématique est multidimensionnelle:
@@ -147,14 +189,17 @@ Cette problématique est multidimensionnelle:
 \subsection{Description de l'Ancienne Architecture}
 
 Avant ce projet, le système en place reposait sur une approche minimaliste et très courante
-dans les petites équipes: un serveur Jenkins auto-hébergé configuré et maintenu de manière
+dans les petites équipes~: un serveur Jenkins auto-hébergé configuré et maintenu de manière
 manuelle.
-Les jobs Jenkins étaient définis et administrés à la main par les développeurs et
-les builds étaient souvent lancés manuellement par un développeur plutôt que par des
-déclencheurs automatisés.
-Jenkins était relié à notre dépôt Git, mais l'intégration restait
-limitée: il se contentait d'exécuter des tests unitaires avant un déploiement
-manuel effectué via des scripts shell.
+
+L'équipe QA exécutait ses \textbf{tests BDD} rédigés avec le framework interne
+\textbf{T4T} via des jobs Jenkins. Ces tests, écrits en syntaxe Gherkin
+(\texttt{Given/When/Then}), validaient les scénarios fonctionnels des applications RH.
+Cependant, les jobs Jenkins étaient définis et administrés à la main par les développeurs, et
+les builds étaient souvent lancés manuellement plutôt que par des déclencheurs automatisés.
+Jenkins était relié au dépôt Git, mais l'intégration restait limitée~: il se contentait
+d'exécuter les tests BDD T4T avant un déploiement manuel effectué via des scripts shell.
+\textbf{Aucun contrôle de sécurité} n'était intégré dans ce pipeline.
 
 La figure \ref{fig:jenkins_architecture_existant} présente l'architecture logique de cette
 approche Jenkins avant la transformation DevSecOps.
@@ -182,7 +227,7 @@ Le tableau \ref{tab:etat_avant} synthétise l'état de l'art avant la transforma
 \tableheader \textbf{Aspect} & \textbf{État Avant} \\
 \hline
 Outil CI & Jenkins (auto-hébergé, configuration manuelle) \\ \hdashline
-Tests & Uniquement tests BDD \\ \hdashline
+Tests & Tests BDD uniquement (framework T4T interne) \\ \hdashline
 Sécurité & \textbf{Aucune} \\ \hdashline
 Scan de vulnérabilités & Absent \\ \hdashline
 Scan des images Docker & Absent \\ \hdashline
@@ -202,10 +247,10 @@ Audit trail & Inexistant \\
 \subsection{Problèmes Identifiés}
 
 \textbf{Problème 1 --- Absence totale de sécurité dans le pipeline:}
-Le pipeline Jenkins se contentait de vérifier que les tests passaient. Aucune analyse statique
-de sécurité (SAST), aucun scan de dépendances (SCA), aucun scan d'images Docker n'était effectué.
-Des vulnérabilités critiques pouvaient transiter du code source jusqu'en production sans être
-détectées.
+Le pipeline Jenkins se contentait de vérifier que les tests BDD T4T passaient. Aucune analyse
+statique de sécurité (SAST), aucun scan de dépendances (SCA), aucun scan d'images Docker
+n'était effectué. Des vulnérabilités critiques pouvaient transiter du code source jusqu'en
+production sans être détectées.
 
 \textbf{Problème 2 --- Clés d'authentification statiques:}
 Jenkins utilisait des clés JSON Google Cloud Service Account avec des permissions larges, stockées
@@ -226,8 +271,10 @@ Après le déploiement, aucun outil ne surveillait les comportements anormaux, l
 d'intrusion ou les événements de sécurité sur les nœuds Kubernetes.
 
 \textbf{Problème 6 --- Tests non représentatifs:}
-Les tests unitaires ne testaient que des fonctions isolées, sans jamais valider le comportement
-réel de l'application dans son contexte de déploiement.
+Les tests BDD T4T ne couvraient que les scénarios fonctionnels métier, sans jamais valider
+le comportement réel de l'application dans son contexte de déploiement cloud-native.
+Aucun test de sécurité, aucun test E2E dans le cluster, et aucun scan dynamique n'étaient
+réalisés. De plus, aucun rapport d'analyse de sécurité n'était généré.
 
 \subsection{Dette Technique et Sécuritaire Accumulée}
 

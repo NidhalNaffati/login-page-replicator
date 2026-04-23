@@ -258,8 +258,13 @@ push du développeur jusqu'au déploiement GitOps et les tests E2E.
 \subsection{Description Fonctionnelle}
 
 L'application déployée est une \textbf{Todo App} avec un portail de connexion, développée
-avec React 18 et TypeScript. Bien que l'application soit fonctionnellement simple, elle sert
-de support idéal pour illustrer tous les aspects DevSecOps car elle possède~:
+avec React 18 et TypeScript. Cette application a été conçue comme \textbf{support de
+démonstration} pour valider l'ensemble de la chaîne DevSecOps. En effet, l'équipe QA
+utilise au quotidien le framework BDD interne \textbf{T4T} pour tester les applications RH
+de production~; la Todo App permet de concevoir et de valider les pipelines DevSecOps dans un
+environnement maîtrisé, avant de transposer ces pratiques aux projets réels de l'équipe.
+
+Bien que fonctionnellement simple, l'application sert de support idéal car elle possède~:
 
 \begin{itemize}
   \item Une \textbf{authentification} (cible pour les tests de sécurité)~;

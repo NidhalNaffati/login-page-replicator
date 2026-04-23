@@ -1,0 +1,184 @@
+{
+  "type": "excalidraw",
+  "version": 2,
+  "source": "https://excalidraw.com",
+  "elements": [
+    {
+      "id": "title", "type": "text",
+      "x": 180, "y": 10, "width": 500, "height": 35, "angle": 0,
+      "strokeColor": "#1e1e1e", "backgroundColor": "transparent", "fillStyle": "solid",
+      "strokeWidth": 1, "strokeStyle": "solid", "roughness": 0, "opacity": 100,
+      "seed": 1, "version": 1, "isDeleted": false, "groupIds": [],
+      "text": "Architecture Physique GCP — pfe-esprit-489411", "fontSize": 20, "fontFamily": 1,
+      "textAlign": "center", "verticalAlign": "top",
+      "containerId": null, "originalText": "Architecture Physique GCP — pfe-esprit-489411", "lineHeight": 1.25
+    },
+    {
+      "id": "gcp_box", "type": "rectangle",
+      "x": 40, "y": 60, "width": 800, "height": 520, "angle": 0,
+      "strokeColor": "#1971c2", "backgroundColor": "#e7f5ff", "fillStyle": "solid",
+      "strokeWidth": 2, "strokeStyle": "solid", "roughness": 0, "opacity": 40,
+      "seed": 2, "version": 1, "isDeleted": false, "groupIds": [],
+      "roundness": { "type": 3 }, "boundElements": []
+    },
+    {
+      "id": "gcp_lbl", "type": "text",
+      "x": 50, "y": 70, "width": 250, "height": 25, "angle": 0,
+      "strokeColor": "#1971c2", "backgroundColor": "transparent", "fillStyle": "solid",
+      "strokeWidth": 1, "strokeStyle": "solid", "roughness": 0, "opacity": 100,
+      "seed": 3, "version": 1, "isDeleted": false, "groupIds": [],
+      "text": "GCP Project: pfe-esprit-489411", "fontSize": 14, "fontFamily": 1,
+      "textAlign": "left", "verticalAlign": "top",
+      "containerId": null, "originalText": "GCP Project: pfe-esprit-489411", "lineHeight": 1.25
+    },
+    {
+      "id": "vpc_box", "type": "rectangle",
+      "x": 70, "y": 100, "width": 750, "height": 460, "angle": 0,
+      "strokeColor": "#2f9e44", "backgroundColor": "#d3f9d8", "fillStyle": "solid",
+      "strokeWidth": 2, "strokeStyle": "dashed", "roughness": 0, "opacity": 30,
+      "seed": 4, "version": 1, "isDeleted": false, "groupIds": [],
+      "roundness": { "type": 3 }, "boundElements": []
+    },
+    {
+      "id": "vpc_lbl", "type": "text",
+      "x": 80, "y": 108, "width": 300, "height": 25, "angle": 0,
+      "strokeColor": "#2f9e44", "backgroundColor": "transparent", "fillStyle": "solid",
+      "strokeWidth": 1, "strokeStyle": "solid", "roughness": 0, "opacity": 100,
+      "seed": 5, "version": 1, "isDeleted": false, "groupIds": [],
+      "text": "VPC: devops-vpc / Subnet: devops-subnet", "fontSize": 14, "fontFamily": 1,
+      "textAlign": "left", "verticalAlign": "top",
+      "containerId": null, "originalText": "VPC: devops-vpc / Subnet: devops-subnet", "lineHeight": 1.25
+    },
+    {
+      "id": "subnet_info", "type": "text",
+      "x": 80, "y": 130, "width": 450, "height": 50, "angle": 0,
+      "strokeColor": "#495057", "backgroundColor": "transparent", "fillStyle": "solid",
+      "strokeWidth": 1, "strokeStyle": "solid", "roughness": 0, "opacity": 100,
+      "seed": 6, "version": 1, "isDeleted": false, "groupIds": [],
+      "text": "Nœuds: 10.10.0.0/20 | Pods: 10.20.0.0/16 | Services: 10.30.0.0/20\nRégion: europe-west1", "fontSize": 12, "fontFamily": 3,
+      "textAlign": "left", "verticalAlign": "top",
+      "containerId": null, "originalText": "Nœuds: 10.10.0.0/20 | Pods: 10.20.0.0/16 | Services: 10.30.0.0/20\nRégion: europe-west1", "lineHeight": 1.25
+    },
+    {
+      "id": "gke", "type": "rectangle",
+      "x": 100, "y": 200, "width": 340, "height": 160, "angle": 0,
+      "strokeColor": "#1971c2", "backgroundColor": "#a5d8ff", "fillStyle": "solid",
+      "strokeWidth": 2, "strokeStyle": "solid", "roughness": 0, "opacity": 100,
+      "seed": 10, "version": 1, "isDeleted": false, "groupIds": [],
+      "roundness": { "type": 3 }, "boundElements": [{ "id": "gke_t", "type": "text" }]
+    },
+    {
+      "id": "gke_t", "type": "text",
+      "x": 105, "y": 240, "width": 330, "height": 80, "angle": 0,
+      "strokeColor": "#1e1e1e", "backgroundColor": "transparent", "fillStyle": "solid",
+      "strokeWidth": 1, "strokeStyle": "solid", "roughness": 0, "opacity": 100,
+      "seed": 11, "version": 1, "isDeleted": false, "groupIds": [],
+      "text": "GKE Autopilot Cluster\ndevops-cluster\n\nMode géré · Patches auto\nFacturation par pod", "fontSize": 14, "fontFamily": 1,
+      "textAlign": "center", "verticalAlign": "middle",
+      "containerId": "gke", "originalText": "GKE Autopilot Cluster\ndevops-cluster\n\nMode géré · Patches auto\nFacturation par pod", "lineHeight": 1.25
+    },
+    {
+      "id": "ar", "type": "rectangle",
+      "x": 490, "y": 200, "width": 300, "height": 80, "angle": 0,
+      "strokeColor": "#1971c2", "backgroundColor": "#d0bfff", "fillStyle": "solid",
+      "strokeWidth": 2, "strokeStyle": "solid", "roughness": 0, "opacity": 100,
+      "seed": 20, "version": 1, "isDeleted": false, "groupIds": [],
+      "roundness": { "type": 3 }, "boundElements": [{ "id": "ar_t", "type": "text" }]
+    },
+    {
+      "id": "ar_t", "type": "text",
+      "x": 495, "y": 220, "width": 290, "height": 40, "angle": 0,
+      "strokeColor": "#1e1e1e", "backgroundColor": "transparent", "fillStyle": "solid",
+      "strokeWidth": 1, "strokeStyle": "solid", "roughness": 0, "opacity": 100,
+      "seed": 21, "version": 1, "isDeleted": false, "groupIds": [],
+      "text": "Artifact Registry\nImages Docker (app + tests)", "fontSize": 14, "fontFamily": 1,
+      "textAlign": "center", "verticalAlign": "middle",
+      "containerId": "ar", "originalText": "Artifact Registry\nImages Docker (app + tests)", "lineHeight": 1.25
+    },
+    {
+      "id": "wazuh_vm", "type": "rectangle",
+      "x": 490, "y": 320, "width": 300, "height": 80, "angle": 0,
+      "strokeColor": "#e03131", "backgroundColor": "#ffc9c9", "fillStyle": "solid",
+      "strokeWidth": 2, "strokeStyle": "solid", "roughness": 0, "opacity": 100,
+      "seed": 30, "version": 1, "isDeleted": false, "groupIds": [],
+      "roundness": { "type": 3 }, "boundElements": [{ "id": "wazuh_t", "type": "text" }]
+    },
+    {
+      "id": "wazuh_t", "type": "text",
+      "x": 495, "y": 330, "width": 290, "height": 55, "angle": 0,
+      "strokeColor": "#1e1e1e", "backgroundColor": "transparent", "fillStyle": "solid",
+      "strokeWidth": 1, "strokeStyle": "solid", "roughness": 0, "opacity": 100,
+      "seed": 31, "version": 1, "isDeleted": false, "groupIds": [],
+      "text": "VM Compute Engine — Wazuh Manager\ne2-medium · IP 10.10.0.2\nPort TCP 1514", "fontSize": 14, "fontFamily": 1,
+      "textAlign": "center", "verticalAlign": "middle",
+      "containerId": "wazuh_vm", "originalText": "VM Compute Engine — Wazuh Manager\ne2-medium · IP 10.10.0.2\nPort TCP 1514", "lineHeight": 1.25
+    },
+    {
+      "id": "wif_arrow", "type": "arrow",
+      "x": 440, "y": 490, "width": 0, "height": 70, "angle": 0,
+      "strokeColor": "#f08c00", "backgroundColor": "transparent", "fillStyle": "solid",
+      "strokeWidth": 2, "strokeStyle": "dashed", "roughness": 0, "opacity": 100,
+      "seed": 40, "version": 1, "isDeleted": false, "groupIds": [],
+      "points": [[0, 70], [0, 0]], "startArrowhead": null, "endArrowhead": "arrow",
+      "startBinding": null, "endBinding": null, "lastCommittedPoint": null, "roundness": { "type": 2 }
+    },
+    {
+      "id": "gh_box", "type": "rectangle",
+      "x": 250, "y": 440, "width": 380, "height": 60, "angle": 0,
+      "strokeColor": "#1e1e1e", "backgroundColor": "#fff3bf", "fillStyle": "solid",
+      "strokeWidth": 2, "strokeStyle": "solid", "roughness": 0, "opacity": 100,
+      "seed": 50, "version": 1, "isDeleted": false, "groupIds": [],
+      "roundness": { "type": 3 }, "boundElements": [{ "id": "gh_t", "type": "text" }]
+    },
+    {
+      "id": "gh_t", "type": "text",
+      "x": 255, "y": 450, "width": 370, "height": 40, "angle": 0,
+      "strokeColor": "#1e1e1e", "backgroundColor": "transparent", "fillStyle": "solid",
+      "strokeWidth": 1, "strokeStyle": "solid", "roughness": 0, "opacity": 100,
+      "seed": 51, "version": 1, "isDeleted": false, "groupIds": [],
+      "text": "GitHub Actions\nWorkload Identity Federation (OIDC)", "fontSize": 14, "fontFamily": 1,
+      "textAlign": "center", "verticalAlign": "middle",
+      "containerId": "gh_box", "originalText": "GitHub Actions\nWorkload Identity Federation (OIDC)", "lineHeight": 1.25
+    },
+    {
+      "id": "wif_label", "type": "text",
+      "x": 450, "y": 510, "width": 200, "height": 20, "angle": 0,
+      "strokeColor": "#f08c00", "backgroundColor": "transparent", "fillStyle": "solid",
+      "strokeWidth": 1, "strokeStyle": "solid", "roughness": 0, "opacity": 100,
+      "seed": 52, "version": 1, "isDeleted": false, "groupIds": [],
+      "text": "OIDC JWT (keyless)", "fontSize": 12, "fontFamily": 1,
+      "textAlign": "left", "verticalAlign": "top",
+      "containerId": null, "originalText": "OIDC JWT (keyless)", "lineHeight": 1.25
+    },
+    {
+      "id": "gke_to_ar", "type": "arrow",
+      "x": 440, "y": 280, "width": 50, "height": 0, "angle": 0,
+      "strokeColor": "#495057", "backgroundColor": "transparent", "fillStyle": "solid",
+      "strokeWidth": 2, "strokeStyle": "solid", "roughness": 0, "opacity": 100,
+      "seed": 60, "version": 1, "isDeleted": false, "groupIds": [],
+      "points": [[0, 0], [50, -40]], "startArrowhead": null, "endArrowhead": "arrow",
+      "startBinding": null, "endBinding": null, "lastCommittedPoint": null, "roundness": { "type": 2 }
+    },
+    {
+      "id": "gke_to_wz", "type": "arrow",
+      "x": 440, "y": 320, "width": 50, "height": 40, "angle": 0,
+      "strokeColor": "#e03131", "backgroundColor": "transparent", "fillStyle": "solid",
+      "strokeWidth": 2, "strokeStyle": "dashed", "roughness": 0, "opacity": 100,
+      "seed": 61, "version": 1, "isDeleted": false, "groupIds": [],
+      "points": [[0, 0], [50, 40]], "startArrowhead": null, "endArrowhead": "arrow",
+      "startBinding": null, "endBinding": null, "lastCommittedPoint": null, "roundness": { "type": 2 }
+    },
+    {
+      "id": "wz_port", "type": "text",
+      "x": 448, "y": 340, "width": 80, "height": 20, "angle": 0,
+      "strokeColor": "#e03131", "backgroundColor": "transparent", "fillStyle": "solid",
+      "strokeWidth": 1, "strokeStyle": "solid", "roughness": 0, "opacity": 100,
+      "seed": 62, "version": 1, "isDeleted": false, "groupIds": [],
+      "text": "TCP 1514", "fontSize": 12, "fontFamily": 3,
+      "textAlign": "left", "verticalAlign": "top",
+      "containerId": null, "originalText": "TCP 1514", "lineHeight": 1.25
+    }
+  ],
+  "appState": { "viewBackgroundColor": "#ffffff", "gridSize": null },
+  "files": {}
+}

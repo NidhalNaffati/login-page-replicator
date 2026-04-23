@@ -856,10 +856,10 @@ Secrets Scan & Absent & Trivy~: secrets ENV + .env détectés \\ \hdashline
 Runtime Security & Absent & Wazuh~: 4 agents actifs \\ \hdashline
 Réseau & Tout ouvert & Zero Trust~: 12 NetworkPolicies \\ \hdashline
 Auth CI & Clés JSON statiques & WIF OIDC~: zéro clé persistante \\ \hdashline
-Tests & Unit tests Jenkins & Unit + E2E + 6 scénarios Playwright \\ \hdashline
+Tests & BDD T4T sur Jenkins uniquement & Unit + E2E + 6 scénarios Playwright \\ \hdashline
 Infrastructure & ClickOps & Terraform IaC~: 100\% reproductible \\ \hdashline
 Déploiement & Scripts manuels & Argo CD GitOps~: auto-sync + self-heal \\ \hdashline
-Audit trail & Inexistant & Chaque commit/build/deploy tracé \\
+Audit trail & Inexistant & Chaque commit/build/deploy tracé + rapports d'analyse \\
 \hline
 \end{tabularx}
 \end{table}

@@ -1,0 +1,141 @@
+{
+  "type": "excalidraw",
+  "version": 2,
+  "source": "https://excalidraw.com",
+  "elements": [
+    {
+      "id": "title", "type": "text",
+      "x": 200, "y": 20, "width": 400, "height": 35, "angle": 0,
+      "strokeColor": "#1e1e1e", "backgroundColor": "transparent", "fillStyle": "solid",
+      "strokeWidth": 1, "strokeStyle": "solid", "roughness": 0, "opacity": 100,
+      "seed": 1, "version": 1, "isDeleted": false, "groupIds": [],
+      "text": "Diagramme de Gantt — Planification des Sprints", "fontSize": 20, "fontFamily": 1,
+      "textAlign": "center", "verticalAlign": "top",
+      "containerId": null, "originalText": "Diagramme de Gantt — Planification des Sprints", "lineHeight": 1.25
+    },
+    {
+      "id": "wk_header", "type": "text",
+      "x": 200, "y": 70, "width": 700, "height": 25, "angle": 0,
+      "strokeColor": "#495057", "backgroundColor": "transparent", "fillStyle": "solid",
+      "strokeWidth": 1, "strokeStyle": "solid", "roughness": 0, "opacity": 100,
+      "seed": 2, "version": 1, "isDeleted": false, "groupIds": [],
+      "text": "S1      S2      S3      S4      S5      S6      S7      S8      S9      S10     S11", "fontSize": 14, "fontFamily": 3,
+      "textAlign": "left", "verticalAlign": "top",
+      "containerId": null, "originalText": "S1      S2      S3      S4      S5      S6      S7      S8      S9      S10     S11", "lineHeight": 1.25
+    },
+    {
+      "id": "lbl1", "type": "text",
+      "x": 10, "y": 105, "width": 180, "height": 25, "angle": 0,
+      "strokeColor": "#1e1e1e", "backgroundColor": "transparent", "fillStyle": "solid",
+      "strokeWidth": 1, "strokeStyle": "solid", "roughness": 0, "opacity": 100,
+      "seed": 3, "version": 1, "isDeleted": false, "groupIds": [],
+      "text": "Sprint 1 — IaC & GKE", "fontSize": 14, "fontFamily": 1,
+      "textAlign": "left", "verticalAlign": "middle",
+      "containerId": null, "originalText": "Sprint 1 — IaC & GKE", "lineHeight": 1.25
+    },
+    {
+      "id": "bar1", "type": "rectangle",
+      "x": 200, "y": 100, "width": 195, "height": 35, "angle": 0,
+      "strokeColor": "#1e1e1e", "backgroundColor": "#a5d8ff", "fillStyle": "solid",
+      "strokeWidth": 2, "strokeStyle": "solid", "roughness": 0, "opacity": 100,
+      "seed": 4, "version": 1, "isDeleted": false, "groupIds": [],
+      "roundness": { "type": 3 }, "boundElements": [{ "id": "bar1_t", "type": "text" }]
+    },
+    {
+      "id": "bar1_t", "type": "text",
+      "x": 205, "y": 105, "width": 185, "height": 25, "angle": 0,
+      "strokeColor": "#1e1e1e", "backgroundColor": "transparent", "fillStyle": "solid",
+      "strokeWidth": 1, "strokeStyle": "solid", "roughness": 0, "opacity": 100,
+      "seed": 5, "version": 1, "isDeleted": false, "groupIds": [],
+      "text": "Semaines 1–3", "fontSize": 14, "fontFamily": 1,
+      "textAlign": "center", "verticalAlign": "middle",
+      "containerId": "bar1", "originalText": "Semaines 1–3", "lineHeight": 1.25
+    },
+    {
+      "id": "lbl2", "type": "text",
+      "x": 10, "y": 160, "width": 180, "height": 25, "angle": 0,
+      "strokeColor": "#1e1e1e", "backgroundColor": "transparent", "fillStyle": "solid",
+      "strokeWidth": 1, "strokeStyle": "solid", "roughness": 0, "opacity": 100,
+      "seed": 6, "version": 1, "isDeleted": false, "groupIds": [],
+      "text": "Sprint 2 — CI/CD & Keyless", "fontSize": 14, "fontFamily": 1,
+      "textAlign": "left", "verticalAlign": "middle",
+      "containerId": null, "originalText": "Sprint 2 — CI/CD & Keyless", "lineHeight": 1.25
+    },
+    {
+      "id": "bar2", "type": "rectangle",
+      "x": 395, "y": 155, "width": 195, "height": 35, "angle": 0,
+      "strokeColor": "#1e1e1e", "backgroundColor": "#b2f2bb", "fillStyle": "solid",
+      "strokeWidth": 2, "strokeStyle": "solid", "roughness": 0, "opacity": 100,
+      "seed": 7, "version": 1, "isDeleted": false, "groupIds": [],
+      "roundness": { "type": 3 }, "boundElements": [{ "id": "bar2_t", "type": "text" }]
+    },
+    {
+      "id": "bar2_t", "type": "text",
+      "x": 400, "y": 160, "width": 185, "height": 25, "angle": 0,
+      "strokeColor": "#1e1e1e", "backgroundColor": "transparent", "fillStyle": "solid",
+      "strokeWidth": 1, "strokeStyle": "solid", "roughness": 0, "opacity": 100,
+      "seed": 8, "version": 1, "isDeleted": false, "groupIds": [],
+      "text": "Semaines 4–6", "fontSize": 14, "fontFamily": 1,
+      "textAlign": "center", "verticalAlign": "middle",
+      "containerId": "bar2", "originalText": "Semaines 4–6", "lineHeight": 1.25
+    },
+    {
+      "id": "lbl3", "type": "text",
+      "x": 10, "y": 215, "width": 180, "height": 25, "angle": 0,
+      "strokeColor": "#1e1e1e", "backgroundColor": "transparent", "fillStyle": "solid",
+      "strokeWidth": 1, "strokeStyle": "solid", "roughness": 0, "opacity": 100,
+      "seed": 9, "version": 1, "isDeleted": false, "groupIds": [],
+      "text": "Sprint 3 — Sécurité & GitOps", "fontSize": 14, "fontFamily": 1,
+      "textAlign": "left", "verticalAlign": "middle",
+      "containerId": null, "originalText": "Sprint 3 — Sécurité & GitOps", "lineHeight": 1.25
+    },
+    {
+      "id": "bar3", "type": "rectangle",
+      "x": 590, "y": 210, "width": 195, "height": 35, "angle": 0,
+      "strokeColor": "#1e1e1e", "backgroundColor": "#ffd8a8", "fillStyle": "solid",
+      "strokeWidth": 2, "strokeStyle": "solid", "roughness": 0, "opacity": 100,
+      "seed": 10, "version": 1, "isDeleted": false, "groupIds": [],
+      "roundness": { "type": 3 }, "boundElements": [{ "id": "bar3_t", "type": "text" }]
+    },
+    {
+      "id": "bar3_t", "type": "text",
+      "x": 595, "y": 215, "width": 185, "height": 25, "angle": 0,
+      "strokeColor": "#1e1e1e", "backgroundColor": "transparent", "fillStyle": "solid",
+      "strokeWidth": 1, "strokeStyle": "solid", "roughness": 0, "opacity": 100,
+      "seed": 11, "version": 1, "isDeleted": false, "groupIds": [],
+      "text": "Semaines 7–9", "fontSize": 14, "fontFamily": 1,
+      "textAlign": "center", "verticalAlign": "middle",
+      "containerId": "bar3", "originalText": "Semaines 7–9", "lineHeight": 1.25
+    },
+    {
+      "id": "lbl4", "type": "text",
+      "x": 10, "y": 270, "width": 180, "height": 25, "angle": 0,
+      "strokeColor": "#1e1e1e", "backgroundColor": "transparent", "fillStyle": "solid",
+      "strokeWidth": 1, "strokeStyle": "solid", "roughness": 0, "opacity": 100,
+      "seed": 12, "version": 1, "isDeleted": false, "groupIds": [],
+      "text": "Sprint 4 — E2E & Monitoring", "fontSize": 14, "fontFamily": 1,
+      "textAlign": "left", "verticalAlign": "middle",
+      "containerId": null, "originalText": "Sprint 4 — E2E & Monitoring", "lineHeight": 1.25
+    },
+    {
+      "id": "bar4", "type": "rectangle",
+      "x": 785, "y": 265, "width": 130, "height": 35, "angle": 0,
+      "strokeColor": "#1e1e1e", "backgroundColor": "#ffc9c9", "fillStyle": "solid",
+      "strokeWidth": 2, "strokeStyle": "solid", "roughness": 0, "opacity": 100,
+      "seed": 13, "version": 1, "isDeleted": false, "groupIds": [],
+      "roundness": { "type": 3 }, "boundElements": [{ "id": "bar4_t", "type": "text" }]
+    },
+    {
+      "id": "bar4_t", "type": "text",
+      "x": 790, "y": 270, "width": 120, "height": 25, "angle": 0,
+      "strokeColor": "#1e1e1e", "backgroundColor": "transparent", "fillStyle": "solid",
+      "strokeWidth": 1, "strokeStyle": "solid", "roughness": 0, "opacity": 100,
+      "seed": 14, "version": 1, "isDeleted": false, "groupIds": [],
+      "text": "Sem 10–11", "fontSize": 14, "fontFamily": 1,
+      "textAlign": "center", "verticalAlign": "middle",
+      "containerId": "bar4", "originalText": "Sem 10–11", "lineHeight": 1.25
+    }
+  ],
+  "appState": { "viewBackgroundColor": "#ffffff", "gridSize": null },
+  "files": {}
+}

@@ -27,8 +27,8 @@ Trois catégories d'acteurs interagissent avec la plateforme DevSecOps~:
 \tableheader \textbf{Acteur} & \textbf{Type} & \textbf{Rôle} \\
 \hline
 Développeur & Humain & Écrit le code, pousse les commits, consulte les rapports de sécurité \\ \hdashline
-Ingénieur DevOps / DevSecOps & Humain & Configure l'infrastructure, le pipeline et les politiques de sécurité \\ \hdashline
-Pipeline CI/CD (GitHub Actions) & Système & Exécute automatiquement les builds, scans et déploiements \\ \hdashline
+Ingénieur QA / DevSecOps & Humain & Conçoit les pipelines, intègre les tests et les scans de sécurité, génère les rapports d'analyse \\ \hdashline
+Pipeline CI/CD (GitHub Actions) & Système & Exécute automatiquement les builds, tests, scans et publications de rapports \\ \hdashline
 Argo CD & Système & Réconcilie l'état du cluster avec l'état désiré dans Git \\ \hdashline
 Utilisateur final & Humain & Utilise l'application Todo App via le navigateur \\
 \hline
@@ -252,9 +252,9 @@ testable, permettant de valider progressivement les composantes de la plateforme
 \hline
 \tableheader \textbf{Rôle Scrum} & \textbf{Personne} & \textbf{Responsabilité} \\
 \hline
-Product Owner & Encadrant professionnel (Sopra Steria) & Définition des priorités et validation des livrables \\ \hdashline
-Scrum Master & Encadrant académique (ESPRIT) & Suivi méthodologique et levée des blocages \\ \hdashline
-Développeur & NAFFATI & Conception, implémentation et tests \\
+Product Owner & Encadrant professionnel (Sopra HR Software) & Définition des priorités et validation des livrables \\ \hdashline
+Scrum Master & Encadrant académique & Suivi méthodologique et levée des blocages \\ \hdashline
+Développeur / QA Engineer & NAFFATI & Conception des pipelines, intégration sécurité, implémentation et tests \\
 \hline
     \end{tabularx}
 \end{table}

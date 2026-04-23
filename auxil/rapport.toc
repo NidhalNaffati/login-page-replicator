@@ -8,99 +8,100 @@
 \contentsline {subsection}{\numberline {\filterminitoc {1.}1.1}Sopra Steria}{4}{subsection.1.1.1}%
 \contentsline {subsection}{\numberline {\filterminitoc {1.}1.2}Sopra HR Software}{4}{subsection.1.1.2}%
 \contentsline {subsection}{\numberline {\filterminitoc {1.}1.3}Département d'Accueil}{5}{subsection.1.1.3}%
-\contentsline {section}{\numberline {\filterminitoc {1.}2}Le Modèle <<Deploy First, Secure Later>> et ses Limites}{5}{section.1.2}%
-\contentsline {section}{\numberline {\filterminitoc {1.}3}Les Pressions Réglementaires et Industrielles}{6}{section.1.3}%
-\contentsline {section}{\numberline {\filterminitoc {1.}4}Problématique Centrale}{6}{section.1.4}%
-\contentsline {section}{\numberline {\filterminitoc {1.}5}Étude de l'Existant --- L'Approche Jenkins}{6}{section.1.5}%
-\contentsline {subsection}{\numberline {\filterminitoc {1.}5.1}Description de l'Ancienne Architecture}{6}{subsection.1.5.1}%
-\contentsline {subsection}{\numberline {\filterminitoc {1.}5.2}Problèmes Identifiés}{8}{subsection.1.5.2}%
-\contentsline {subsection}{\numberline {\filterminitoc {1.}5.3}Dette Technique et Sécuritaire Accumulée}{9}{subsection.1.5.3}%
-\contentsline {chapter}{\numberline {2}Analyse des Besoins}{10}{chapter.2}%
-\contentsline {section}{\numberline {\filterminitoc {2.}1}Identification des Acteurs}{11}{section.2.1}%
-\contentsline {section}{\numberline {\filterminitoc {2.}2}Besoins Fonctionnels}{11}{section.2.2}%
-\contentsline {section}{\numberline {\filterminitoc {2.}3}Besoins Non Fonctionnels}{13}{section.2.3}%
-\contentsline {section}{\numberline {\filterminitoc {2.}4}Diagramme de Cas d'Utilisation Global}{15}{section.2.4}%
-\contentsline {section}{\numberline {\filterminitoc {2.}5}Cas d'Utilisation Détaillés}{16}{section.2.5}%
-\contentsline {subsection}{\numberline {\filterminitoc {2.}5.1}CU-01~: Pousser du Code et Déclencher le Pipeline}{16}{subsection.2.5.1}%
-\contentsline {subsection}{\numberline {\filterminitoc {2.}5.2}CU-02~: Déployer via GitOps}{17}{subsection.2.5.2}%
-\contentsline {subsection}{\numberline {\filterminitoc {2.}5.3}CU-03~: Gérer les Tâches Todo}{18}{subsection.2.5.3}%
-\contentsline {section}{\numberline {\filterminitoc {2.}6}Méthodologie de Travail~: Scrum Agile}{18}{section.2.6}%
-\contentsline {subsection}{\numberline {\filterminitoc {2.}6.1}Choix de la Méthodologie}{18}{subsection.2.6.1}%
-\contentsline {subsection}{\numberline {\filterminitoc {2.}6.2}Équipe Scrum}{19}{subsection.2.6.2}%
-\contentsline {subsection}{\numberline {\filterminitoc {2.}6.3}Planification des Sprints}{19}{subsection.2.6.3}%
-\contentsline {subsection}{\numberline {\filterminitoc {2.}6.4}Product Backlog}{20}{subsection.2.6.4}%
-\contentsline {chapter}{\numberline {3}Analyse et Conception du Système}{23}{chapter.3}%
-\contentsline {section}{\numberline {\filterminitoc {3.}1}Définition du DevSecOps et Principe Shift-Left}{24}{section.3.1}%
-\contentsline {section}{\numberline {\filterminitoc {3.}2}Les Huit Principes Directeurs du Projet}{24}{section.3.2}%
-\contentsline {section}{\numberline {\filterminitoc {3.}3}Architecture Globale en Six Couches}{25}{section.3.3}%
-\contentsline {section}{\numberline {\filterminitoc {3.}4}Architecture Physique GCP}{26}{section.3.4}%
-\contentsline {section}{\numberline {\filterminitoc {3.}5}Architecture Logique Kubernetes}{27}{section.3.5}%
-\contentsline {section}{\numberline {\filterminitoc {3.}6}Diagrammes de Conception}{28}{section.3.6}%
-\contentsline {subsection}{\numberline {\filterminitoc {3.}6.1}Diagramme de Séquence~: Pipeline CI/CD Complet}{28}{subsection.3.6.1}%
-\contentsline {subsection}{\numberline {\filterminitoc {3.}6.2}Diagramme de Séquence~: Authentification Workload Identity Federation}{30}{subsection.3.6.2}%
-\contentsline {subsection}{\numberline {\filterminitoc {3.}6.3}Diagramme d'Activité~: Flux GitOps avec Argo CD}{31}{subsection.3.6.3}%
-\contentsline {subsection}{\numberline {\filterminitoc {3.}6.4}Diagramme de Déploiement}{32}{subsection.3.6.4}%
-\contentsline {section}{\numberline {\filterminitoc {3.}7}L'Application Cible~: Todo App React}{32}{section.3.7}%
-\contentsline {subsection}{\numberline {\filterminitoc {3.}7.1}Description Fonctionnelle}{32}{subsection.3.7.1}%
-\contentsline {subsection}{\numberline {\filterminitoc {3.}7.2}Diagramme de Classes de l'Application}{34}{subsection.3.7.2}%
-\contentsline {subsection}{\numberline {\filterminitoc {3.}7.3}Stack Technique}{34}{subsection.3.7.3}%
-\contentsline {subsection}{\numberline {\filterminitoc {3.}7.4}Vulnérabilités Intentionnelles}{35}{subsection.3.7.4}%
-\contentsline {section}{\numberline {\filterminitoc {3.}8}Choix Technologiques et Justifications}{37}{section.3.8}%
-\contentsline {section}{\numberline {\filterminitoc {3.}9}Comparaison Globale Avant/Après}{38}{section.3.9}%
-\contentsline {chapter}{\numberline {4}Implémentation et Réalisation par Sprints Agile}{39}{chapter.4}%
-\contentsline {section}{\numberline {\filterminitoc {4.}1}Sprint 1~: Infrastructure as Code et Cluster GKE}{40}{section.4.1}%
-\contentsline {subsection}{\numberline {\filterminitoc {4.}1.1}Objectif et Backlog du Sprint}{40}{subsection.4.1.1}%
-\contentsline {subsection}{\numberline {\filterminitoc {4.}1.2}Infrastructure as Code avec Terraform}{40}{subsection.4.1.2}%
-\contentsline {subsubsection}{\numberline {\filterminitoc {4.}1.2.1}Justification du Choix Terraform}{40}{subsubsection.4.1.2.1}%
-\contentsline {subsubsection}{\numberline {\filterminitoc {4.}1.2.2}Structure des Modules Terraform}{41}{subsubsection.4.1.2.2}%
-\contentsline {subsubsection}{\numberline {\filterminitoc {4.}1.2.3}Ressources Clés Provisionnées}{42}{subsubsection.4.1.2.3}%
-\contentsline {subsubsection}{\numberline {\filterminitoc {4.}1.2.4}Bonnes Pratiques Terraform Appliquées}{42}{subsubsection.4.1.2.4}%
-\contentsline {subsection}{\numberline {\filterminitoc {4.}1.3}Rétrospective Sprint 1}{43}{subsection.4.1.3}%
-\contentsline {section}{\numberline {\filterminitoc {4.}2}Sprint 2~: Containerisation et Pipeline CI/CD}{44}{section.4.2}%
-\contentsline {subsection}{\numberline {\filterminitoc {4.}2.1}Objectif et Backlog du Sprint}{44}{subsection.4.2.1}%
-\contentsline {subsection}{\numberline {\filterminitoc {4.}2.2}Containerisation et Sécurité des Images Docker}{44}{subsection.4.2.2}%
-\contentsline {subsubsection}{\numberline {\filterminitoc {4.}2.2.1}Build Multi-Étapes}{44}{subsubsection.4.2.2.1}%
-\contentsline {subsubsection}{\numberline {\filterminitoc {4.}2.2.2}Vulnérabilités Intentionnelles dans le Dockerfile}{45}{subsubsection.4.2.2.2}%
-\contentsline {subsubsection}{\numberline {\filterminitoc {4.}2.2.3}Comparaison Image Vulnérable vs Durcie}{46}{subsubsection.4.2.2.3}%
-\contentsline {subsection}{\numberline {\filterminitoc {4.}2.3}Pipeline CI/CD avec GitHub Actions}{46}{subsection.4.2.3}%
-\contentsline {subsubsection}{\numberline {\filterminitoc {4.}2.3.1}Vue Globale du Pipeline}{46}{subsubsection.4.2.3.1}%
-\contentsline {subsubsection}{\numberline {\filterminitoc {4.}2.3.2}Job build-test --- Première Ligne de Défense}{47}{subsubsection.4.2.3.2}%
-\contentsline {subsubsection}{\numberline {\filterminitoc {4.}2.3.3}Authentification sans Clés Statiques --- Workload Identity Federation}{48}{subsubsection.4.2.3.3}%
-\contentsline {subsection}{\numberline {\filterminitoc {4.}2.4}Orchestration Kubernetes sur GKE}{48}{subsection.4.2.4}%
-\contentsline {subsection}{\numberline {\filterminitoc {4.}2.5}Rétrospective Sprint 2}{49}{subsection.4.2.5}%
-\contentsline {section}{\numberline {\filterminitoc {4.}3}Sprint 3~: Sécurité Intégrée et GitOps}{50}{section.4.3}%
-\contentsline {subsection}{\numberline {\filterminitoc {4.}3.1}Objectif et Backlog du Sprint}{50}{subsection.4.3.1}%
-\contentsline {subsection}{\numberline {\filterminitoc {4.}3.2}SAST avec SonarCloud}{50}{subsection.4.3.2}%
-\contentsline {subsection}{\numberline {\filterminitoc {4.}3.3}SCA avec Trivy --- Vulnérabilités Détectées}{51}{subsection.4.3.3}%
-\contentsline {subsection}{\numberline {\filterminitoc {4.}3.4}DAST avec OWASP ZAP}{52}{subsection.4.3.4}%
-\contentsline {subsection}{\numberline {\filterminitoc {4.}3.5}GitOps avec Argo CD}{54}{subsection.4.3.5}%
-\contentsline {subsubsection}{\numberline {\filterminitoc {4.}3.5.1}Configuration de l'Application Argo CD}{54}{subsubsection.4.3.5.1}%
-\contentsline {subsection}{\numberline {\filterminitoc {4.}3.6}Réseau Zero Trust --- NetworkPolicies}{55}{subsection.4.3.6}%
-\contentsline {subsection}{\numberline {\filterminitoc {4.}3.7}Rétrospective Sprint 3}{56}{subsection.4.3.7}%
-\contentsline {section}{\numberline {\filterminitoc {4.}4}Sprint 4~: Tests E2E, Observabilité, SIEM et Bilan}{57}{section.4.4}%
-\contentsline {subsection}{\numberline {\filterminitoc {4.}4.1}Objectif et Backlog du Sprint}{57}{subsection.4.4.1}%
-\contentsline {subsection}{\numberline {\filterminitoc {4.}4.2}Tests Unitaires avec Vitest}{57}{subsection.4.4.2}%
-\contentsline {subsection}{\numberline {\filterminitoc {4.}4.3}Tests E2E Playwright --- 6 Scénarios}{58}{subsection.4.4.3}%
-\contentsline {subsection}{\numberline {\filterminitoc {4.}4.4}Observabilité avec Prometheus et Grafana}{59}{subsection.4.4.4}%
-\contentsline {subsection}{\numberline {\filterminitoc {4.}4.5}Sécurité Runtime --- Wazuh SIEM}{60}{subsection.4.4.5}%
-\contentsline {subsection}{\numberline {\filterminitoc {4.}4.6}Gouvernance IAM et Identité}{61}{subsection.4.4.6}%
-\contentsline {subsection}{\numberline {\filterminitoc {4.}4.7}Rétrospective Sprint 4}{61}{subsection.4.4.7}%
-\contentsline {section}{\numberline {\filterminitoc {4.}5}Bilan Global~: Résultats et Comparaison Avant/Après}{63}{section.4.5}%
-\contentsline {subsection}{\numberline {\filterminitoc {4.}5.1}Tableau de Bord de Sécurité}{63}{subsection.4.5.1}%
-\contentsline {subsection}{\numberline {\filterminitoc {4.}5.2}KPIs Techniques Mesurés}{64}{subsection.4.5.2}%
-\contentsline {subsection}{\numberline {\filterminitoc {4.}5.3}Alignement aux Frameworks de Sécurité}{65}{subsection.4.5.3}%
-\contentsline {chapter}{Conclusion et Perspectives}{66}{chapter*.74}%
-\contentsline {chapter}{Annexes}{70}{table.caption.76}%
-\contentsline {chapter}{\numberline {A}Commandes de Déploiement}{70}{appendix.A}%
-\contentsline {section}{\numberline {\filterminitoc {1.}1}Provisionnement de l'Infrastructure}{71}{section.A.1}%
-\contentsline {section}{\numberline {\filterminitoc {1.}2}Deploiement des Ressources Kubernetes}{71}{section.A.2}%
-\contentsline {section}{\numberline {\filterminitoc {1.}3}Verification de l'Etat Argo CD}{71}{section.A.3}%
-\contentsline {section}{\numberline {\filterminitoc {1.}4}Lancement des Tests E2E}{71}{section.A.4}%
-\contentsline {section}{\numberline {\filterminitoc {1.}5}Consultation des Logs Wazuh}{71}{section.A.5}%
-\contentsline {chapter}{\numberline {B}Variables GitHub Actions et Ports des Services}{72}{appendix.B}%
-\contentsline {section}{\numberline {\filterminitoc {2.}1}Secrets et Variables GitHub Actions}{73}{section.B.1}%
-\contentsline {section}{\numberline {\filterminitoc {2.}2}Ports et Services de la Plateforme}{73}{section.B.2}%
-\contentsline {chapter}{\numberline {C}Glossaire des Termes Techniques}{74}{appendix.C}%
+\contentsline {section}{\numberline {\filterminitoc {1.}2}La Mission~: Du Jenkins Basique à une Chaîne DevSecOps}{6}{section.1.2}%
+\contentsline {section}{\numberline {\filterminitoc {1.}3}Le Modèle <<Deploy First, Secure Later>> et ses Limites}{7}{section.1.3}%
+\contentsline {section}{\numberline {\filterminitoc {1.}4}Les Pressions Réglementaires et Industrielles}{7}{section.1.4}%
+\contentsline {section}{\numberline {\filterminitoc {1.}5}Problématique Centrale}{7}{section.1.5}%
+\contentsline {section}{\numberline {\filterminitoc {1.}6}Étude de l'Existant --- L'Approche Jenkins}{8}{section.1.6}%
+\contentsline {subsection}{\numberline {\filterminitoc {1.}6.1}Description de l'Ancienne Architecture}{8}{subsection.1.6.1}%
+\contentsline {subsection}{\numberline {\filterminitoc {1.}6.2}Problèmes Identifiés}{9}{subsection.1.6.2}%
+\contentsline {subsection}{\numberline {\filterminitoc {1.}6.3}Dette Technique et Sécuritaire Accumulée}{11}{subsection.1.6.3}%
+\contentsline {chapter}{\numberline {2}Analyse des Besoins}{12}{chapter.2}%
+\contentsline {section}{\numberline {\filterminitoc {2.}1}Identification des Acteurs}{13}{section.2.1}%
+\contentsline {section}{\numberline {\filterminitoc {2.}2}Besoins Fonctionnels}{13}{section.2.2}%
+\contentsline {section}{\numberline {\filterminitoc {2.}3}Besoins Non Fonctionnels}{15}{section.2.3}%
+\contentsline {section}{\numberline {\filterminitoc {2.}4}Diagramme de Cas d'Utilisation Global}{17}{section.2.4}%
+\contentsline {section}{\numberline {\filterminitoc {2.}5}Cas d'Utilisation Détaillés}{18}{section.2.5}%
+\contentsline {subsection}{\numberline {\filterminitoc {2.}5.1}CU-01~: Pousser du Code et Déclencher le Pipeline}{18}{subsection.2.5.1}%
+\contentsline {subsection}{\numberline {\filterminitoc {2.}5.2}CU-02~: Déployer via GitOps}{19}{subsection.2.5.2}%
+\contentsline {subsection}{\numberline {\filterminitoc {2.}5.3}CU-03~: Gérer les Tâches Todo}{20}{subsection.2.5.3}%
+\contentsline {section}{\numberline {\filterminitoc {2.}6}Méthodologie de Travail~: Scrum Agile}{20}{section.2.6}%
+\contentsline {subsection}{\numberline {\filterminitoc {2.}6.1}Choix de la Méthodologie}{20}{subsection.2.6.1}%
+\contentsline {subsection}{\numberline {\filterminitoc {2.}6.2}Équipe Scrum}{21}{subsection.2.6.2}%
+\contentsline {subsection}{\numberline {\filterminitoc {2.}6.3}Planification des Sprints}{21}{subsection.2.6.3}%
+\contentsline {subsection}{\numberline {\filterminitoc {2.}6.4}Product Backlog}{22}{subsection.2.6.4}%
+\contentsline {chapter}{\numberline {3}Analyse et Conception du Système}{25}{chapter.3}%
+\contentsline {section}{\numberline {\filterminitoc {3.}1}Définition du DevSecOps et Principe Shift-Left}{26}{section.3.1}%
+\contentsline {section}{\numberline {\filterminitoc {3.}2}Les Huit Principes Directeurs du Projet}{26}{section.3.2}%
+\contentsline {section}{\numberline {\filterminitoc {3.}3}Architecture Globale en Six Couches}{27}{section.3.3}%
+\contentsline {section}{\numberline {\filterminitoc {3.}4}Architecture Physique GCP}{28}{section.3.4}%
+\contentsline {section}{\numberline {\filterminitoc {3.}5}Architecture Logique Kubernetes}{29}{section.3.5}%
+\contentsline {section}{\numberline {\filterminitoc {3.}6}Diagrammes de Conception}{30}{section.3.6}%
+\contentsline {subsection}{\numberline {\filterminitoc {3.}6.1}Diagramme de Séquence~: Pipeline CI/CD Complet}{30}{subsection.3.6.1}%
+\contentsline {subsection}{\numberline {\filterminitoc {3.}6.2}Diagramme de Séquence~: Authentification Workload Identity Federation}{32}{subsection.3.6.2}%
+\contentsline {subsection}{\numberline {\filterminitoc {3.}6.3}Diagramme d'Activité~: Flux GitOps avec Argo CD}{33}{subsection.3.6.3}%
+\contentsline {subsection}{\numberline {\filterminitoc {3.}6.4}Diagramme de Déploiement}{34}{subsection.3.6.4}%
+\contentsline {section}{\numberline {\filterminitoc {3.}7}L'Application Cible~: Todo App React}{34}{section.3.7}%
+\contentsline {subsection}{\numberline {\filterminitoc {3.}7.1}Description Fonctionnelle}{34}{subsection.3.7.1}%
+\contentsline {subsection}{\numberline {\filterminitoc {3.}7.2}Diagramme de Classes de l'Application}{36}{subsection.3.7.2}%
+\contentsline {subsection}{\numberline {\filterminitoc {3.}7.3}Stack Technique}{36}{subsection.3.7.3}%
+\contentsline {subsection}{\numberline {\filterminitoc {3.}7.4}Vulnérabilités Intentionnelles}{37}{subsection.3.7.4}%
+\contentsline {section}{\numberline {\filterminitoc {3.}8}Choix Technologiques et Justifications}{39}{section.3.8}%
+\contentsline {section}{\numberline {\filterminitoc {3.}9}Comparaison Globale Avant/Après}{40}{section.3.9}%
+\contentsline {chapter}{\numberline {4}Implémentation et Réalisation par Sprints Agile}{41}{chapter.4}%
+\contentsline {section}{\numberline {\filterminitoc {4.}1}Sprint 1~: Infrastructure as Code et Cluster GKE}{42}{section.4.1}%
+\contentsline {subsection}{\numberline {\filterminitoc {4.}1.1}Objectif et Backlog du Sprint}{42}{subsection.4.1.1}%
+\contentsline {subsection}{\numberline {\filterminitoc {4.}1.2}Infrastructure as Code avec Terraform}{42}{subsection.4.1.2}%
+\contentsline {subsubsection}{\numberline {\filterminitoc {4.}1.2.1}Justification du Choix Terraform}{42}{subsubsection.4.1.2.1}%
+\contentsline {subsubsection}{\numberline {\filterminitoc {4.}1.2.2}Structure des Modules Terraform}{43}{subsubsection.4.1.2.2}%
+\contentsline {subsubsection}{\numberline {\filterminitoc {4.}1.2.3}Ressources Clés Provisionnées}{44}{subsubsection.4.1.2.3}%
+\contentsline {subsubsection}{\numberline {\filterminitoc {4.}1.2.4}Bonnes Pratiques Terraform Appliquées}{44}{subsubsection.4.1.2.4}%
+\contentsline {subsection}{\numberline {\filterminitoc {4.}1.3}Rétrospective Sprint 1}{45}{subsection.4.1.3}%
+\contentsline {section}{\numberline {\filterminitoc {4.}2}Sprint 2~: Containerisation et Pipeline CI/CD}{46}{section.4.2}%
+\contentsline {subsection}{\numberline {\filterminitoc {4.}2.1}Objectif et Backlog du Sprint}{46}{subsection.4.2.1}%
+\contentsline {subsection}{\numberline {\filterminitoc {4.}2.2}Containerisation et Sécurité des Images Docker}{46}{subsection.4.2.2}%
+\contentsline {subsubsection}{\numberline {\filterminitoc {4.}2.2.1}Build Multi-Étapes}{46}{subsubsection.4.2.2.1}%
+\contentsline {subsubsection}{\numberline {\filterminitoc {4.}2.2.2}Vulnérabilités Intentionnelles dans le Dockerfile}{47}{subsubsection.4.2.2.2}%
+\contentsline {subsubsection}{\numberline {\filterminitoc {4.}2.2.3}Comparaison Image Vulnérable vs Durcie}{48}{subsubsection.4.2.2.3}%
+\contentsline {subsection}{\numberline {\filterminitoc {4.}2.3}Pipeline CI/CD avec GitHub Actions}{48}{subsection.4.2.3}%
+\contentsline {subsubsection}{\numberline {\filterminitoc {4.}2.3.1}Vue Globale du Pipeline}{48}{subsubsection.4.2.3.1}%
+\contentsline {subsubsection}{\numberline {\filterminitoc {4.}2.3.2}Job build-test --- Première Ligne de Défense}{49}{subsubsection.4.2.3.2}%
+\contentsline {subsubsection}{\numberline {\filterminitoc {4.}2.3.3}Authentification sans Clés Statiques --- Workload Identity Federation}{50}{subsubsection.4.2.3.3}%
+\contentsline {subsection}{\numberline {\filterminitoc {4.}2.4}Orchestration Kubernetes sur GKE}{50}{subsection.4.2.4}%
+\contentsline {subsection}{\numberline {\filterminitoc {4.}2.5}Rétrospective Sprint 2}{51}{subsection.4.2.5}%
+\contentsline {section}{\numberline {\filterminitoc {4.}3}Sprint 3~: Sécurité Intégrée et GitOps}{52}{section.4.3}%
+\contentsline {subsection}{\numberline {\filterminitoc {4.}3.1}Objectif et Backlog du Sprint}{52}{subsection.4.3.1}%
+\contentsline {subsection}{\numberline {\filterminitoc {4.}3.2}SAST avec SonarCloud}{52}{subsection.4.3.2}%
+\contentsline {subsection}{\numberline {\filterminitoc {4.}3.3}SCA avec Trivy --- Vulnérabilités Détectées}{53}{subsection.4.3.3}%
+\contentsline {subsection}{\numberline {\filterminitoc {4.}3.4}DAST avec OWASP ZAP}{54}{subsection.4.3.4}%
+\contentsline {subsection}{\numberline {\filterminitoc {4.}3.5}GitOps avec Argo CD}{56}{subsection.4.3.5}%
+\contentsline {subsubsection}{\numberline {\filterminitoc {4.}3.5.1}Configuration de l'Application Argo CD}{56}{subsubsection.4.3.5.1}%
+\contentsline {subsection}{\numberline {\filterminitoc {4.}3.6}Réseau Zero Trust --- NetworkPolicies}{57}{subsection.4.3.6}%
+\contentsline {subsection}{\numberline {\filterminitoc {4.}3.7}Rétrospective Sprint 3}{58}{subsection.4.3.7}%
+\contentsline {section}{\numberline {\filterminitoc {4.}4}Sprint 4~: Tests E2E, Observabilité, SIEM et Bilan}{59}{section.4.4}%
+\contentsline {subsection}{\numberline {\filterminitoc {4.}4.1}Objectif et Backlog du Sprint}{59}{subsection.4.4.1}%
+\contentsline {subsection}{\numberline {\filterminitoc {4.}4.2}Tests Unitaires avec Vitest}{59}{subsection.4.4.2}%
+\contentsline {subsection}{\numberline {\filterminitoc {4.}4.3}Tests E2E Playwright --- 6 Scénarios}{60}{subsection.4.4.3}%
+\contentsline {subsection}{\numberline {\filterminitoc {4.}4.4}Observabilité avec Prometheus et Grafana}{61}{subsection.4.4.4}%
+\contentsline {subsection}{\numberline {\filterminitoc {4.}4.5}Sécurité Runtime --- Wazuh SIEM}{62}{subsection.4.4.5}%
+\contentsline {subsection}{\numberline {\filterminitoc {4.}4.6}Gouvernance IAM et Identité}{63}{subsection.4.4.6}%
+\contentsline {subsection}{\numberline {\filterminitoc {4.}4.7}Rétrospective Sprint 4}{63}{subsection.4.4.7}%
+\contentsline {section}{\numberline {\filterminitoc {4.}5}Bilan Global~: Résultats et Comparaison Avant/Après}{65}{section.4.5}%
+\contentsline {subsection}{\numberline {\filterminitoc {4.}5.1}Tableau de Bord de Sécurité}{65}{subsection.4.5.1}%
+\contentsline {subsection}{\numberline {\filterminitoc {4.}5.2}KPIs Techniques Mesurés}{66}{subsection.4.5.2}%
+\contentsline {subsection}{\numberline {\filterminitoc {4.}5.3}Alignement aux Frameworks de Sécurité}{67}{subsection.4.5.3}%
+\contentsline {chapter}{Conclusion et Perspectives}{68}{chapter*.75}%
+\contentsline {chapter}{Annexes}{72}{table.caption.77}%
+\contentsline {chapter}{\numberline {A}Commandes de Déploiement}{72}{appendix.A}%
+\contentsline {section}{\numberline {\filterminitoc {1.}1}Provisionnement de l'Infrastructure}{73}{section.A.1}%
+\contentsline {section}{\numberline {\filterminitoc {1.}2}Deploiement des Ressources Kubernetes}{73}{section.A.2}%
+\contentsline {section}{\numberline {\filterminitoc {1.}3}Verification de l'Etat Argo CD}{73}{section.A.3}%
+\contentsline {section}{\numberline {\filterminitoc {1.}4}Lancement des Tests E2E}{73}{section.A.4}%
+\contentsline {section}{\numberline {\filterminitoc {1.}5}Consultation des Logs Wazuh}{73}{section.A.5}%
+\contentsline {chapter}{\numberline {B}Variables GitHub Actions et Ports des Services}{74}{appendix.B}%
+\contentsline {section}{\numberline {\filterminitoc {2.}1}Secrets et Variables GitHub Actions}{75}{section.B.1}%
+\contentsline {section}{\numberline {\filterminitoc {2.}2}Ports et Services de la Plateforme}{75}{section.B.2}%
+\contentsline {chapter}{\numberline {C}Glossaire des Termes Techniques}{76}{appendix.C}%
 \babel@toc {french}{}\relax 
 \babel@toc {english}{}\relax 
 \babel@toc {french}{}\relax 
