@@ -1,0 +1,50 @@
+\section*{Contexte du Projet de Fin d'Études}
+
+Ce projet de fin d'études s'inscrit dans le cadre d'un stage d'ingénierie au sein de
+\textbf{Sopra Steria}, groupe international de conseil et de services numériques.
+La mission confiée est de moderniser et de sécuriser le cycle de vie logiciel d'une application
+web en adoptant une approche \textbf{DevSecOps} complète, depuis le code source jusqu'à la
+production sur le cloud.
+
+La transformation numérique des entreprises impose aujourd'hui des exigences croissantes en
+matière de rapidité de livraison, de fiabilité des systèmes, et surtout de \textbf{sécurité
+intégrée}. Les organisations qui déploient des applications cloud-native font face à une
+complexité croissante~: gestion de conteneurs, orchestration Kubernetes, multiplication des
+pipelines CI/CD, et une surface d'attaque qui s'étend à chaque couche de la chaîne de valeur.
+
+\section*{Objectifs du Rapport}
+
+Ce rapport a pour but de~:
+\begin{itemize}
+  \item Documenter la \textbf{démarche complète} de conception et d'implémentation d'une
+        plateforme DevSecOps~;
+  \item Démontrer la \textbf{valeur ajoutée} par rapport à l'approche initiale basée sur
+        Jenkins sans sécurité~;
+  \item Présenter les \textbf{choix techniques} et les justifications architecturales~;
+  \item Illustrer les \textbf{résultats concrets} à travers des métriques et artefacts~;
+  \item Proposer un \textbf{plan d'amélioration continue} pour les phases suivantes.
+\end{itemize}
+
+\section*{Structure du Rapport}
+
+Le rapport est organisé de manière progressive selon quatre chapitres~:
+
+\begin{itemize}
+  \item Le \textbf{Chapitre~\ref{chap:contexte}} analyse le contexte, la problématique
+        et l'état de l'existant (pipeline Jenkins). Il identifie les lacunes de sécurité
+        et justifie la nécessité d'une transformation~;
+  \item Le \textbf{Chapitre~\ref{chap:besoins}} présente l'analyse des besoins fonctionnels
+        et non fonctionnels du projet, identifie les acteurs, définit les cas d'utilisation,
+        et décrit la méthodologie Agile adoptée avec la planification des sprints~;
+  \item Le \textbf{Chapitre~\ref{chap:conception}} détaille l'analyse et la conception du
+        système~: l'architecture DevSecOps en six couches, l'architecture physique GCP,
+        l'architecture logique Kubernetes, les diagrammes de séquence et d'activité,
+        ainsi que les choix technologiques~;
+  \item Le \textbf{Chapitre~\ref{chap:implementation}} décrit la réalisation du projet
+        organisée en quatre sprints Agile~: infrastructure et IaC (Sprint~1), containerisation
+        et pipeline CI/CD (Sprint~2), sécurité intégrée et GitOps (Sprint~3), et tests
+        automatisés, observabilité et résultats (Sprint~4).
+\end{itemize}
+
+Le rapport se conclut par une synthèse des compétences acquises, les limites identifiées
+et une roadmap d'amélioration continue à court, moyen et long terme.

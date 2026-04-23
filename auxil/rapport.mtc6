@@ -1,0 +1,17 @@
+{\reset@font\mtcSfont\mtc@string\contentsline{section}{\noexpand \leavevmode \numberline {\filterminitoc {3.}1}Définition du DevSecOps et Principe Shift-Left}{\reset@font\mtcSfont 24}{section.3.1}}
+{\reset@font\mtcSfont\mtc@string\contentsline{section}{\noexpand \leavevmode \numberline {\filterminitoc {3.}2}Les Huit Principes Directeurs du Projet}{\reset@font\mtcSfont 24}{section.3.2}}
+{\reset@font\mtcSfont\mtc@string\contentsline{section}{\noexpand \leavevmode \numberline {\filterminitoc {3.}3}Architecture Globale en Six Couches}{\reset@font\mtcSfont 25}{section.3.3}}
+{\reset@font\mtcSfont\mtc@string\contentsline{section}{\noexpand \leavevmode \numberline {\filterminitoc {3.}4}Architecture Physique GCP}{\reset@font\mtcSfont 26}{section.3.4}}
+{\reset@font\mtcSfont\mtc@string\contentsline{section}{\noexpand \leavevmode \numberline {\filterminitoc {3.}5}Architecture Logique Kubernetes}{\reset@font\mtcSfont 27}{section.3.5}}
+{\reset@font\mtcSfont\mtc@string\contentsline{section}{\noexpand \leavevmode \numberline {\filterminitoc {3.}6}Diagrammes de Conception}{\reset@font\mtcSfont 28}{section.3.6}}
+{\reset@font\mtcSSfont\mtc@string\contentsline{subsection}{\noexpand \leavevmode \numberline {\filterminitoc {3.}6.1}Diagramme de Séquence~: Pipeline CI/CD Complet}{\reset@font\mtcSSfont 28}{subsection.3.6.1}}
+{\reset@font\mtcSSfont\mtc@string\contentsline{subsection}{\noexpand \leavevmode \numberline {\filterminitoc {3.}6.2}Diagramme de Séquence~: Authentification Workload Identity Federation}{\reset@font\mtcSSfont 30}{subsection.3.6.2}}
+{\reset@font\mtcSSfont\mtc@string\contentsline{subsection}{\noexpand \leavevmode \numberline {\filterminitoc {3.}6.3}Diagramme d'Activité~: Flux GitOps avec Argo CD}{\reset@font\mtcSSfont 31}{subsection.3.6.3}}
+{\reset@font\mtcSSfont\mtc@string\contentsline{subsection}{\noexpand \leavevmode \numberline {\filterminitoc {3.}6.4}Diagramme de Déploiement}{\reset@font\mtcSSfont 32}{subsection.3.6.4}}
+{\reset@font\mtcSfont\mtc@string\contentsline{section}{\noexpand \leavevmode \numberline {\filterminitoc {3.}7}L'Application Cible~: Todo App React}{\reset@font\mtcSfont 32}{section.3.7}}
+{\reset@font\mtcSSfont\mtc@string\contentsline{subsection}{\noexpand \leavevmode \numberline {\filterminitoc {3.}7.1}Description Fonctionnelle}{\reset@font\mtcSSfont 32}{subsection.3.7.1}}
+{\reset@font\mtcSSfont\mtc@string\contentsline{subsection}{\noexpand \leavevmode \numberline {\filterminitoc {3.}7.2}Diagramme de Classes de l'Application}{\reset@font\mtcSSfont 34}{subsection.3.7.2}}
+{\reset@font\mtcSSfont\mtc@string\contentsline{subsection}{\noexpand \leavevmode \numberline {\filterminitoc {3.}7.3}Stack Technique}{\reset@font\mtcSSfont 34}{subsection.3.7.3}}
+{\reset@font\mtcSSfont\mtc@string\contentsline{subsection}{\noexpand \leavevmode \numberline {\filterminitoc {3.}7.4}Vulnérabilités Intentionnelles}{\reset@font\mtcSSfont 35}{subsection.3.7.4}}
+{\reset@font\mtcSfont\mtc@string\contentsline{section}{\noexpand \leavevmode \numberline {\filterminitoc {3.}8}Choix Technologiques et Justifications}{\reset@font\mtcSfont 37}{section.3.8}}
+{\reset@font\mtcSfont\mtc@string\contentsline{section}{\noexpand \leavevmode \numberline {\filterminitoc {3.}9}Comparaison Globale Avant/Après}{\reset@font\mtcSfont 38}{section.3.9}}

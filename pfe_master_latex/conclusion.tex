@@ -1,0 +1,158 @@
+﻿Ce projet de fin d'études avait pour ambition de répondre à une problématique concrète~:
+\textit{comment intégrer la sécurité à chaque étape d'une chaîne de livraison logicielle
+cloud-native, sans sacrifier la vélocité~?} La conclusion générale revient sur l'ensemble
+de la démarche, évalue l'atteinte des objectifs, analyse les difficultés rencontrées,
+mesure les apports de part et d'autre, et ouvre sur des perspectives d'approfondissement.
+
+\section*{Récapitulation de la Démarche}
+
+La démarche suivie tout au long de ce projet s'est organisée en quatre étapes progressives
+et complémentaires. Un premier travail d'analyse a permis de cartographier précisément
+les lacunes du pipeline Jenkins existant~: absence totale de scans de sécurité, clés
+d'authentification statiques, infrastructure non reproductible et absence de monitoring.
+Sur la base de cette analyse, les besoins fonctionnels et non fonctionnels ont été formalisés,
+puis une vision cible DevSecOps a été conçue autour de huit principes directeurs et d'une
+architecture en six couches.
+
+L'implémentation, organisée en quatre sprints Agile, a couvert~: le provisionnement de
+l'infrastructure GCP via Terraform (Sprint~1), la containerisation et le pipeline CI/CD
+avec authentification keyless (Sprint~2), l'intégration des couches de sécurité SAST/SCA/DAST
+et le déploiement GitOps avec réseau Zero Trust (Sprint~3), et enfin les tests E2E,
+l'observabilité et la surveillance runtime (Sprint~4).
+
+\section*{Présentation des Résultats}
+
+Les résultats obtenus répondent directement à chaque lacune identifiée dans la problématique
+initiale. Le tableau~\ref{tab:resultats_finaux} synthétise les indicateurs clés.
+
+\begin{table}[h]
+\centering
+\caption{Bilan quantitatif de la transformation DevSecOps}
+\label{tab:resultats_finaux}
+\begin{tabularx}{\textwidth}{|l|X|X|}
+\hline
+\rowcolor{gray!20}\textbf{Indicateur} & \textbf{Avant} & \textbf{Après} \\
+\hline
+CVEs détectées (npm) & 0 (non scanné) & 9 CVEs dont 4 HIGH \\
+\hline
+CVEs détectées (image) & 0 (non scanné) & 47 CVEs dont 3 CRITICAL \\
+\hline
+Findings OWASP ZAP & 0 (non testé) & 10 findings dont 1 HIGH (XSS) \\
+\hline
+Secrets détectés & 0 (non scanné) & 3 secrets exposés identifiés \\
+\hline
+Auth CI/CD & Clé JSON statique & OIDC éphémère (WIF) \\
+\hline
+Infrastructure & ClickOps manuel & Terraform IaC 100\% \\
+\hline
+Tests E2E & Absents & 6 scénarios Playwright in-cluster \\
+\hline
+Coverage tests unitaires & Non mesurée & 70\,\%+ (Vitest) \\
+\hline
+NetworkPolicies & Aucune & 12 règles default-deny \\
+\hline
+SIEM actif & Absent & Wazuh 4 agents opérationnels \\
+\hline
+ZAP FAIL count & Non applicable & 0 (après durcissement nginx) \\
+\hline
+\end{tabularx}
+\end{table}
+
+\section*{Difficultés Rencontrées}
+
+\textbf{Contraintes GKE Autopilot~:} Le mode Autopilot bloque les capacités
+privilégiées des pods (\texttt{hostPID}, \texttt{hostNetwork}). Ces restrictions ont
+limité la surveillance kernel de Wazuh. La solution retenue est de déployer le manager
+Wazuh sur une VM Compute Engine dédiée et de connecter les agents via TCP~1514.
+
+\textbf{Orchestration des tests E2E en GitOps~:} L'intégration de Playwright comme
+PostSync hooks Argo CD a nécessité une conception minutieuse des RBAC et des
+NetworkPolicies pour permettre aux pods de tests d'accéder à l'application dans le
+respect du principe Zero Trust.
+
+\textbf{Gestion des faux positifs~:} Les scanners génèrent des faux positifs qui
+nécessitent un tri manuel. La mise en place de fichiers d'exception (\texttt{.trivyignore},
+règles SonarCloud) a permis de filtrer le bruit sans masquer les vulnérabilités réelles.
+
+\textbf{Workload Identity Federation~:} La configuration initiale du mécanisme OIDC
+entre GitHub Actions et GCP a exigé une maîtrise des concepts d'identité fédérée,
+de pools de fournisseurs d'identité et de conditions d'attribut~---~concepts peu documentés
+pour ce cas d'usage précis.
+
+\section*{Apports du Stage}
+
+\textbf{Apports à l'entreprise~:} Le projet a livré à Sopra Steria une plateforme
+DevSecOps opérationnelle et documentée, un référentiel de bonnes pratiques, une
+démonstration concrète de l'intégration SAST/SCA/DAST dans GitHub Actions, et des
+templates Terraform/Kubernetes réutilisables pour d'autres projets.
+
+\textbf{Apports pour l'élève-ingénieur~:} Ce stage a permis d'acquérir des compétences
+transversales rares combinant le cloud engineering, la sécurité applicative, l'orchestration
+Kubernetes et l'ingénierie des systèmes distribués.
+
+\begin{table}[h]
+\centering
+\caption{Compétences acquises durant le stage}
+\label{tab:competences}
+\begin{tabularx}{\textwidth}{|l|X|}
+\hline
+\rowcolor{gray!20}\textbf{Domaine} & \textbf{Compétences Acquises} \\
+\hline
+Cloud Engineering & GCP, GKE Autopilot, Terraform, Artifact Registry, IAM \\
+\hline
+DevSecOps & GitHub Actions, Argo CD, GitOps, Shift-Left Security \\
+\hline
+Sécurité applicative & Trivy, OWASP ZAP, SonarCloud, gestion des CVEs \\
+\hline
+Kubernetes & Deployments, NetworkPolicies, RBAC, HPA, Jobs, Ingress \\
+\hline
+Observabilité & Prometheus, Grafana, ServiceMonitor, métriques nginx \\
+\hline
+Développement & React 18, TypeScript, Vite, Vitest, Playwright E2E \\
+\hline
+Méthode & Analyse de risque, architecture en couches, documentation \\
+\hline
+\end{tabularx}
+\end{table}
+
+\section*{Perspectives d'Approfondissement}
+
+\textbf{Court terme~:}
+\begin{itemize}
+  \item Intégration de \textbf{Gitleaks} en hook pre-commit pour détecter les secrets
+        avant qu'ils n'atteignent le dépôt Git~;
+  \item Signature des images Docker avec \textbf{cosign} et vérification à l'admission
+        via \textbf{Kyverno}~;
+  \item Ajout de règles Kyverno pour enforcer les contraintes de sécurité pod-level.
+\end{itemize}
+
+\textbf{Moyen terme~:}
+\begin{itemize}
+  \item Migration vers \textbf{Istio Service Mesh} pour une mTLS automatique entre
+        services et une observabilité réseau L7~;
+  \item Génération et publication d'un \textbf{SBOM} (\textit{Software Bill of Materials})
+        via Syft à chaque release~;
+  \item Intégration de \textbf{Falco} pour la détection d'anomalies comportementales
+        syscall dans les pods.
+\end{itemize}
+
+\textbf{Long terme~:}
+\begin{itemize}
+  \item Atteindre le niveau \textbf{SLSA~3} avec des preuves de provenance vérifiables~;
+  \item Déploiement multi-région avec stratégie de \textit{disaster recovery} automatisée~;
+  \item Mise en conformité formelle \textbf{ISO~27001} en s'appuyant sur les artefacts
+        d'audit générés automatiquement par la plateforme.
+\end{itemize}
+
+\section*{Message Final}
+
+Ce projet illustre une vérité fondamentale du développement logiciel moderne~:
+
+\begin{center}
+\large\textit{«~La sécurité n'est pas un obstacle à la vélocité~--- c'est un enabler de confiance.~»}
+\end{center}
+
+Une équipe qui automatise ses contrôles de sécurité livre plus vite, avec plus de
+confiance, et consacre moins de temps à gérer des incidents. Le DevSecOps n'est pas
+une contrainte imposée par les équipes sécurité~--- c'est une pratique d'ingénierie
+mature qui bénéficie à l'ensemble de l'organisation.

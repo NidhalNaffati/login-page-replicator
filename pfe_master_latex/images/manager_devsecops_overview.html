@@ -1,0 +1,219 @@
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#f7f6f4;
+  --text:#3d3d3a;
+  --text-muted:#6d6c67;
+  --border:#b6b4ae;
+  --layer-dash:#888780;
+  --card-neutral:#f1efe8;
+  --card-neutral-border:#5f5e5a;
+  --card-purple:#eeedfe;
+  --card-purple-border:#534ab7;
+  --card-amber:#faeeda;
+  --card-amber-border:#854f0b;
+  --card-blue:#e6f1fb;
+  --card-blue-border:#185fa5;
+  --card-green:#eaf3de;
+  --card-green-border:#3b6d11;
+  --card-coral:#faece7;
+  --card-coral-border:#993c1d;
+}
+body{font-family:Inter,"Segoe UI",Arial,sans-serif;background:var(--bg);color:var(--text)}
+.wrap{max-width:1120px;margin:0 auto;padding:24px 16px;display:flex;flex-direction:column;gap:18px}
+.phase{display:flex;flex-direction:column;gap:10px;border:1px dashed var(--layer-dash);border-radius:12px;padding:12px;background:#fff}
+.phase-label{font-size:11px;font-weight:600;letter-spacing:.06em;color:var(--text-muted);text-transform:uppercase;padding-left:2px}
+.row{display:flex;align-items:center;gap:8px;flex-wrap:nowrap}
+.tool{display:flex;flex-direction:column;align-items:center;gap:6px;background:var(--card-neutral);border:0.8px solid var(--card-neutral-border);border-radius:12px;padding:12px 10px;min-width:72px;max-width:90px;cursor:pointer;transition:transform .12s,border-color .12s}
+.tool:hover{transform:translateY(-1px)}
+.tool img{width:36px;height:36px;object-fit:contain}
+.tool-name{font-size:11px;color:var(--text-muted);text-align:center;line-height:1.3}
+.arrow{color:var(--text-muted);font-size:18px;flex-shrink:0;user-select:none}
+.badge{font-size:10px;font-weight:500;padding:2px 8px;border-radius:20px;white-space:nowrap}
+.badge-sec{background:#EEEDFE;color:#3C3489}
+.badge-ok{background:#EAF3DE;color:#27500A}
+.badge-obs{background:#E1F5EE;color:#085041}
+.badge-cloud{background:#E6F1FB;color:#0C447C}
+.section-row{display:flex;align-items:stretch;gap:8px;flex-wrap:wrap}
+.group{background:#fff;border:0.8px solid var(--border);border-radius:12px;padding:12px 14px;display:flex;flex-direction:column;gap:10px;flex:1;min-width:200px}
+.group-title{font-size:11px;font-weight:600;color:var(--text);display:flex;align-items:center;gap:6px}
+.group-tools{display:flex;gap:8px;flex-wrap:wrap}
+.tool-sm{display:flex;flex-direction:column;align-items:center;gap:4px;min-width:56px}
+.tool-sm img{width:28px;height:28px;object-fit:contain}
+.tool-sm span{font-size:10px;color:var(--text-muted);text-align:center}
+.connector{display:flex;align-items:center;justify-content:center;padding:0 2px;color:var(--text-muted);font-size:20px;flex-shrink:0}
+.flow-row{display:flex;align-items:center;gap:6px;overflow-x:auto;padding-bottom:4px}
+.step{display:flex;flex-direction:column;align-items:center;gap:6px;background:var(--card-neutral);border:0.8px solid var(--card-neutral-border);border-radius:10px;padding:10px 8px;min-width:68px;flex-shrink:0}
+.step img{width:30px;height:30px;object-fit:contain}
+.step-name{font-size:10px;color:var(--text-muted);text-align:center;line-height:1.3}
+.divider{height:0.5px;background:var(--border);margin:2px 0}
+
+/* Phase-specific card tinting aligned with architecture SVG. */
+.phase:nth-of-type(2) .step{background:var(--card-purple);border-color:var(--card-purple-border)}
+.phase:nth-of-type(3) .step{background:var(--card-blue);border-color:var(--card-blue-border)}
+.phase:nth-of-type(4) .group:nth-child(1){background:var(--card-green);border-color:var(--card-green-border)}
+.phase:nth-of-type(4) .group:nth-child(2){background:var(--card-coral);border-color:var(--card-coral-border)}
+.phase:nth-of-type(4) .group:nth-child(3){background:var(--card-blue);border-color:var(--card-blue-border)}
+
+.legend{border:1px dashed var(--layer-dash);border-radius:12px;background:#fff;padding:10px 12px;display:flex;gap:10px;flex-wrap:wrap}
+.legend-item{display:flex;align-items:center;gap:6px;font-size:11px;color:var(--text-muted)}
+.legend-swatch{width:12px;height:12px;border-radius:3px;border:0.8px solid transparent}
+.sw-neutral{background:var(--card-neutral);border-color:var(--card-neutral-border)}
+.sw-purple{background:var(--card-purple);border-color:var(--card-purple-border)}
+.sw-blue{background:var(--card-blue);border-color:var(--card-blue-border)}
+.sw-green{background:var(--card-green);border-color:var(--card-green-border)}
+.sw-coral{background:var(--card-coral);border-color:var(--card-coral-border)}
+</style>
+
+<div class="wrap">
+
+  <div class="phase">
+    <div class="phase-label">1 — Developer writes code</div>
+    <div class="flow-row">
+      <div class="step" title="Developer">
+        <svg width="30" height="30" viewBox="0 0 30 30" fill="none"><circle cx="15" cy="10" r="6" fill="#378ADD"/><path d="M3 28c0-6.627 5.373-12 12-12s12 5.373 12 12" stroke="#378ADD" stroke-width="2" stroke-linecap="round" fill="none"/></svg>
+        <span class="step-name">Developer</span>
+      </div>
+      <div class="connector">→</div>
+      <div class="step" title="GitHub — code repository">
+        <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/github/github-original.svg" alt="GitHub"/>
+        <span class="step-name">GitHub</span>
+      </div>
+      <div class="connector">→</div>
+      <div class="step" title="GitHub Actions — automated pipeline">
+        <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/githubactions/githubactions-original.svg" alt="GitHub Actions"/>
+        <span class="step-name">Actions</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="divider"></div>
+
+  <div class="phase">
+    <div class="phase-label">2 — Automated security checks <span class="badge badge-sec" style="margin-left:6px">security gates</span></div>
+    <div class="flow-row">
+      <div class="step" title="SonarCloud — code quality and vulnerability scanner">
+        <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/sonarqube/sonarqube-original.svg" alt="SonarCloud"/>
+        <span class="step-name">SonarCloud</span>
+      </div>
+      <div class="connector">+</div>
+      <div class="step" title="Trivy — container and dependency vulnerability scanner">
+        <svg width="30" height="30" viewBox="0 0 30 30"><rect width="30" height="30" rx="6" fill="#1904da" opacity=".1"/><text x="15" y="20" text-anchor="middle" font-size="12" font-weight="700" fill="#1904da" font-family="sans-serif">Trivy</text></svg>
+        <span class="step-name">Trivy</span>
+      </div>
+      <div class="connector">+</div>
+      <div class="step" title="Vitest — unit tests">
+        <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/vitest/vitest-original.svg" alt="Vitest"/>
+        <span class="step-name">Vitest</span>
+      </div>
+      <div class="connector" style="font-size:13px;color:var(--color-text-success)">✓ all pass</div>
+      <div class="connector">→</div>
+      <div class="step" title="Docker — application container image built">
+        <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/docker/docker-original.svg" alt="Docker"/>
+        <span class="step-name">Image built</span>
+      </div>
+      <div class="connector">→</div>
+      <div class="step" title="Google Artifact Registry — secure image storage">
+        <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/googlecloud/googlecloud-original.svg" alt="Artifact Registry"/>
+        <span class="step-name">Registry</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="divider"></div>
+
+  <div class="phase">
+    <div class="phase-label">3 — Automatic deployment <span class="badge badge-ok" style="margin-left:6px">GitOps — no manual steps</span></div>
+    <div class="flow-row">
+      <div class="step" title="Argo CD — watches Git and deploys automatically">
+        <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/argocd/argocd-original.svg" alt="Argo CD"/>
+        <span class="step-name">Argo CD</span>
+      </div>
+      <div class="connector">→</div>
+      <div class="step" title="Google Kubernetes Engine — runs the application">
+        <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/kubernetes/kubernetes-original.svg" alt="Kubernetes"/>
+        <span class="step-name">Kubernetes</span>
+      </div>
+      <div class="connector">→</div>
+      <div class="step" title="React app — live for users">
+        <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/react/react-original.svg" alt="React app"/>
+        <span class="step-name">Live app</span>
+      </div>
+      <div class="connector">→</div>
+      <div class="step" title="Playwright — automated end-to-end tests run after every deploy">
+        <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/playwright/playwright-original.svg" alt="Playwright"/>
+        <span class="step-name">E2E tests</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="divider"></div>
+
+  <div class="phase">
+    <div class="phase-label">4 — Always-on monitoring &amp; security</div>
+    <div class="section-row">
+      <div class="group">
+        <div class="group-title">
+          <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><rect x="1" y="8" width="3" height="5" rx="1" fill="#639922"/><rect x="5.5" y="5" width="3" height="8" rx="1" fill="#639922"/><rect x="10" y="2" width="3" height="11" rx="1" fill="#639922"/></svg>
+          <span class="badge badge-obs">Performance</span>
+        </div>
+        <div class="group-tools">
+          <div class="tool-sm" title="Prometheus — collects system metrics">
+            <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/prometheus/prometheus-original.svg" alt="Prometheus"/>
+            <span>Prometheus</span>
+          </div>
+          <div class="tool-sm" title="Grafana — visual dashboards for the team">
+            <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/grafana/grafana-original.svg" alt="Grafana"/>
+            <span>Grafana</span>
+          </div>
+        </div>
+        <p style="font-size:11px;color:var(--color-text-tertiary);line-height:1.5">Real-time dashboards showing app health, traffic, and server load.</p>
+      </div>
+
+      <div class="group">
+        <div class="group-title">
+          <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M7 1L2 4v4c0 3 2.5 5 5 5s5-2 5-5V4L7 1z" fill="#D85A30" opacity=".2" stroke="#D85A30" stroke-width="1"/><path d="M5 7l1.5 1.5L9 5.5" stroke="#D85A30" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          <span class="badge badge-sec">Security</span>
+        </div>
+        <div class="group-tools">
+          <div class="tool-sm" title="Wazuh — detects threats and unusual behaviour in real time">
+            <svg width="28" height="28" viewBox="0 0 28 28" aria-label="Wazuh" role="img">
+              <rect width="28" height="28" rx="6" fill="#D85A30" opacity=".12"/>
+              <path d="M14 4l7 3v5c0 5-3.2 8.8-7 10.3C10.2 20.8 7 17 7 12V7l7-3z" fill="#FCEEE8" stroke="#993C1D" stroke-width="1"/>
+              <path d="M9.5 9.8l2.1 7.2 2.4-5.1 2.4 5.1 2.1-7.2" fill="none" stroke="#993C1D" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            <span>Wazuh</span>
+          </div>
+        </div>
+        <p style="font-size:11px;color:var(--color-text-tertiary);line-height:1.5">Detects intrusions and suspicious behaviour across all servers 24/7.</p>
+      </div>
+
+      <div class="group">
+        <div class="group-title">
+          <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><rect x="1" y="1" width="12" height="12" rx="2" stroke="#185FA5" stroke-width="1"/><path d="M4 7h6M4 4.5h6M4 9.5h4" stroke="#185FA5" stroke-width="1" stroke-linecap="round"/></svg>
+          <span class="badge badge-cloud">Infrastructure</span>
+        </div>
+        <div class="group-tools">
+          <div class="tool-sm" title="Terraform — all cloud infrastructure defined as code">
+            <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/terraform/terraform-original.svg" alt="Terraform"/>
+            <span>Terraform</span>
+          </div>
+          <div class="tool-sm" title="Google Cloud Platform — cloud provider">
+            <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/googlecloud/googlecloud-original.svg" alt="GCP"/>
+            <span>GCP</span>
+          </div>
+        </div>
+        <p style="font-size:11px;color:var(--color-text-tertiary);line-height:1.5">All infrastructure built from code — reproducible, auditable, no manual setup.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="legend">
+    <div class="legend-item"><span class="legend-swatch sw-neutral"></span>Source / acteurs</div>
+    <div class="legend-item"><span class="legend-swatch sw-purple"></span>Gates sécurité (Shift-Left)</div>
+    <div class="legend-item"><span class="legend-swatch sw-blue"></span>CI/CD et GitOps</div>
+    <div class="legend-item"><span class="legend-swatch sw-green"></span>Observabilité</div>
+    <div class="legend-item"><span class="legend-swatch sw-coral"></span>Sécurité runtime</div>
+  </div>
+
+</div>

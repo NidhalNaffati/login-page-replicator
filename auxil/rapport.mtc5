@@ -1,0 +1,13 @@
+{\reset@font\mtcSfont\mtc@string\contentsline{section}{\noexpand \leavevmode \numberline {\filterminitoc {2.}1}Identification des Acteurs}{\reset@font\mtcSfont 11}{section.2.1}}
+{\reset@font\mtcSfont\mtc@string\contentsline{section}{\noexpand \leavevmode \numberline {\filterminitoc {2.}2}Besoins Fonctionnels}{\reset@font\mtcSfont 11}{section.2.2}}
+{\reset@font\mtcSfont\mtc@string\contentsline{section}{\noexpand \leavevmode \numberline {\filterminitoc {2.}3}Besoins Non Fonctionnels}{\reset@font\mtcSfont 13}{section.2.3}}
+{\reset@font\mtcSfont\mtc@string\contentsline{section}{\noexpand \leavevmode \numberline {\filterminitoc {2.}4}Diagramme de Cas d'Utilisation Global}{\reset@font\mtcSfont 15}{section.2.4}}
+{\reset@font\mtcSfont\mtc@string\contentsline{section}{\noexpand \leavevmode \numberline {\filterminitoc {2.}5}Cas d'Utilisation Détaillés}{\reset@font\mtcSfont 16}{section.2.5}}
+{\reset@font\mtcSSfont\mtc@string\contentsline{subsection}{\noexpand \leavevmode \numberline {\filterminitoc {2.}5.1}CU-01~: Pousser du Code et Déclencher le Pipeline}{\reset@font\mtcSSfont 16}{subsection.2.5.1}}
+{\reset@font\mtcSSfont\mtc@string\contentsline{subsection}{\noexpand \leavevmode \numberline {\filterminitoc {2.}5.2}CU-02~: Déployer via GitOps}{\reset@font\mtcSSfont 17}{subsection.2.5.2}}
+{\reset@font\mtcSSfont\mtc@string\contentsline{subsection}{\noexpand \leavevmode \numberline {\filterminitoc {2.}5.3}CU-03~: Gérer les Tâches Todo}{\reset@font\mtcSSfont 18}{subsection.2.5.3}}
+{\reset@font\mtcSfont\mtc@string\contentsline{section}{\noexpand \leavevmode \numberline {\filterminitoc {2.}6}Méthodologie de Travail~: Scrum Agile}{\reset@font\mtcSfont 18}{section.2.6}}
+{\reset@font\mtcSSfont\mtc@string\contentsline{subsection}{\noexpand \leavevmode \numberline {\filterminitoc {2.}6.1}Choix de la Méthodologie}{\reset@font\mtcSSfont 18}{subsection.2.6.1}}
+{\reset@font\mtcSSfont\mtc@string\contentsline{subsection}{\noexpand \leavevmode \numberline {\filterminitoc {2.}6.2}Équipe Scrum}{\reset@font\mtcSSfont 19}{subsection.2.6.2}}
+{\reset@font\mtcSSfont\mtc@string\contentsline{subsection}{\noexpand \leavevmode \numberline {\filterminitoc {2.}6.3}Planification des Sprints}{\reset@font\mtcSSfont 19}{subsection.2.6.3}}
+{\reset@font\mtcSSfont\mtc@string\contentsline{subsection}{\noexpand \leavevmode \numberline {\filterminitoc {2.}6.4}Product Backlog}{\reset@font\mtcSSfont 20}{subsection.2.6.4}}

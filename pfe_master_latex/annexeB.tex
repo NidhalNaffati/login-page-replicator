@@ -1,0 +1,47 @@
+﻿%% ANNEXE B -- Variables GitHub Actions et Ports
+\section{Secrets et Variables GitHub Actions}
+\begin{table}[h]
+\centering
+\caption{Variables et secrets requis dans GitHub Actions}
+\begin{tabularx}{\textwidth}{|l|X|l|}
+\hline
+\rowcolor{gray!20}\textbf{Secret/Variable} & \textbf{Description} & \textbf{Source} \\
+\hline
+WIF\_PROVIDER & ID du pool Workload Identity Federation & Terraform output \\
+\hline
+WIF\_SERVICE\_ACCOUNT & Email du GSA GitHub Actions & Terraform output \\
+\hline
+SONAR\_TOKEN & Token d'authentification SonarCloud & SonarCloud UI \\
+\hline
+DAST\_TARGET\_URL & URL cible pour le scan OWASP ZAP & Cloud Run URL \\
+\hline
+GKE\_CLUSTER & Nom du cluster GKE & devops-cluster \\
+\hline
+GKE\_ZONE & Region du cluster GKE & europe-west1 \\
+\hline
+\end{tabularx}
+\end{table}
+\section{Ports et Services de la Plateforme}
+\begin{table}[h]
+\centering
+\caption{Ports et services de la plateforme DevSecOps}
+\begin{tabularx}{\textwidth}{|l|l|l|l|}
+\hline
+\rowcolor{gray!20}\textbf{Service} & \textbf{Port} & \textbf{Protocole} & \textbf{Namespace} \\
+\hline
+App nginx & 80 & HTTP & app \\
+\hline
+nginx-exporter (Prometheus) & 9113 & HTTP & app \\
+\hline
+Wazuh Manager (events) & 1514 & TCP & VM GCE \\
+\hline
+Wazuh Manager (enrollment) & 1515 & TCP & VM GCE \\
+\hline
+Wazuh Dashboard & 443 & HTTPS & VM GCE \\
+\hline
+Prometheus & 9090 & HTTP & observability \\
+\hline
+Grafana & 3000 & HTTP & observability \\
+\hline
+\end{tabularx}
+\end{table}

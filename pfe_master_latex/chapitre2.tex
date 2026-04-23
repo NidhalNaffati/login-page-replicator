@@ -1,0 +1,341 @@
+%% ============================================================
+%%  CHAPITRE 2 — Analyse des Besoins (Requirement Analysis)
+%% ============================================================
+
+\section*{Introduction}
+
+Ce chapitre présente l'analyse des besoins du projet. À partir de la problématique identifiée
+au chapitre précédent, nous identifions les acteurs impliqués, formulons les besoins fonctionnels
+et non fonctionnels, modélisons les cas d'utilisation, et décrivons la méthodologie Agile
+adoptée pour organiser la réalisation du projet en sprints itératifs.
+
+
+\section{Identification des Acteurs}
+
+Trois catégories d'acteurs interagissent avec la plateforme DevSecOps~:
+
+\begin{table}[h]
+    \centering
+    \setlength{\arrayrulewidth}{0.8pt}
+    \setlength{\dashlinedash}{3pt}
+    \setlength{\dashlinegap}{2pt}
+    \renewcommand{\arraystretch}{1.4}
+    \caption{Acteurs du système et leurs rôles}
+    \label{tab:acteurs}
+    \begin{tabularx}{\textwidth}{|>{\centering\arraybackslash}X|>{\centering\arraybackslash}X|>{\centering\arraybackslash}X|}
+\hline
+\tableheader \textbf{Acteur} & \textbf{Type} & \textbf{Rôle} \\
+\hline
+Développeur & Humain & Écrit le code, pousse les commits, consulte les rapports de sécurité \\ \hdashline
+Ingénieur DevOps / DevSecOps & Humain & Configure l'infrastructure, le pipeline et les politiques de sécurité \\ \hdashline
+Pipeline CI/CD (GitHub Actions) & Système & Exécute automatiquement les builds, scans et déploiements \\ \hdashline
+Argo CD & Système & Réconcilie l'état du cluster avec l'état désiré dans Git \\ \hdashline
+Utilisateur final & Humain & Utilise l'application Todo App via le navigateur \\
+\hline
+    \end{tabularx}
+\end{table}
+
+
+\section{Besoins Fonctionnels}
+
+Les besoins fonctionnels couvrent les capacités que la plateforme doit offrir. Ils sont
+organisés par domaine dans le tableau~\ref{tab:besoins_fonctionnels}~:
+
+\begin{table}[H]
+    \centering
+    \setlength{\arrayrulewidth}{0.8pt}
+    \setlength{\dashlinedash}{3pt}
+    \setlength{\dashlinegap}{2pt}
+    \renewcommand{\arraystretch}{1.4}
+    \caption{Besoins fonctionnels du projet}
+    \label{tab:besoins_fonctionnels}
+    \begin{tabularx}{\textwidth}{|>{\centering\arraybackslash}X|>{\centering\arraybackslash}X|>{\centering\arraybackslash}X|}
+\hline
+\tableheader \textbf{ID} & \textbf{Besoin Fonctionnel} & \textbf{Domaine} \\
+\hline
+BF-01 & Provisionner l'infrastructure GCP de manière reproductible via du code & Infrastructure \\ \hdashline
+BF-02 & Construire et publier automatiquement les images Docker à chaque push & CI/CD \\ \hdashline
+BF-03 & Exécuter des tests unitaires automatiquement à chaque commit & CI/CD \\ \hdashline
+BF-04 & Scanner le code source pour détecter les vulnérabilités (SAST) & Sécurité \\ \hdashline
+BF-05 & Scanner les dépendances npm et les images Docker pour les CVEs (SCA) & Sécurité \\ \hdashline
+BF-06 & Scanner l'application déployée en boîte noire (DAST) & Sécurité \\ \hdashline
+BF-07 & Déployer automatiquement l'application via GitOps (Argo CD) & Déploiement \\ \hdashline
+BF-08 & Exécuter des tests E2E dans le cluster après chaque déploiement & Tests \\ \hdashline
+BF-09 & Collecter et visualiser les métriques de l'application en temps réel & Observabilité \\ \hdashline
+BF-10 & Surveiller les événements de sécurité en production (SIEM) & Sécurité \\ \hdashline
+BF-11 & Permettre l'authentification, la gestion de tâches (CRUD) et la persistance & Application \\
+\hline
+    \end{tabularx}
+\end{table}
+
+
+\section{Besoins Non Fonctionnels}
+
+Les besoins non fonctionnels définissent les contraintes de qualité de la plateforme~:
+
+\begin{table}[H]
+    \centering
+    \setlength{\arrayrulewidth}{0.8pt}
+    \setlength{\dashlinedash}{3pt}
+    \setlength{\dashlinegap}{2pt}
+    \renewcommand{\arraystretch}{1.4}
+    \caption{Besoins non fonctionnels du projet}
+    \label{tab:besoins_non_fonctionnels}
+    \begin{tabularx}{\textwidth}{|>{\centering\arraybackslash}X|>{\centering\arraybackslash}X|>{\centering\arraybackslash}X|}
+\hline
+\tableheader \textbf{ID} & \textbf{Besoin Non Fonctionnel} & \textbf{Catégorie} \\
+\hline
+BNF-01 & Zéro clé d'authentification statique dans le pipeline (Keyless) & Sécurité \\ \hdashline
+BNF-02 & Réseau Zero Trust~: tout trafic interdit par défaut, flux explicites & Sécurité \\ \hdashline
+BNF-03 & Auto-scaling horizontal de 2 à 8 replicas selon la charge CPU & Performance \\ \hdashline
+BNF-04 & Infrastructure 100\% reproductible à partir du code source & Fiabilité \\ \hdashline
+BNF-05 & Chaque build, scan et déploiement doit produire un rapport auditable & Auditabilité \\ \hdashline
+BNF-06 & Détection automatique et correction du drift de configuration (self-heal) & Résilience \\ \hdashline
+BNF-07 & Couverture de tests unitaires $\geq$ 70\% & Qualité \\ \hdashline
+BNF-08 & Temps de détection d'une CVE critique < 5 minutes & Sécurité \\ \hdashline
+BNF-09 & Rollback automatique via Git revert + Argo CD & Disponibilité \\
+\hline
+    \end{tabularx}
+\end{table}
+
+
+\section{Diagramme de Cas d'Utilisation Global}
+
+Le diagramme de cas d'utilisation global modélise les interactions entre les acteurs
+et les principales fonctionnalités de la plateforme DevSecOps.
+
+\begin{figure}[H]
+    \centering
+    \fbox{\parbox{0.85\textwidth}{\centering
+        \vspace{3cm}
+        Espace réservé pour la Figure~\ref{fig:use_case_global}\\
+        \textbf{Diagramme de cas d'utilisation global}\\[6pt]
+        \footnotesize Acteurs~: Développeur, Ingénieur DevSecOps, Utilisateur final,\\
+        Pipeline CI/CD (système), Argo CD (système)\\[6pt]
+        Cas d'utilisation~: Pousser du code, Construire \& tester, Scanner la sécurité,\\
+        Déployer via GitOps, Surveiller, Gérer les tâches Todo
+        \vspace{3cm}
+    }}
+    \caption{Diagramme de cas d'utilisation global de la plateforme DevSecOps}
+    \label{fig:use_case_global}
+\end{figure}
+
+
+\section{Cas d'Utilisation Détaillés}
+
+\subsection{CU-01~: Pousser du Code et Déclencher le Pipeline}
+
+\begin{table}[H]
+    \centering
+    \setlength{\arrayrulewidth}{0.8pt}
+    \renewcommand{\arraystretch}{1.4}
+    \caption{Description du cas d'utilisation CU-01}
+    \label{tab:cu01}
+    \begin{tabularx}{\textwidth}{|>{\raggedright\arraybackslash}p{3.5cm}|X|}
+\hline
+\tableheader \textbf{Champ} & \textbf{Description} \\
+\hline
+Titre & Pousser du code et déclencher le pipeline \\
+\hline
+Acteur principal & Développeur \\
+\hline
+Précondition & Le développeur a un accès au dépôt Git \\
+\hline
+Scénario nominal & 1. Le développeur pousse un commit sur la branche principale \newline
+2. GitHub Actions détecte le push et démarre le pipeline \newline
+3. Le job \texttt{build-test} exécute lint, tests unitaires, SonarCloud et Trivy FS \newline
+4. En cas de succès, le job \texttt{app-image-release} construit et publie l'image Docker \newline
+5. Le job \texttt{update-k8s-tags} met à jour les manifests Kubernetes \\
+\hline
+Postcondition & L'image Docker est publiée, les manifests K8s sont mis à jour dans Git \\
+\hline
+Scénario alternatif & Si un test échoue ou un scan critique bloque, le pipeline s'arrête et notifie le développeur \\
+\hline
+    \end{tabularx}
+\end{table}
+
+\subsection{CU-02~: Déployer via GitOps}
+
+\begin{table}[H]
+    \centering
+    \setlength{\arrayrulewidth}{0.8pt}
+    \renewcommand{\arraystretch}{1.4}
+    \caption{Description du cas d'utilisation CU-02}
+    \label{tab:cu02}
+    \begin{tabularx}{\textwidth}{|>{\raggedright\arraybackslash}p{3.5cm}|X|}
+\hline
+\tableheader \textbf{Champ} & \textbf{Description} \\
+\hline
+Titre & Déployer automatiquement via GitOps \\
+\hline
+Acteur principal & Argo CD (système) \\
+\hline
+Précondition & Les manifests K8s dans Git ont été mis à jour avec le nouveau tag d'image \\
+\hline
+Scénario nominal & 1. Argo CD détecte un changement dans le dépôt Git \newline
+2. Argo CD compare l'état désiré (Git) avec l'état réel du cluster \newline
+3. Argo CD synchronise automatiquement les ressources Kubernetes \newline
+4. Les hooks PostSync lancent les tests Playwright E2E \newline
+5. Le dashboard Argo CD affiche l'état synchronisé \\
+\hline
+Postcondition & L'application est déployée, les tests E2E sont validés \\
+\hline
+Scénario alternatif & En cas de drift détecté, Argo CD applique le self-heal automatiquement \\
+\hline
+    \end{tabularx}
+\end{table}
+
+\subsection{CU-03~: Gérer les Tâches Todo}
+
+\begin{table}[H]
+    \centering
+    \setlength{\arrayrulewidth}{0.8pt}
+    \renewcommand{\arraystretch}{1.4}
+    \caption{Description du cas d'utilisation CU-03}
+    \label{tab:cu03}
+    \begin{tabularx}{\textwidth}{|>{\raggedright\arraybackslash}p{3.5cm}|X|}
+\hline
+\tableheader \textbf{Champ} & \textbf{Description} \\
+\hline
+Titre & Gérer les tâches Todo (CRUD) \\
+\hline
+Acteur principal & Utilisateur final \\
+\hline
+Précondition & L'utilisateur est authentifié sur l'application \\
+\hline
+Scénario nominal & 1. L'utilisateur ajoute une nouvelle tâche \newline
+2. L'utilisateur coche une tâche comme complétée \newline
+3. L'utilisateur supprime une tâche \newline
+4. Les données persistent via localStorage après rechargement \\
+\hline
+Postcondition & Les tâches sont sauvegardées et visibles \\
+\hline
+Scénario alternatif & Si l'utilisateur n'est pas authentifié, il est redirigé vers la page de login \\
+\hline
+    \end{tabularx}
+\end{table}
+
+
+\section{Méthodologie de Travail~: Scrum Agile}
+
+\subsection{Choix de la Méthodologie}
+
+Le projet suit la méthodologie \textbf{Scrum} pour sa capacité à gérer la complexité
+de manière itérative et incrémentale. Chaque sprint livre un incrément fonctionnel et
+testable, permettant de valider progressivement les composantes de la plateforme DevSecOps.
+
+\begin{figure}[H]
+    \centering
+    \fbox{\parbox{0.85\textwidth}{\centering
+        \vspace{2.5cm}
+        Espace réservé pour la Figure~\ref{fig:scrum_process}\\
+        \textbf{Processus Scrum appliqué au projet}\\[6pt]
+        \footnotesize Product Backlog $\to$ Sprint Planning $\to$ Sprint (2--3 semaines)\\
+        $\to$ Sprint Review $\to$ Sprint Retrospective $\to$ Incrément livré
+        \vspace{2.5cm}
+    }}
+    \caption{Processus Scrum appliqué au projet}
+    \label{fig:scrum_process}
+\end{figure}
+
+\subsection{Équipe Scrum}
+
+\begin{table}[H]
+    \centering
+    \setlength{\arrayrulewidth}{0.8pt}
+    \setlength{\dashlinedash}{3pt}
+    \setlength{\dashlinegap}{2pt}
+    \renewcommand{\arraystretch}{1.4}
+    \caption{Composition de l'équipe Scrum}
+    \label{tab:equipe_scrum}
+    \begin{tabularx}{\textwidth}{|>{\centering\arraybackslash}X|>{\centering\arraybackslash}X|>{\centering\arraybackslash}X|}
+\hline
+\tableheader \textbf{Rôle Scrum} & \textbf{Personne} & \textbf{Responsabilité} \\
+\hline
+Product Owner & Encadrant professionnel (Sopra Steria) & Définition des priorités et validation des livrables \\ \hdashline
+Scrum Master & Encadrant académique (ESPRIT) & Suivi méthodologique et levée des blocages \\ \hdashline
+Développeur & NAFFATI & Conception, implémentation et tests \\
+\hline
+    \end{tabularx}
+\end{table}
+
+\subsection{Planification des Sprints}
+
+Le projet est découpé en \textbf{quatre sprints} de 2 à 3 semaines chacun, couvrant
+l'ensemble des besoins identifiés~:
+
+\begin{table}[H]
+    \centering
+    \setlength{\arrayrulewidth}{0.8pt}
+    \setlength{\dashlinedash}{3pt}
+    \setlength{\dashlinegap}{2pt}
+    \renewcommand{\arraystretch}{1.4}
+    \caption{Planification des sprints du projet}
+    \label{tab:sprints}
+    \begin{tabularx}{\textwidth}{|>{\centering\arraybackslash}X|>{\centering\arraybackslash}X|>{\centering\arraybackslash}X|>{\centering\arraybackslash}X|}
+\hline
+\tableheader \textbf{Sprint} & \textbf{Durée} & \textbf{Objectif} & \textbf{Besoins couverts} \\
+\hline
+Sprint 1 & 3 semaines & Infrastructure as Code et cluster GKE & BF-01, BNF-04 \\ \hdashline
+Sprint 2 & 3 semaines & Containerisation, pipeline CI/CD et authentification Keyless & BF-02, BF-03, BNF-01, BNF-05 \\ \hdashline
+Sprint 3 & 3 semaines & Sécurité intégrée (SAST, SCA, DAST), GitOps et réseau Zero Trust & BF-04, BF-05, BF-06, BF-07, BNF-02, BNF-06 \\ \hdashline
+Sprint 4 & 2 semaines & Tests E2E, observabilité, SIEM et bilan & BF-08, BF-09, BF-10, BNF-03, BNF-07, BNF-08, BNF-09 \\
+\hline
+    \end{tabularx}
+\end{table}
+
+\subsection{Product Backlog}
+
+Le Product Backlog regroupe l'ensemble des \textit{User Stories} priorisées par le
+Product Owner. Le tableau~\ref{tab:backlog} présente les éléments principaux~:
+
+\begin{table}[H]
+    \centering
+    \setlength{\arrayrulewidth}{0.8pt}
+    \setlength{\dashlinedash}{3pt}
+    \setlength{\dashlinegap}{2pt}
+    \renewcommand{\arraystretch}{1.4}
+    \caption{Product Backlog (extrait)}
+    \label{tab:backlog}
+    \begin{tabularx}{\textwidth}{|>{\centering\arraybackslash}X|>{\centering\arraybackslash}X|>{\centering\arraybackslash}X|>{\centering\arraybackslash}X|}
+\hline
+\tableheader \textbf{ID} & \textbf{User Story} & \textbf{Priorité} & \textbf{Sprint} \\
+\hline
+US-01 & En tant que DevOps, je veux provisionner l'infra via Terraform & Haute & 1 \\ \hdashline
+US-02 & En tant que DevOps, je veux un cluster GKE Autopilot opérationnel & Haute & 1 \\ \hdashline
+US-03 & En tant que Dev, je veux un Dockerfile multi-stage optimisé & Haute & 2 \\ \hdashline
+US-04 & En tant que Dev, je veux un pipeline CI qui build et teste à chaque push & Haute & 2 \\ \hdashline
+US-05 & En tant que DevSecOps, je veux une auth CI sans clé statique (WIF) & Haute & 2 \\ \hdashline
+US-06 & En tant que DevSecOps, je veux des scans SAST/SCA automatiques & Haute & 3 \\ \hdashline
+US-07 & En tant que DevSecOps, je veux un déploiement GitOps avec Argo CD & Haute & 3 \\ \hdashline
+US-08 & En tant que DevSecOps, je veux un réseau Zero Trust (NetworkPolicies) & Moyenne & 3 \\ \hdashline
+US-09 & En tant que DevSecOps, je veux un scan DAST post-déploiement (ZAP) & Moyenne & 3 \\ \hdashline
+US-10 & En tant que QA, je veux 6 scénarios Playwright E2E in-cluster & Moyenne & 4 \\ \hdashline
+US-11 & En tant que Ops, je veux Prometheus + Grafana pour l'observabilité & Moyenne & 4 \\ \hdashline
+US-12 & En tant que SecOps, je veux Wazuh SIEM pour la surveillance runtime & Moyenne & 4 \\
+\hline
+    \end{tabularx}
+\end{table}
+
+\begin{figure}[H]
+    \centering
+    \fbox{\parbox{0.85\textwidth}{\centering
+        \vspace{2.5cm}
+        Espace réservé pour la Figure~\ref{fig:gantt}\\
+        \textbf{Diagramme de Gantt du projet}\\[6pt]
+        \footnotesize Sprint 1 (semaines 1--3) | Sprint 2 (semaines 4--6) |\\
+        Sprint 3 (semaines 7--9) | Sprint 4 (semaines 10--11)
+        \vspace{2.5cm}
+    }}
+    \caption{Diagramme de Gantt de la planification des sprints}
+    \label{fig:gantt}
+\end{figure}
+
+
+\section*{Conclusion}
+
+Ce chapitre a formalisé les besoins du projet à travers onze besoins fonctionnels et neuf
+besoins non fonctionnels, identifié les acteurs du système, et modélisé les cas d'utilisation
+clés. La méthodologie Scrum adoptée organise la réalisation en quatre sprints itératifs,
+chacun livrant un incrément fonctionnel et testable. Le chapitre suivant présente l'analyse
+et la conception détaillée du système.

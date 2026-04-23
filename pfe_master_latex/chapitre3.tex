@@ -1,0 +1,418 @@
+﻿%% ============================================================
+%%  CHAPITRE 3 — Analyse et Conception du Système
+%% ============================================================
+
+\section*{Introduction}
+
+Ce chapitre présente l'analyse et la conception détaillée du système. Nous y définissons
+les fondements du DevSecOps et le principe Shift-Left, décrivons l'architecture globale en
+six couches, l'architecture physique sur Google Cloud Platform, l'architecture logique
+Kubernetes, les diagrammes UML de conception (séquence, activité, déploiement), le stack
+technique de l'application cible, et les choix technologiques justifiés.
+
+
+\section{Définition du DevSecOps et Principe Shift-Left}
+
+\textbf{DevSecOps} est une extension de la philosophie DevOps qui intègre la sécurité
+(\textbf{Sec}) comme responsabilité partagée, continue et automatisée dans le cycle de
+développement. L'idée fondamentale est le \textbf{Shift-Left}~: déplacer les contrôles
+de sécurité le plus tôt possible dans le cycle, là où les corrections sont les moins coûteuses.
+
+\begin{figure}[H]
+    \centering
+    \fbox{\parbox{0.85\textwidth}{\centering
+        \vspace{2.5cm}
+        Espace réservé pour la Figure~\ref{fig:shiftleft}\\
+        \textbf{Principe Shift-Left de la sécurité dans le cycle DevSecOps}\\[6pt]
+        \footnotesize Plan $\to$ Code $\to$ Build $\to$ Test $\to$ Release $\to$ Deploy $\to$ Monitor\\
+        Sec Review | SAST/Lint | SCA/Trivy | DAST/ZAP | cosign | K8s Sec | SIEM/Wazuh
+        \vspace{2.5cm}
+    }}
+    \caption{Principe Shift-Left de la sécurité dans le cycle DevSecOps}
+    \label{fig:shiftleft}
+\end{figure}
+
+
+\section{Les Huit Principes Directeurs du Projet}
+
+Le tableau~\ref{tab:principes} présente les huit principes directeurs qui guident la conception
+de la solution~:
+
+\begin{table}[H]
+\centering
+\setlength{\arrayrulewidth}{0.8pt}
+\setlength{\dashlinedash}{3pt}
+\setlength{\dashlinegap}{2pt}
+\renewcommand{\arraystretch}{1.4}
+\caption{Huit principes directeurs de la plateforme DevSecOps}
+\label{tab:principes}
+\begin{tabularx}{\textwidth}{|>{\centering\arraybackslash}X|>{\centering\arraybackslash}X|>{\centering\arraybackslash}X|}
+\hline
+\tableheader \textbf{\#} & \textbf{Principe} & \textbf{Implémentation} \\
+\hline
+1 & Tout est Code & Terraform pour l'infra, YAML pour K8s, tout versionné dans Git \\ \hdashline
+2 & Sécurité Shift-Left & Trivy + SonarCloud dès le build, avant tout déploiement \\ \hdashline
+3 & Keyless First & Workload Identity Federation --- zéro clé JSON statique \\ \hdashline
+4 & Zero Trust Réseau & NetworkPolicies default-deny, flux explicitement autorisés \\ \hdashline
+5 & GitOps & Argo CD comme seul moteur de réconciliation du cluster \\ \hdashline
+6 & Tests au plus proche du réel & Playwright E2E dans le cluster, PostSync hooks \\ \hdashline
+7 & Observabilité Continue & Prometheus + Grafana + Wazuh en permanence \\ \hdashline
+8 & Preuves Auditables & Chaque outil génère des rapports uploadés comme artefacts CI \\
+\hline
+\end{tabularx}
+\end{table}
+
+
+\section{Architecture Globale en Six Couches}
+
+La solution s'articule autour de \textbf{six couches complémentaires} illustrées dans
+la figure~\ref{fig:couches}~:
+
+\begin{figure}[H]
+    \centering
+    \fbox{\parbox{0.85\textwidth}{\centering
+        \vspace{3cm}
+        Espace réservé pour la Figure~\ref{fig:couches}\\
+        \textbf{Architecture en six couches de la plateforme DevSecOps}\\[6pt]
+        \footnotesize
+        Couche 6~: Sécurité Runtime (Wazuh, NetworkPolicies, Workload Identity)\\
+        Couche 5~: Observabilité (Prometheus, Grafana, nginx-exporter)\\
+        Couche 4~: Orchestration (GKE Autopilot, Namespaces, HPA, Ingress)\\
+        Couche 3~: Livraison (GitHub Actions, Argo CD, Artifact Registry)\\
+        Couche 2~: Sécurité Applicative (Trivy, OWASP ZAP, SonarCloud, Playwright)\\
+        Couche 1~: Infrastructure (Terraform, GCP VPC, GKE, IAM, Artifact Registry)
+        \vspace{3cm}
+    }}
+    \caption{Architecture en six couches de la plateforme DevSecOps}
+    \label{fig:couches}
+\end{figure}
+
+
+\section{Architecture Physique GCP}
+
+L'infrastructure est déployée sur le projet GCP \texttt{pfe-esprit-489411} dans la région
+\texttt{europe-west1}. Elle comprend les composants suivants~:
+
+\begin{itemize}
+  \item \textbf{VPC \texttt{devops-vpc}}~: réseau dédié avec subnet \texttt{devops-subnet}~;
+        plages secondaires pour les nœuds (\texttt{10.10.0.0/20}), pods (\texttt{10.20.0.0/16})
+        et services (\texttt{10.30.0.0/20})~;
+  \item \textbf{Cluster GKE Autopilot \texttt{devops-cluster}}~: mode géré, patches de
+        sécurité automatiques, facturation à la ressource pod~;
+  \item \textbf{Artifact Registry}~: stockage des images Docker de l'application et des tests~;
+  \item \textbf{VM Compute Engine}~: hébergement du manager Wazuh SIEM
+        (\texttt{e2-medium}, IP \texttt{10.10.0.2}).
+\end{itemize}
+
+\begin{figure}[H]
+    \centering
+    \fbox{\parbox{0.85\textwidth}{\centering
+        \vspace{3cm}
+        Espace réservé pour la Figure~\ref{fig:archi_physique}\\
+        \textbf{Architecture physique GCP}\\[6pt]
+        \footnotesize GCP Project $\to$ VPC devops-vpc $\to$ Subnet devops-subnet\\
+        GKE Autopilot Cluster | Artifact Registry | Wazuh VM (e2-medium)\\
+        Workload Identity Federation $\leftrightarrow$ GitHub Actions
+        \vspace{3cm}
+    }}
+    \caption{Architecture physique de l'infrastructure GCP}
+    \label{fig:archi_physique}
+\end{figure}
+
+
+\section{Architecture Logique Kubernetes}
+
+Le cluster est segmenté en \textbf{cinq namespaces fonctionnels} avec des responsabilités
+strictement séparées, comme présenté dans le tableau~\ref{tab:namespaces}~:
+
+\begin{table}[H]
+\centering
+\setlength{\arrayrulewidth}{0.8pt}
+\setlength{\dashlinedash}{3pt}
+\setlength{\dashlinegap}{2pt}
+\renewcommand{\arraystretch}{1.4}
+\caption{Organisation en namespaces Kubernetes}
+\label{tab:namespaces}
+\begin{tabularx}{\textwidth}{|>{\centering\arraybackslash}X|>{\centering\arraybackslash}X|>{\centering\arraybackslash}X|}
+\hline
+\tableheader \textbf{Namespace} & \textbf{Rôle} & \textbf{Ressources principales} \\
+\hline
+\texttt{app} & Workload applicatif & Deployment, Service, Ingress, HPA, PostSync Job \\ \hdashline
+\texttt{testing} & Validation E2E & Playwright Job, ServiceAccount \\ \hdashline
+\texttt{observability} & Collecte de métriques & Prometheus, Grafana, ServiceMonitor \\ \hdashline
+\texttt{security} & Politiques et SIEM & NetworkPolicies, Wazuh Agent DaemonSet \\ \hdashline
+\texttt{argocd} & Moteur GitOps & Argo CD Applications \\
+\hline
+\end{tabularx}
+\end{table}
+
+\begin{figure}[H]
+    \centering
+    \fbox{\parbox{0.85\textwidth}{\centering
+        \vspace{3cm}
+        Espace réservé pour la Figure~\ref{fig:archi_k8s}\\
+        \textbf{Diagramme d'architecture logique Kubernetes}\\[6pt]
+        \footnotesize 5 namespaces~: app, testing, observability, security, argocd\\
+        Flux réseau~: testing $\to$ app (TCP 80), observability $\to$ app (TCP 9113),\\
+        security $\to$ Wazuh VM (TCP 1514), Ingress $\to$ app (TCP 80)
+        \vspace{3cm}
+    }}
+    \caption{Architecture logique du cluster Kubernetes}
+    \label{fig:archi_k8s}
+\end{figure}
+
+
+\section{Diagrammes de Conception}
+
+\subsection{Diagramme de Séquence~: Pipeline CI/CD Complet}
+
+Le diagramme de séquence suivant modélise le flux complet du pipeline CI/CD, depuis le
+push du développeur jusqu'au déploiement GitOps et les tests E2E.
+
+\begin{figure}[H]
+    \centering
+    \fbox{\parbox{0.85\textwidth}{\centering
+        \vspace{4cm}
+        Espace réservé pour la Figure~\ref{fig:seq_pipeline}\\
+        \textbf{Diagramme de séquence~: Pipeline CI/CD complet}\\[6pt]
+        \footnotesize Développeur $\to$ GitHub~: push commit\\
+        GitHub $\to$ Actions~: déclencher pipeline\\
+        Actions $\to$ SonarCloud~: scan SAST\\
+        Actions $\to$ Trivy~: scan FS (SCA)\\
+        Actions $\to$ Artifact Registry~: push image Docker\\
+        Actions $\to$ Trivy~: scan image\\
+        Actions $\to$ Git~: update K8s tags\\
+        Argo CD $\to$ Git~: detect change\\
+        Argo CD $\to$ GKE~: sync ressources\\
+        Argo CD $\to$ Playwright~: PostSync E2E tests\\
+        Actions $\to$ ZAP~: scan DAST
+        \vspace{4cm}
+    }}
+    \caption{Diagramme de séquence du pipeline CI/CD complet}
+    \label{fig:seq_pipeline}
+\end{figure}
+
+\subsection{Diagramme de Séquence~: Authentification Workload Identity Federation}
+
+\begin{figure}[H]
+    \centering
+    \fbox{\parbox{0.85\textwidth}{\centering
+        \vspace{3cm}
+        Espace réservé pour la Figure~\ref{fig:seq_wif}\\
+        \textbf{Diagramme de séquence~: Authentification WIF}\\[6pt]
+        \footnotesize GitHub Actions $\to$ GitHub OIDC~: request JWT token\\
+        GitHub Actions $\to$ GCP WIF Pool~: present JWT\\
+        GCP WIF $\to$ GCP IAM~: verify issuer, repo, branch\\
+        GCP IAM $\to$ GitHub Actions~: temporary credentials (1h)\\
+        GitHub Actions $\to$ GCP APIs~: authenticated calls
+        \vspace{3cm}
+    }}
+    \caption{Diagramme de séquence de l'authentification Workload Identity Federation}
+    \label{fig:seq_wif}
+\end{figure}
+
+\subsection{Diagramme d'Activité~: Flux GitOps avec Argo CD}
+
+\begin{figure}[H]
+    \centering
+    \fbox{\parbox{0.85\textwidth}{\centering
+        \vspace{3cm}
+        Espace réservé pour la Figure~\ref{fig:act_gitops}\\
+        \textbf{Diagramme d'activité~: Flux GitOps Argo CD}\\[6pt]
+        \footnotesize [Commit dans Git] $\to$ Argo CD détecte le changement $\to$\\
+        Comparer état désiré vs état réel $\to$ [Si différence] Synchroniser $\to$\\
+        Appliquer les manifests K8s $\to$ Exécuter PostSync hooks (Playwright) $\to$\\
+        [Si drift détecté] Self-heal automatique $\to$ État synchronisé
+        \vspace{3cm}
+    }}
+    \caption{Diagramme d'activité du flux GitOps avec Argo CD}
+    \label{fig:act_gitops}
+\end{figure}
+
+\subsection{Diagramme de Déploiement}
+
+\begin{figure}[H]
+    \centering
+    \fbox{\parbox{0.85\textwidth}{\centering
+        \vspace{3.5cm}
+        Espace réservé pour la Figure~\ref{fig:deployment_diagram}\\
+        \textbf{Diagramme de déploiement UML}\\[6pt]
+        \footnotesize
+        \textbf{Nœud GitHub}~: Actions Runner, OIDC Provider\\
+        \textbf{Nœud GCP}~: VPC devops-vpc\\
+        \quad \textbf{GKE Cluster}~: ns app (Deployment + nginx-exporter sidecar),\\
+        \quad\quad ns testing (Playwright Job), ns observability (Prometheus, Grafana),\\
+        \quad\quad ns security (Wazuh Agent), ns argocd (Argo CD)\\
+        \quad \textbf{VM Wazuh}~: Wazuh Manager (TCP 1514)\\
+        \quad \textbf{Artifact Registry}~: Docker images\\
+        \textbf{Nœud Externe}~: Navigateur utilisateur $\to$ Ingress GCE
+        \vspace{3.5cm}
+    }}
+    \caption{Diagramme de déploiement de la plateforme}
+    \label{fig:deployment_diagram}
+\end{figure}
+
+
+\section{L'Application Cible~: Todo App React}
+
+\subsection{Description Fonctionnelle}
+
+L'application déployée est une \textbf{Todo App} avec un portail de connexion, développée
+avec React 18 et TypeScript. Bien que l'application soit fonctionnellement simple, elle sert
+de support idéal pour illustrer tous les aspects DevSecOps car elle possède~:
+
+\begin{itemize}
+  \item Une \textbf{authentification} (cible pour les tests de sécurité)~;
+  \item Une \textbf{interaction utilisateur} (cible pour les tests E2E et XSS)~;
+  \item Une \textbf{persistance de données} via localStorage (cible pour les vulnérabilités
+        de stockage)~;
+  \item Une \textbf{chaîne de dépendances npm} (cible pour le SCA).
+\end{itemize}
+
+\begin{figure}[H]
+    \centering
+    \fbox{\parbox{0.85\textwidth}{\centering
+        \vspace{2.5cm}
+        Espace réservé pour la Figure~\ref{fig:app_screenshot_login}\\
+        \textbf{Capture d'écran~: Page de login de la Todo App}
+        \vspace{2.5cm}
+    }}
+    \caption{Page de login de la Todo App}
+    \label{fig:app_screenshot_login}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \fbox{\parbox{0.85\textwidth}{\centering
+        \vspace{2.5cm}
+        Espace réservé pour la Figure~\ref{fig:app_screenshot_dashboard}\\
+        \textbf{Capture d'écran~: Dashboard Todo avec liste de tâches}
+        \vspace{2.5cm}
+    }}
+    \caption{Dashboard de gestion des tâches Todo}
+    \label{fig:app_screenshot_dashboard}
+\end{figure}
+
+\subsection{Diagramme de Classes de l'Application}
+
+\begin{figure}[H]
+    \centering
+    \fbox{\parbox{0.85\textwidth}{\centering
+        \vspace{3cm}
+        Espace réservé pour la Figure~\ref{fig:class_diagram}\\
+        \textbf{Diagramme de classes de la Todo App}\\[6pt]
+        \footnotesize Classes~: App, AuthContext, AuthProvider, LoginPage,\\
+        TodoDashboard, TodoItem, Todo (interface)\\
+        Relations~: App $\to$ AuthProvider $\to$ LoginPage / TodoDashboard\\
+        TodoDashboard $\to$ TodoItem[] , TodoItem $\to$ Todo
+        \vspace{3cm}
+    }}
+    \caption{Diagramme de classes de l'application Todo App}
+    \label{fig:class_diagram}
+\end{figure}
+
+\subsection{Stack Technique}
+
+Le tableau~\ref{tab:stack} détaille les technologies utilisées~:
+
+\begin{table}[H]
+\centering
+\setlength{\arrayrulewidth}{0.8pt}
+\setlength{\dashlinedash}{3pt}
+\setlength{\dashlinegap}{2pt}
+\renewcommand{\arraystretch}{1.4}
+\caption{Stack technique de l'application}
+\label{tab:stack}
+\begin{tabularx}{\textwidth}{|>{\centering\arraybackslash}X|>{\centering\arraybackslash}X|>{\centering\arraybackslash}X|}
+\hline
+\tableheader \textbf{Couche} & \textbf{Technologie} & \textbf{Version} \\
+\hline
+Framework UI & React & 18.3.1 \\ \hdashline
+Langage & TypeScript & 5.8.3 \\ \hdashline
+Build tool & Vite & 8.0.0 \\ \hdashline
+Styling & Tailwind CSS + Rosé Pine theme & 3.4.17 \\ \hdashline
+Composants UI & shadcn/ui (Radix UI) & --- \\ \hdashline
+Animations & Framer Motion & 12.x \\ \hdashline
+Routing & React Router DOM & 6.30.1 \\ \hdashline
+Gestionnaire de paquets & Bun & Latest \\ \hdashline
+Serveur de production & Nginx & 1.21 (vulnérable intentionnel) \\
+\hline
+\end{tabularx}
+\end{table}
+
+\subsection{Vulnérabilités Intentionnelles}
+
+\begin{warningbox}
+Le composant \texttt{TodoItem} utilise intentionnellement \texttt{dangerouslySetInnerHTML}
+pour rendre le texte des tâches, créant une vulnérabilité \textbf{XSS stockée} détectable
+par OWASP ZAP et SonarCloud. De même, l'authentification est hardcodée côté client dans
+\texttt{AuthContext.tsx}. Ces choix sont délibérés pour la démonstration des outils DevSecOps.
+\end{warningbox}
+
+
+\section{Choix Technologiques et Justifications}
+
+\begin{table}[H]
+\centering
+\setlength{\arrayrulewidth}{0.8pt}
+\setlength{\dashlinedash}{3pt}
+\setlength{\dashlinegap}{2pt}
+\renewcommand{\arraystretch}{1.4}
+\caption{Choix technologiques et justifications}
+\label{tab:choix_techno}
+\begin{tabularx}{\textwidth}{|>{\centering\arraybackslash}X|>{\centering\arraybackslash}X|>{\centering\arraybackslash}X|}
+\hline
+\tableheader \textbf{Domaine} & \textbf{Outil choisi} & \textbf{Justification} \\
+\hline
+IaC & Terraform & Standard industriel, multi-cloud, état déclaratif \\ \hdashline
+Orchestration & GKE Autopilot & Gestion nœuds par Google, sécurité par défaut, scaling auto \\ \hdashline
+CI/CD & GitHub Actions & Natif GitHub, OIDC intégré, marketplace riche \\ \hdashline
+GitOps & Argo CD & Self-heal, drift detection, UI dashboard, CNCF graduated \\ \hdashline
+SAST & SonarCloud & Analyse TypeScript/React, Quality Gates, gratuit open-source \\ \hdashline
+SCA + Container & Trivy & 3 modes (fs, image, config), SARIF output, open-source \\ \hdashline
+DAST & OWASP ZAP & Standard industriel, baseline scan intégrable en CI \\ \hdashline
+SIEM & Wazuh & Open-source, HIDS + FIM + compliance, compatible K8s \\ \hdashline
+Observabilité & Prometheus + Grafana & Standard CNCF, écosystème exporters, dashboards \\ \hdashline
+Tests E2E & Playwright & Multi-navigateur, conteneurisable, tags pour parallélisme \\
+\hline
+\end{tabularx}
+\end{table}
+
+
+\section{Comparaison Globale Avant/Après}
+
+Le tableau~\ref{tab:avant_apres} offre une vue synthétique de la transformation conçue~:
+
+\begin{table}[H]
+\centering
+\setlength{\arrayrulewidth}{0.8pt}
+\setlength{\dashlinedash}{3pt}
+\setlength{\dashlinegap}{2pt}
+\renewcommand{\arraystretch}{1.4}
+\caption{Comparaison des approches avant et après transformation}
+\label{tab:avant_apres}
+\begin{tabularx}{\textwidth}{|>{\centering\arraybackslash}X|>{\centering\arraybackslash}X|>{\centering\arraybackslash}X|}
+\hline
+\tableheader \textbf{Dimension} & \textbf{Avant (Jenkins)} & \textbf{Après (DevSecOps)} \\
+\hline
+Sécurité & Post-déploiement ou absente & Intégrée à chaque étape \\ \hdashline
+Infrastructure & ClickOps manuel & Terraform IaC versionné \\ \hdashline
+Déploiement & Scripts impératifs & GitOps déclaratif (Argo CD) \\ \hdashline
+Tests & Unitaires seulement & Unit + E2E in-cluster + scans sécurité \\ \hdashline
+Authentification & Clés JSON statiques & OIDC Workload Identity Federation \\ \hdashline
+Réseau & Ouvert par défaut & Zero Trust (default-deny) \\ \hdashline
+Monitoring & CPU/RAM basique & Métriques + SIEM + alertes \\ \hdashline
+Audit trail & Inexistant & Chaque commit, build, déploiement tracé \\ \hdashline
+Rollback & Manuel & Automatique via Git revert + Argo CD \\
+\hline
+\end{tabularx}
+\end{table}
+
+
+\section*{Conclusion}
+
+Ce chapitre a présenté la conception détaillée du système~: une architecture DevSecOps en
+six couches articulée autour de huit principes directeurs, une infrastructure GCP bien définie,
+un cluster Kubernetes segmenté en cinq namespaces, et des diagrammes UML modélisant les flux
+de livraison, de sécurité et de déploiement. Le chapitre suivant se consacre à l'implémentation
+concrète de cette conception, organisée en quatre sprints Agile.

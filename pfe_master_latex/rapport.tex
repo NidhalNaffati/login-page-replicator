@@ -1,0 +1,129 @@
+%% Rapport de PFE — Industrialisation DevSecOps
+%% Auteur : NAFFATI
+%% ESPRIT / Sopra Steria — Avril 2026
+
+\documentclass[12pt,a4paper]{./tpl/isipfe}
+\graphicspath{{./}}
+
+\input{./tpl/new_commands}
+
+\makeindex
+
+\begin{document}
+    \input{global_config}
+
+    \frontmatter
+    \input{tpl/title_page}
+    \dominitoc
+    \setcounter{page}{1}
+
+    %% Dédicace
+    \chapter*{Dédicace}
+    \adjustmtc
+    \thispagestyle{frontmatter}
+    \begin{center}
+        {\it
+        À tous ceux qui croient que la sécurité n'est pas une fonctionnalité optionnelle,\\
+        mais une responsabilité fondamentale de tout ingénieur logiciel.\\
+        \vspace{1cm}
+        À ma famille, pour leur soutien indéfectible tout au long de ce parcours.
+        }
+    \end{center}
+
+    %% Remerciements
+    \chapter*{Remerciements}
+    \adjustmtc
+    \thispagestyle{frontmatter}
+
+    Je tiens à remercier l'ensemble de l'équipe \textbf{Sopra Steria} pour l'accueil chaleureux,
+    le soutien technique et la confiance accordée tout au long de ce projet de fin d'études.
+
+    Je remercie également mes encadrants académiques de \textbf{l'ESPRIT} pour leurs conseils
+    précieux, leur rigueur scientifique et leur suivi attentif qui ont été déterminants dans
+    la réalisation de ce travail.
+
+    Ma gratitude va aussi à tous mes collègues de promotion dont les échanges ont enrichi
+    ma réflexion, ainsi qu'à ma famille pour son soutien moral constant.
+
+    %% Tables
+    \setcounter{secnumdepth}{3}
+    \setcounter{tocdepth}{2}
+    \dominitoc
+    \tableofcontents
+    \adjustmtc
+    \thispagestyle{frontmatter}
+
+    \listoffigures
+    \adjustmtc
+    \thispagestyle{frontmatter}
+    \listoftables
+    \adjustmtc
+    \thispagestyle{frontmatter}
+
+    \mainmatter
+    %% Introduction Générale
+    \chapter*{Introduction Générale}
+    \markboth{\MakeUppercase{Introduction Générale}}{}
+    \addcontentsline{toc}{chapter}{Introduction Générale}
+    \input{introduction.tex}
+    \clearpage
+
+    %% Chapitre 1
+    \chapter{Contexte, Problématique et Étude de l'Existant}
+    \label{chap:contexte}
+    \input{chapitre1.tex}
+    \clearpage
+
+    %% Chapitre 2
+    \chapter{Analyse des Besoins}
+    \label{chap:besoins}
+    \input{chapitre2.tex}
+    \clearpage
+
+    %% Chapitre 3
+    \chapter{Analyse et Conception du Système}
+    \label{chap:conception}
+    \input{chapitre3.tex}
+    \clearpage
+
+    %% Chapitre 4
+    \chapter{Implémentation et Réalisation par Sprints Agile}
+    \label{chap:implementation}
+    \input{chapitre4.tex}
+    \clearpage
+
+    %% Conclusion
+    \chapter*{Conclusion et Perspectives}
+    \adjustmtc
+    \markboth{\MakeUppercase{Conclusion et Perspectives}}{}
+    \addcontentsline{toc}{chapter}{Conclusion et Perspectives}
+    \input{conclusion.tex}
+    \clearpage
+
+    %% Bibliographie
+    \clearpage
+    \printbibliography[title={Bibliographie}]
+
+    %% Annexes
+    \appendix
+    \addcontentsline{toc}{chapter}{Annexes}
+
+    \chapter{Commandes de Déploiement}
+    \label{annex:deploy}
+    \input{annexeA.tex}
+    \clearpage
+
+    \chapter{Variables GitHub Actions et Ports des Services}
+    \label{annex:vars}
+    \input{annexeB.tex}
+    \clearpage
+
+    \chapter{Glossaire des Termes Techniques}
+    \label{annex:glossaire}
+    \input{annexeC.tex}
+    \clearpage
+
+    \backmatter
+    \input{./tpl/resume}
+
+\end{document}

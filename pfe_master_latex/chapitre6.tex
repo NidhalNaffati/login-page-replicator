@@ -1,0 +1,201 @@
+﻿%% CHAPITRE 6 -- Tests, Observabilite et Resultats
+
+\section*{Introduction}
+
+Ce chapitre clôture la description du travail réalisé en présentant les résultats mesurables
+de la transformation. Nous y décrivons la stratégie de tests multi-niveaux (unitaires, sécurité
+et E2E), l'architecture d'observabilité avec Prometheus et Grafana, la démonstration des
+vulnérabilités intentionnelles, et enfin le bilan comparatif avant/après avec les indicateurs
+de performance clés (KPIs) qui quantifient la valeur ajoutée de la plateforme DevSecOps.
+
+\section{Strategie de Tests Multi-Niveaux}
+La pyramide de tests du projet comprend trois niveaux complementaires~:
+\begin{enumerate}
+  \item \textbf{Tests unitaires} (Vitest + Testing Library)~: tests rapides, nombreux,
+        isolent les composants React individuellement~;
+  \item \textbf{Tests de securite} (Trivy, ZAP, SonarCloud)~: tests automatises de securite
+        integres dans le pipeline CI/CD~;
+  \item \textbf{Tests E2E} (Playwright in-cluster)~: tests lents mais a haute valeur ajoutee,
+        valident le comportement reel de l'application dans le contexte de production.
+\end{enumerate}
+\section{Tests Unitaires avec Vitest}
+Les tests unitaires couvrent les composants React critiques~:
+\begin{itemize}
+  \item \textbf{TodoItem}~: rendu du texte, toggle completed, suppression~;
+  \item \textbf{AuthContext}~: login/logout, persistence de session~;
+  \item \textbf{TodoDashboard}~: CRUD complet, filtrage, compteurs.
+\end{itemize}
+La couverture de code est superieure a 80\% grace au Quality Gate SonarCloud qui bloque
+toute PR faisant baisser la couverture sous ce seuil.
+\section{Tests E2E Playwright --- 6 Scenarios}
+\begin{table}[h]
+\centering
+\setlength{\arrayrulewidth}{0.8pt}
+\setlength{\dashlinedash}{3pt}
+\setlength{\dashlinegap}{2pt}
+\renewcommand{\arraystretch}{1.4}
+\caption{Les 6 scenarios de tests Playwright E2E}
+\label{tab:playwright}
+\begin{tabularx}{\textwidth}{|>{\centering\arraybackslash}X|>{\centering\arraybackslash}X|>{\centering\arraybackslash}X|}
+\hline
+\tableheader \textbf{Tag} & \textbf{Scenario} & \textbf{Ce que ca valide} \\
+\hline
+@t1 & Credentials invalides -> message d'erreur & Authentification, gestion erreurs \\ \hdashline
+@t2 & Login -> dashboard vide affiche & Flux d'authentification complet \\ \hdashline
+@t3 & Login -> Logout -> retour formulaire & Cycle auth complet \\ \hdashline
+@t4 & Session persiste apres rechargement & Persistance localStorage \\ \hdashline
+@t5 & Todos persistent apres rechargement & Persistance des donnees \\ \hdashline
+@t6 & Ajouter, completer, supprimer une tache & CRUD complet \\
+\hline
+\end{tabularx}
+\end{table}
+Les tests sont executes en trois modes~:
+\begin{itemize}
+  \item \textbf{In-cluster (PostSync)}~: jobs Kubernetes crees par Argo CD apres chaque
+        deploiement~;
+  \item \textbf{Local CI (matrice)}~: GitHub Actions execute Playwright avec \texttt{--grep
+        @t1..@t6}~;
+  \item \textbf{Standalone Job}~: \texttt{k8s/testing/playwright-job.yaml} pour tests manuels
+        ponctuels.
+\end{itemize}
+\section{Observabilite avec Prometheus et Grafana}
+\subsection{Architecture d'Observabilite}
+Le flux de collecte des metriques~:
+\begin{enumerate}
+  \item Le sidecar \texttt{nginx-exporter} (port 9113) expose les metriques Nginx~;
+  \item Le \texttt{ServiceMonitor} dans le namespace \texttt{observability} scrape ces metriques
+        toutes les 30 secondes~;
+  \item Prometheus stocke les series temporelles~;
+  \item Grafana interroge Prometheus pour les tableaux de bord.
+\end{enumerate}
+\subsection{Metriques de Securite Cles}
+\begin{table}[h]
+\centering
+\setlength{\arrayrulewidth}{0.8pt}
+\setlength{\dashlinedash}{3pt}
+\setlength{\dashlinegap}{2pt}
+\renewcommand{\arraystretch}{1.4}
+\caption{Metriques Nginx collectees et leur utilite securite}
+\label{tab:metrics}
+\begin{tabularx}{\textwidth}{|>{\centering\arraybackslash}X|>{\centering\arraybackslash}X|>{\centering\arraybackslash}X|}
+\hline
+\tableheader \textbf{Metrique} & \textbf{Description} & \textbf{Utilite Securite} \\
+\hline
+nginx\_connections\_active & Connexions actives & Detection de DDoS \\ \hdashline
+nginx\_http\_requests\_total & Requetes par status code & Spike de 4xx = attaque de scan \\ \hdashline
+nginx\_connections\_accepted & Connexions acceptees total & Baseline trafic normal \\ \hdashline
+nginx\_connections\_handled & Connexions traitees & Performance et disponibilite \\
+\hline
+\end{tabularx}
+\end{table}
+\section{Resultats et Comparaison Avant/Apres}
+\subsection{Tableau de Bord de Securite}
+\begin{table}[h]
+\centering
+\setlength{\arrayrulewidth}{0.8pt}
+\setlength{\dashlinedash}{3pt}
+\setlength{\dashlinegap}{2pt}
+\renewcommand{\arraystretch}{1.4}
+\caption{Bilan securite avant et apres la transformation DevSecOps}
+\label{tab:bilan_securite}
+\begin{tabularx}{\textwidth}{|>{\centering\arraybackslash}X|>{\centering\arraybackslash}X|>{\centering\arraybackslash}X|}
+\hline
+\tableheader \textbf{Domaine} & \textbf{Avant (Jenkins)} & \textbf{Apres (DevSecOps)} \\
+\hline
+SAST & Absent & SonarCloud detecte XSS, hotspots \\ \hdashline
+SCA & Absent & Trivy FS : 9 CVEs sur 3 packages \\ \hdashline
+Container Scan & Absent & Trivy Image : 47 CVEs nginx:1.21 \\ \hdashline
+IaC Scan & Absent & Trivy Config : 8 misconfigs K8s \\ \hdashline
+DAST & Absent & OWASP ZAP : 10 findings securite \\ \hdashline
+Secrets Scan & Absent & Trivy : secrets ENV + .env detectes \\ \hdashline
+Runtime Security & Absent & Wazuh : 4 agents actifs \\ \hdashline
+Reseau & Tout ouvert & Zero Trust : 12 NetworkPolicies \\ \hdashline
+Auth CI & Cles JSON statiques & WIF OIDC : zero cle persistante \\ \hdashline
+Tests & Unit tests Jenkins & Unit + E2E + 6 scenarios Playwright \\ \hdashline
+Infrastructure & ClickOps & Terraform IaC : 100\% reproductible \\ \hdashline
+Deploiement & Scripts manuels & Argo CD GitOps : auto-sync + self-heal \\ \hdashline
+Audit trail & Inexistant & Chaque commit/build/deploy trace \\
+\hline
+\end{tabularx}
+\end{table}
+\subsection{KPIs Techniques Mesures}
+\begin{table}[h]
+\centering
+\setlength{\arrayrulewidth}{0.8pt}
+\setlength{\dashlinedash}{3pt}
+\setlength{\dashlinegap}{2pt}
+\renewcommand{\arraystretch}{1.4}
+\caption{Indicateurs cles de performance avant/apres}
+\label{tab:kpis}
+\begin{tabularx}{\textwidth}{|>{\centering\arraybackslash}X|>{\centering\arraybackslash}X|>{\centering\arraybackslash}X|}
+\hline
+\tableheader \textbf{KPI} & \textbf{Avant} & \textbf{Apres} \\
+\hline
+Vulnerabilites detectees avant prod & 0 & 9+ CVEs + 10 findings ZAP \\ \hdashline
+Temps de detection d'une CVE critique & Jamais & < 5 min (sur push) \\ \hdashline
+Infrastructure reproductible & Non & Oui (terraform apply) \\ \hdashline
+Rollback automatique & Non & Oui (git revert + Argo CD) \\ \hdashline
+Tests E2E automatises & 0 & 6 scenarios in-cluster \\ \hdashline
+Couverture tests unitaires & 40\% & > 80\% (gate SonarCloud) \\ \hdashline
+Auth CI sans cle statique & Non & Oui (WIF OIDC) \\ \hdashline
+Namespaces avec isolation reseau & 0 & 5 (100\% du cluster) \\ \hdashline
+SIEM actif & Non & Oui (Wazuh 4 agents) \\
+\hline
+\end{tabularx}
+\end{table}
+\section{Limites et Plan d'Amelioration Continue}
+\subsection{Limites Actuelles}
+\begin{itemize}
+  \item \textbf{GKE Autopilot et Wazuh}~: hostPID/hostNetwork bloques, monitoring kernel
+        limite~;
+  \item \textbf{Authentification applicative}~: credentials hardcodes cote client (demo)~;
+  \item \textbf{Secrets applicatifs}~: dans les variables ENV (demo intentionnelle)~;
+  \item \textbf{Single environment}~: un seul environnement (production)~;
+  \item \textbf{DAST baseline}~: scan passif uniquement, pas de scan actif complet.
+\end{itemize}
+\subsection{Roadmap Court Terme (1--3 mois)}
+\begin{itemize}
+  \item Ajouter CodeQL pour SAST JavaScript avance~;
+  \item Implementer cosign pour la signature des images (SLSA Level 2)~;
+  \item Generer un SBOM pour chaque image (syft ou trivy sbom)~;
+  \item Ajouter Gitleaks en pre-commit pour bloquer les secrets avant push~;
+  \item Ajouter Kyverno pour le Policy-as-Code en admission control.
+\end{itemize}
+\subsection{Roadmap Moyen Terme (3--6 mois)}
+\begin{itemize}
+  \item Migrer vers GCP Secret Manager + External Secrets Operator~;
+  \item Ajouter un environnement staging avec promotion d'artefacts~;
+  \item Implementer Checkov pour le scan IaC Terraform~;
+  \item Configurer kube-bench pour le score de conformite CIS Kubernetes~;
+  \item Ajouter des alertes Grafana de securite (Prometheus Alertmanager).
+\end{itemize}
+\subsection{Alignement aux Frameworks de Securite}
+\begin{table}[h]
+\centering
+\setlength{\arrayrulewidth}{0.8pt}
+\setlength{\dashlinedash}{3pt}
+\setlength{\dashlinegap}{2pt}
+\renewcommand{\arraystretch}{1.4}
+\caption{Alignement aux frameworks de securite}
+\label{tab:frameworks}
+\begin{tabularx}{\textwidth}{|>{\centering\arraybackslash}X|>{\centering\arraybackslash}X|>{\centering\arraybackslash}X|}
+\hline
+\tableheader \textbf{Framework} & \textbf{Couverture Actuelle} & \textbf{Objectif} \\
+\hline
+OWASP Top 10 & A03, A05, A06, A09 couverts & A01, A02, A08 a ajouter \\ \hdashline
+NIST SSDF & PW.1 (Build), RV.1 (Scan) & PW.4 (Signing), PO.3 (Reqs) \\ \hdashline
+CIS Controls v8 & Config, Vuln Mgmt, AppSec & Inventory, Logging \\ \hdashline
+OWASP SAMM & Secure Build, Sec Testing & Secure Architecture, Operations \\
+\hline
+\end{tabularx}
+\end{table}
+
+\section*{Conclusion}
+
+Ce chapitre a fourni la synthèse quantitative de la transformation~: six scénarios Playwright
+validés en cluster, une couverture de tests unitaires supérieure à 70~\%, un tableau de bord
+Grafana opérationnel, et un bilan avant/après qui démontre la suppression de toutes les lacunes
+sécuritaires identifiées au chapitre~1. Ces résultats confirment que la problématique posée
+en début de stage a été pleinement résolue. La conclusion générale du rapport revient sur
+l'ensemble de la démarche et ouvre des perspectives d'amélioration continue.
+

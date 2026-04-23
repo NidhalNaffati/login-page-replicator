@@ -1,0 +1,31 @@
+﻿%% ANNEXE A -- Commandes de Deploiement
+\section{Provisionnement de l'Infrastructure}
+\begin{lstlisting}[language=bash, caption=Provisionnement Terraform]
+cd terraform/
+terraform init
+terraform plan -out=tfplan
+terraform apply tfplan
+\end{lstlisting}
+\section{Deploiement des Ressources Kubernetes}
+\begin{lstlisting}[language=bash, caption=Application des manifests Kubernetes]
+kubectl apply -f k8s/namespaces.yaml
+kubectl apply -f k8s/app/
+kubectl apply -f k8s/security/
+kubectl apply -f k8s/argocd/app-application.yaml
+\end{lstlisting}
+\section{Verification de l'Etat Argo CD}
+\begin{lstlisting}[language=bash, caption=Verification de la synchronisation Argo CD]
+kubectl get applications -n argocd
+kubectl describe application login-page-replicator -n argocd
+\end{lstlisting}
+\section{Lancement des Tests E2E}
+\begin{lstlisting}[language=bash, caption=Lancement manuel des tests Playwright]
+SHORT_SHA="<sha>"
+sed "s|IMAGE_TAG|${SHORT_SHA}|g" k8s/testing/playwright-job.yaml \
+  | kubectl apply -f -
+kubectl logs -n testing -l app=playwright --tail=100 -f
+\end{lstlisting}
+\section{Consultation des Logs Wazuh}
+\begin{lstlisting}[language=bash, caption=Consultation des logs de l'agent Wazuh]
+kubectl logs -n security -l app=wazuh-agent --tail=50
+\end{lstlisting}

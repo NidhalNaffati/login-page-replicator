@@ -1,0 +1,78 @@
+
+%=== File containing Global Configuration of the report ===%
+% Configure your cover pages and abstracts here            %
+%==========================================================%
+
+%============= Config new columns type ==============%
+\newcolumntype{L}{>{\raggedright\arraybackslash}}
+\newcolumntype{R}{>{\raggedleft\arraybackslash}}
+\newcolumntype{C}{>{\centering\arraybackslash}}
+%==================================================%
+
+%========= Config the cover section ==========%
+
+\title{Industrialisation DevSecOps d'une Application Web Cloud-Native}
+
+\author{NAFFATI}
+
+\diplomaName{Diplôme National d'Ingénieur}
+\speciality{Génie Logiciel}
+
+%% Encadrant professionnel
+\proFramerName{Sopra Steria}
+\proFramerSpeciality{}
+
+%% Encadrant académique
+\academicFramerName{ESPRIT}
+\academicFramerSpeciality{}
+
+%% Entreprise d'accueil
+\companyName{Sopra Steria}
+
+%% Année universitaire
+\collegeYear{2025 - 2026}
+
+%%%%%% Signatures section %%%%%%
+\proSignSentence{J'autorise l'étudiant à faire le dépôt de son rapport de stage en vue d'une soutenance.}
+\academicSignSentence{J'autorise l'étudiant à faire le dépôt de son rapport de stage en vue d'une soutenance.}
+
+%%% FR
+\frenchAbstract{Ce rapport présente la conception et l'implémentation d'une plateforme \textbf{DevSecOps} complète
+autour d'une application web moderne développée avec React, TypeScript et Vite, déployée sur
+\textbf{Google Kubernetes Engine (GKE)} en mode Autopilot. Le projet part d'une situation initiale
+où l'équipe utilisait uniquement \textbf{Jenkins} comme pipeline d'intégration continue pour
+exécuter des tests unitaires, sans aucune considération de sécurité intégrée.
+
+L'objectif principal est de transformer cette approche naïve en une \textbf{chaîne de valeur
+logicielle sécurisée de bout en bout}, en intégrant~: l'Infrastructure as Code avec Terraform,
+le GitOps avec Argo CD, l'analyse de vulnérabilités avec Trivy et OWASP ZAP, la sécurité runtime
+avec Wazuh SIEM, l'observabilité avec Prometheus et Grafana, et un modèle d'identité sans clés
+statiques via Workload Identity Federation.
+
+Le résultat est une plateforme reproductible, auditable et directement applicable à des contextes
+de production réels.
+}
+
+\frenchAbstractKeywords{DevSecOps, Kubernetes, GKE, Terraform, Argo CD, Trivy, OWASP ZAP, Wazuh, CI/CD,
+GitOps, Zero Trust, Workload Identity, SAST, DAST, SCA, GitHub Actions, Prometheus, Grafana.}
+
+%%% EN
+\englishAbstract{This report presents the design and implementation of a complete \textbf{DevSecOps} platform
+built around a modern web application developed with React, TypeScript and Vite, deployed on
+\textbf{Google Kubernetes Engine (GKE)} in Autopilot mode. The project starts from an initial
+situation where the team was using only \textbf{Jenkins} as a continuous integration pipeline
+to run unit tests, with no integrated security considerations whatsoever.
+
+The main objective is to transform this naive approach into a \textbf{secure end-to-end software
+value chain}, integrating: Infrastructure as Code with Terraform, GitOps with Argo CD,
+vulnerability analysis with Trivy and OWASP ZAP, runtime security with Wazuh SIEM, observability
+with Prometheus and Grafana, and a keyless identity model via Workload Identity Federation.
+
+The result is a reproducible, auditable platform directly applicable to real production contexts,
+demonstrating that security does not hinder delivery velocity but rather enables confidence
+in every deployment.
+}
+
+\englishAbstractKeywords{DevSecOps, Kubernetes, GKE, Terraform, Argo CD, Trivy, OWASP ZAP, Wazuh, CI/CD,
+GitOps, Zero Trust, Workload Identity, SAST, DAST, SCA, GitHub Actions, Prometheus, Grafana.}
+

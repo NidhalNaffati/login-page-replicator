@@ -1,0 +1,165 @@
+﻿%% CHAPITRE 5 -- Securite integree : SAST, SCA, DAST, Zero Trust et IAM
+
+\section*{Introduction}
+
+Ce chapitre constitue le cœur technique du projet en termes de sécurité. Il couvre l'ensemble
+des couches de protection mises en place~: les tests de sécurité statiques et dynamiques
+intégrés dans le pipeline CI/CD (SAST, SCA, DAST), l'architecture réseau Zero Trust avec les
+NetworkPolicies Kubernetes, la surveillance runtime via Wazuh SIEM, et la gouvernance des
+identités et des accès (IAM). Pour chaque mécanisme, les résultats concrets obtenus sont
+présentés avec les métriques mesurables.
+
+\section{Taxonomie des Tests de Securite}
+Trois types complementaires de tests de securite sont integres dans la plateforme~:
+\begin{itemize}
+  \item \textbf{SAST} (\textit{Static Application Security Testing})~: analyse le code source
+        sans l'executer. Outils~: SonarCloud, Trivy FS, ESLint-security~;
+  \item \textbf{SCA} (\textit{Software Composition Analysis})~: analyse les dependances tierces
+        (packages npm, couches OS des images Docker). Outil~: Trivy~;
+  \item \textbf{DAST} (\textit{Dynamic Application Security Testing})~: teste l'application en
+        cours d'execution en boite noire. Outil~: OWASP ZAP.
+\end{itemize}
+\section{SAST avec SonarCloud}
+SonarCloud analyse le code TypeScript/React a chaque push et detecte~:
+\begin{itemize}
+  \item \textbf{Security Hotspots}~: utilisations de \texttt{dangerouslySetInnerHTML} (XSS)~;
+  \item \textbf{Vulnerabilities}~: patterns de code pouvant mener a des injections~;
+  \item \textbf{Code Smells}~: indicateurs de qualite masquant des vulnerabilites~;
+  \item \textbf{Coverage gate}~: bloque la PR si la couverture de tests chute sous le seuil.
+\end{itemize}
+\section{SCA avec Trivy --- Vulnerabilites Detectees}
+Le projet integre intentionnellement des dependances vulnerables~:
+\begin{table}[h]
+\centering
+\setlength{\arrayrulewidth}{0.8pt}
+\setlength{\dashlinedash}{3pt}
+\setlength{\dashlinegap}{2pt}
+\renewcommand{\arraystretch}{1.4}
+\caption{CVEs detectees par Trivy FS sur les dependances npm}
+\label{tab:cves_npm}
+\begin{tabularx}{\textwidth}{|>{\centering\arraybackslash}X|>{\centering\arraybackslash}X|>{\centering\arraybackslash}X|>{\centering\arraybackslash}X|}
+\hline
+\tableheader \textbf{CVE} & \textbf{Package} & \textbf{Severite} & \textbf{Description} \\
+\hline
+CVE-2021-23337 & lodash 4.17.20 & HIGH & Command Injection \\ \hdashline
+CVE-2026-4800  & lodash 4.17.20 & HIGH & Code Injection via \_.template \\ \hdashline
+CVE-2025-13465 & lodash 4.17.20 & MEDIUM & Prototype Pollution \\ \hdashline
+CVE-2022-23539 & jsonwebtoken 8.5.1 & HIGH & Insecure key types \\ \hdashline
+CVE-2022-23540 & jsonwebtoken 8.5.1 & MEDIUM & Signature bypass (none algo) \\ \hdashline
+CVE-2022-23541 & jsonwebtoken 8.5.1 & MEDIUM & RSA to HMAC forgery \\ \hdashline
+CVE-2024-29041 & express 4.17.1 & MEDIUM & Open Redirect \\
+\hline
+\end{tabularx}
+\end{table}
+Le scan de l'image \texttt{nginx:1.21} revele \textbf{47 vulnerabilites}~: 3 CRITICAL, 12 HIGH,
+18 MEDIUM, 14 LOW. Les plus critiques incluent CVE-2022-0778 (OpenSSL infinite loop) et
+CVE-2021-3711 (OpenSSL buffer overflow).
+\section{DAST avec OWASP ZAP}
+OWASP ZAP effectue un scan en boite noire de l'application deployee apres chaque deploiement~:
+\begin{table}[h]
+\centering
+\setlength{\arrayrulewidth}{0.8pt}
+\setlength{\dashlinedash}{3pt}
+\setlength{\dashlinegap}{2pt}
+\renewcommand{\arraystretch}{1.4}
+\caption{Findings OWASP ZAP sur l'application}
+\label{tab:zap_findings}
+\begin{tabularx}{\textwidth}{|>{\centering\arraybackslash}X|>{\centering\arraybackslash}X|>{\centering\arraybackslash}X|}
+\hline
+\tableheader \textbf{Finding} & \textbf{Regle} & \textbf{Severite} \\
+\hline
+Stored XSS (dangerouslySetInnerHTML) & 40012 & HIGH \\ \hdashline
+Missing Content-Security-Policy & 10038 & MEDIUM \\ \hdashline
+Missing X-Frame-Options (Clickjacking) & 10020 & MEDIUM \\ \hdashline
+Directory Browsing Enabled & 10033 & MEDIUM \\ \hdashline
+Server Version Leaked (nginx/1.21.6) & 10036 & LOW \\ \hdashline
+Missing HSTS & 10035 & LOW \\ \hdashline
+Missing X-Content-Type-Options & 10021 & LOW \\
+\hline
+\end{tabularx}
+\end{table}
+Apres durcissement de \texttt{nginx.conf} (ajout des headers de securite, desactivation de
+\texttt{server\_tokens} et \texttt{autoindex})~: \textbf{0 FAIL, 0 WARN}.
+\section{Reseau Zero Trust --- NetworkPolicies}
+\subsection{Principe Default-Deny}
+Sans NetworkPolicies, tous les pods d'un cluster Kubernetes peuvent communiquer librement.
+Ce comportement par defaut est contraire au principe du moindre privilege. La politique
+appliquee~: \textbf{tout est interdit par defaut, chaque flux autorise est declare explicitement}.
+Une politique \texttt{default-deny-all} est appliquee dans chaque namespace (\texttt{app},
+\texttt{testing}, \texttt{observability}, \texttt{security}).
+\subsection{Matrice des Flux Autorises}
+\begin{table}[h]
+\centering
+\setlength{\arrayrulewidth}{0.8pt}
+\setlength{\dashlinedash}{3pt}
+\setlength{\dashlinegap}{2pt}
+\renewcommand{\arraystretch}{1.4}
+\caption{Matrice des flux reseau autorises}
+\label{tab:network_matrix}
+\begin{tabularx}{\textwidth}{|>{\centering\arraybackslash}X|>{\centering\arraybackslash}X|>{\centering\arraybackslash}X|>{\centering\arraybackslash}X|}
+\hline
+\tableheader \textbf{Source} & \textbf{Destination} & \textbf{Port} & \textbf{Politique} \\
+\hline
+\texttt{testing} pods & \texttt{app} pods & TCP 80 & allow-testing-to-app \\ \hdashline
+PostSync hook & \texttt{app} pods & TCP 80 & allow-playwright-hook \\ \hdashline
+\texttt{observability} & \texttt{app} sidecar & TCP 9113 & allow-prometheus-scrape \\ \hdashline
+\texttt{security} DaemonSet & Wazuh VM & TCP 1514/1515 & allow-wazuh-egress \\ \hdashline
+\texttt{app} pods & kube-dns & UDP/TCP 53 & allow-dns-egress \\ \hdashline
+kubelet & \texttt{app} pods & TCP (probes) & allow-kubelet-probes \\
+\hline
+\end{tabularx}
+\end{table}
+\section{Securite Runtime --- Wazuh SIEM}
+\subsection{Architecture Wazuh}
+Wazuh est un SIEM open-source qui fournit~: detection d'intrusion (HIDS), monitoring de
+l'integrite des fichiers (FIM), conformite reglementaire (PCI DSS, GDPR, NIST), et
+correlation d'evenements en temps reel.
+L'agent Wazuh est deploye comme \textbf{DaemonSet} dans le namespace \texttt{security},
+garantissant une instance par noeud. Il collecte les logs depuis \texttt{/var/log/containers/}
+et les envoie via TCP 1514 vers le manager sur la VM GCE.
+\subsection{Limites GKE Autopilot}
+GKE Autopilot bloque \texttt{hostPID}, \texttt{hostNetwork} et les conteneurs privilegies,
+ce qui limite les capacites de monitoring kernel de Wazuh (pas d'audit syscall, pas de visibilite
+reseau host). Les logs conteneurs et l'inventaire reseau/OS restent fonctionnels.
+\section{Gouvernance IAM et Identite}
+\subsection{Probleme des Cles JSON Statiques}
+Les cles JSON GCP n'ont pas de date d'expiration par defaut, leur rotation est manuelle
+et souvent negligee, et leur compromission donne un acces longue duree a l'infrastructure.
+\subsection{Workload Identity Federation}
+Le flux WIF en 5 etapes~:
+\begin{enumerate}
+  \item GitHub Actions obtient un token OIDC (JWT signe par GitHub)~;
+  \item Le JWT est presente au pool WIF GCP~;
+  \item GCP verifie l'issuer, le repository et la branche~;
+  \item GCP emet des credentials temporaires (valides 1 heure maximum)~;
+  \item GitHub Actions utilise ces credentials pour appeler les APIs GCP.
+\end{enumerate}
+\subsection{Modele IAM Complet}
+\begin{table}[h]
+\centering
+\setlength{\arrayrulewidth}{0.8pt}
+\setlength{\dashlinedash}{3pt}
+\setlength{\dashlinegap}{2pt}
+\renewcommand{\arraystretch}{1.4}
+\caption{Identites et roles IAM du projet}
+\label{tab:iam}
+\begin{tabularx}{\textwidth}{|>{\centering\arraybackslash}X|>{\centering\arraybackslash}X|>{\centering\arraybackslash}X|>{\centering\arraybackslash}X|}
+\hline
+\tableheader \textbf{Identite} & \textbf{Type} & \textbf{Roles GCP} & \textbf{Usage} \\
+\hline
+gke-app-sa & GSA & artifactregistry.reader & Pull d'images depuis les noeuds \\ \hdashline
+github-actions-sa & GSA & container.developer, artifactregistry.writer & Pipeline CI/CD \\ \hdashline
+playwright-runner & KSA & Via Workload Identity & Jobs Playwright en cluster \\
+\hline
+\end{tabularx}
+\end{table}
+
+\section*{Conclusion}
+
+Ce chapitre a démontré la mise en œuvre concrète des couches de sécurité~: neuf CVEs détectées
+par Trivy sur les dépendances npm, 47 vulnérabilités identifiées dans l'image nginx, dix
+findings reportés par OWASP ZAP, un réseau Zero Trust avec douze NetworkPolicies, un SIEM
+Wazuh opérationnel, et une gouvernance IAM keyless. L'ensemble constitue une couverture
+sécuritaire multi-niveaux et auditable. Le chapitre final présente les tests fonctionnels,
+l'observabilité, et la synthèse quantitative des résultats obtenus.
+

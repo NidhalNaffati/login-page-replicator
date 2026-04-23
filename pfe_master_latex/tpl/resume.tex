@@ -1,0 +1,44 @@
+%===== Back cover — Résumé / Abstract =====%
+
+\thispagestyle{backcover}
+\newgeometry{bottom=15mm,left=15mm,top=17mm,right=15mm}
+
+\begin{changemargin}{3mm}{0cm}
+    \begin{minipage}[c]{0.96\columnwidth}
+
+        \vskip8mm
+
+        \selectlanguage{french}
+
+        {\LARGE\textbf{Résumé}}
+        \vskip1mm
+            \begingroup
+                \large
+                \@frenchAbstract
+            \endgroup
+        \vskip1mm
+        {\textbf{Mots clés : }
+            \begingroup
+                \@frenchAbstractKeywords
+            \endgroup
+        }
+
+        \vskip8mm
+
+        \selectlanguage{english}
+        {\LARGE\textbf{Abstract}}
+        \vskip1mm
+            \begingroup
+                \large
+                \@englishAbstract
+            \endgroup
+        \vskip1mm
+        {\textbf{Keywords : }
+            \begingroup
+                \@englishAbstractKeywords
+            \endgroup
+        }
+    \end{minipage}
+
+\end{changemargin}
+
