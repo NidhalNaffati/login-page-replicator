@@ -1,5 +1,11 @@
 import { useState } from 'react';
 
+// VULN [SAST-007]: Hardcoded credentials duplicated in Login component (CWE-798)
+// Same credentials as AuthContext — code duplication detected by SonarCloud
+const HARDCODED_USERNAME = "TNEEIN";
+const HARDCODED_PASSWORD = "4YOU";           // duplicate of AuthContext
+const ADMIN_PASSWORD     = "admin123";       // duplicate of AuthContext
+
 interface LoginProps {
   onLogin: () => void;
 }
@@ -10,10 +16,24 @@ export default function Login({ onLogin }: LoginProps) {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (creds.username === 'TNEEIN' && creds.password === '4YOU') {
+
+    // VULN [SAST-008]: Open Redirect — redirect URL taken directly from query string without validation (CWE-601)
+    // DAST (ZAP rule 10016) will detect this as a redirect vulnerability
+    const params = new URLSearchParams(window.location.search);
+    const redirectUrl = params.get('redirect') || '/dashboard';
+
+    // VULN [SAST-007 continued]: Credentials compared in plaintext, duplicated logic
+    if (
+      creds.username === HARDCODED_USERNAME && creds.password === HARDCODED_PASSWORD ||
+      creds.username === 'admin'             && creds.password === ADMIN_PASSWORD
+    ) {
       onLogin();
+      // VULN [SAST-008]: Unvalidated redirect — attacker can set ?redirect=https://evil.com
+      window.location.href = redirectUrl;
     } else {
       setError(true);
+      // VULN [SAST-009]: Error message reveals valid username hint — information leakage (CWE-209)
+      console.warn(`[LOGIN] Failed attempt for user: ${creds.username}`);
       setTimeout(() => setError(false), 2000);
     }
   };

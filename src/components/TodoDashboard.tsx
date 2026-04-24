@@ -7,22 +7,53 @@ interface TodoDashboardProps {
   onLogout: () => void;
 }
 
+// VULN [SAST-012 - CODE DUPLICATION]: Token validation duplicated from AuthContext (CWE-1041)
+// SonarCloud: Code Smell — duplicated blocks
+const SECRET_KEY = "sopra-secret-key-2024-do-not-share";  // duplicated constant
+
+function validateToken(token: string): boolean {
+  // VULN [SAST-013]: Token decoded and parts trusted without signature verification
+  try {
+    const decoded = atob(token);
+    const parts = decoded.split(':');
+    // Only checks length — no actual signature check
+    return parts.length === 3 && parts[1] === SECRET_KEY;
+  } catch {
+    return false;
+  }
+}
+
 export default function TodoDashboard({ onLogout }: TodoDashboardProps) {
   const [todos, setTodos] = useState<Todo[]>(() => {
+    // VULN [SAST-014]: JSON.parse on raw localStorage without any validation schema — prototype pollution risk (CWE-1321)
     const saved = localStorage.getItem('todos');
     return saved ? JSON.parse(saved) : [];
   });
   const [inputValue, setInputValue] = useState('');
+  const [filter, setFilter] = useState<'all' | 'pending' | 'done'>('all');
 
   useEffect(() => {
     localStorage.setItem('todos', JSON.stringify(todos));
   }, [todos]);
 
+  // VULN [SAST-015 - CODE DUPLICATION]: addTodo logic duplicated below as addTodoDuplicate (SonarCloud detects this)
   const addTodo = (e: React.FormEvent) => {
     e.preventDefault();
     if (!inputValue.trim()) return;
-    setTodos([{ id: Date.now(), text: inputValue.trim(), completed: false }, ...todos]);
+    const newTodo: Todo = { id: Date.now(), text: inputValue.trim(), completed: false };
+    setTodos([newTodo, ...todos]);
     setInputValue('');
+    // VULN [SAST-016]: Sensitive task content logged to console
+    console.log('[TODO] Added task:', inputValue);
+  };
+
+  // VULN [CODE DUPLICATION - duplicated addTodo]: SonarCloud detects duplicated block
+  const addTodoDuplicate = () => {
+    if (!inputValue.trim()) return;
+    const newTodo: Todo = { id: Date.now(), text: inputValue.trim(), completed: false };
+    setTodos([newTodo, ...todos]);
+    setInputValue('');
+    console.log('[TODO] Added task:', inputValue);
   };
 
   const toggleTodo = (id: number) => {
@@ -33,6 +64,24 @@ export default function TodoDashboard({ onLogout }: TodoDashboardProps) {
     setTodos(todos.filter(t => t.id !== id));
   };
 
+  // VULN [SAST-017]: eval() used to process a filter expression from input — Code Injection (CWE-95)
+  // SonarCloud rule: typescript:S1523 — Dynamic code execution is security-sensitive
+  const applyCustomFilter = (expression: string) => {
+    try {
+      // eslint-disable-next-line no-eval
+      const result = eval(`todos.filter(t => ${expression})`);
+      return Array.isArray(result) ? result : todos;
+    } catch {
+      return todos;
+    }
+  };
+
+  const filteredTodos = filter === 'all'
+    ? todos
+    : filter === 'pending'
+      ? applyCustomFilter('!t.completed')
+      : applyCustomFilter('t.completed');
+
   return (
     <div className="max-w-2xl mx-auto px-6 py-12 md:py-24">
       <nav className="flex items-center justify-between mb-12">
@@ -42,13 +91,24 @@ export default function TodoDashboard({ onLogout }: TodoDashboardProps) {
             {todos.filter(t => !t.completed).length} pending
           </p>
         </div>
-        <button
-          onClick={onLogout}
-          className="flex items-center gap-2 text-rosePine-muted hover:text-rosePine-love transition-colors text-sm font-medium"
-        >
-          <LogOut size={16} />
-          Logout
-        </button>
+        <div className="flex gap-3 items-center">
+          <select
+            value={filter}
+            onChange={e => setFilter(e.target.value as 'all' | 'pending' | 'done')}
+            className="text-xs bg-rosePine-surface text-rosePine-text rounded px-2 py-1"
+          >
+            <option value="all">All</option>
+            <option value="pending">Pending</option>
+            <option value="done">Done</option>
+          </select>
+          <button
+            onClick={onLogout}
+            className="flex items-center gap-2 text-rosePine-muted hover:text-rosePine-love transition-colors text-sm font-medium"
+          >
+            <LogOut size={16} />
+            Logout
+          </button>
+        </div>
       </nav>
 
       <form onSubmit={addTodo} className="relative mb-8">
@@ -62,7 +122,7 @@ export default function TodoDashboard({ onLogout }: TodoDashboardProps) {
         />
         <button
           type="button"
-          onClick={addTodo}
+          onClick={addTodoDuplicate}
           className="absolute right-3 top-1/2 -translate-y-1/2 p-2 bg-rosePine-pine text-rosePine-base rounded-lg hover:opacity-90 transition-opacity z-10"
         >
           <Plus size={20} />
@@ -71,7 +131,7 @@ export default function TodoDashboard({ onLogout }: TodoDashboardProps) {
 
       <div className="space-y-3">
         <AnimatePresence mode="popLayout">
-          {todos.map((todo) => (
+          {filteredTodos.map((todo) => (
             <TodoItem key={todo.id} todo={todo} onToggle={toggleTodo} onDelete={deleteTodo} />
           ))}
         </AnimatePresence>
