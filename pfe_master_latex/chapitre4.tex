@@ -123,25 +123,15 @@ patches de sécurité gérés par Google, profil de sécurité renforcé par dé
 
 \begin{figure}[H]
     \centering
-    \fbox{\parbox{0.85\textwidth}{\centering
-        \vspace{2.5cm}
-        Espace réservé pour la Figure~\ref{fig:terraform_plan}\\
-        \textbf{Capture d'écran~: Sortie de \texttt{terraform plan}}
-        \vspace{2.5cm}
-    }}
-    \caption{Sortie de \texttt{terraform plan} montrant les ressources à créer}
+    \includegraphics[width=0.95\textwidth,keepaspectratio]{images/screenshots/terraform-plan-gke-node-service-account-changes}
+    \caption{Sortie de \texttt{terraform plan} montrant les changements sur le service account GKE}
     \label{fig:terraform_plan}
 \end{figure}
 
 \begin{figure}[H]
     \centering
-    \fbox{\parbox{0.85\textwidth}{\centering
-        \vspace{2.5cm}
-        Espace réservé pour la Figure~\ref{fig:gke_console}\\
-        \textbf{Capture d'écran~: Cluster GKE Autopilot dans la console GCP}
-        \vspace{2.5cm}
-    }}
-    \caption{Cluster GKE Autopilot provisionné via Terraform}
+    \includegraphics[width=0.95\textwidth,keepaspectratio]{images/screenshots/gke-cluster-observability-dashboard}
+    \caption{Dashboard du cluster GKE Autopilot dans la console GCP}
     \label{fig:gke_console}
 \end{figure}
 
@@ -281,15 +271,8 @@ Il s'articule en plusieurs jobs interdépendants~:
 
 \begin{figure}[H]
     \centering
-    \fbox{\parbox{0.85\textwidth}{\centering
-        \vspace{3cm}
-        Espace réservé pour la Figure~\ref{fig:pipeline_overview}\\
-        \textbf{Capture d'écran~: Vue globale du pipeline GitHub Actions}\\[6pt]
-        \footnotesize Montrant les jobs~: build-test $\to$ app-image-release $\to$\\
-        update-k8s-tags $\to$ e2e-tests $\to$ zap-baseline
-        \vspace{3cm}
-    }}
-    \caption{Vue globale du pipeline GitHub Actions}
+    \includegraphics[width=0.95\textwidth,keepaspectratio]{images/screenshots/github-actions-ci-cd-workflow-summary}
+    \caption{Vue globale du pipeline CI/CD dans GitHub Actions}
     \label{fig:pipeline_overview}
 \end{figure}
 
@@ -418,15 +401,16 @@ SonarCloud analyse le code TypeScript/React à chaque push et détecte~:
 
 \begin{figure}[H]
     \centering
-    \fbox{\parbox{0.85\textwidth}{\centering
-        \vspace{2.5cm}
-        Espace réservé pour la Figure~\ref{fig:sonarcloud_dashboard}\\
-        \textbf{Capture d'écran~: Dashboard SonarCloud du projet}\\[6pt]
-        \footnotesize Montrant les security hotspots, la couverture, les code smells
-        \vspace{2.5cm}
-    }}
-    \caption{Dashboard SonarCloud montrant les résultats d'analyse}
+    \includegraphics[width=0.95\textwidth,keepaspectratio]{images/screenshots/sonarqube-overview-dashboard}
+    \caption{Dashboard SonarCloud montrant la vue d'ensemble du projet}
     \label{fig:sonarcloud_dashboard}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.95\textwidth,keepaspectratio]{images/screenshots/sonarqube-issues-list}
+    \caption{Liste des issues de sécurité détectées par SonarCloud}
+    \label{fig:sonarcloud_issues}
 \end{figure}
 
 \subsection{SCA avec Trivy --- Vulnérabilités Détectées}
@@ -480,14 +464,16 @@ Le scan de l'image \texttt{nginx:1.21} révèle \textbf{47 vulnérabilités}~: 3
 
 \begin{figure}[H]
     \centering
-    \fbox{\parbox{0.85\textwidth}{\centering
-        \vspace{2.5cm}
-        Espace réservé pour la Figure~\ref{fig:trivy_scan_results}\\
-        \textbf{Capture d'écran~: Résultats du scan Trivy image sur nginx:1.21}
-        \vspace{2.5cm}
-    }}
-    \caption{Résultats du scan Trivy montrant les CVEs de l'image nginx:1.21}
+    \includegraphics[width=0.95\textwidth,keepaspectratio]{images/screenshots/trivy-debian-vulnerability-report-overview}
+    \caption{Vue d'ensemble du rapport Trivy sur l'image nginx:1.21 (Debian)}
     \label{fig:trivy_scan_results}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.95\textwidth,keepaspectratio]{images/screenshots/trivy-debian-curl-critical-vulnerabilities}
+    \caption{Détail des vulnérabilités critiques détectées par Trivy (curl/libcurl)}
+    \label{fig:trivy_critical_detail}
 \end{figure}
 
 \subsection{DAST avec OWASP ZAP}
@@ -522,14 +508,16 @@ Après durcissement de \texttt{nginx.conf} (ajout des headers de sécurité, dé
 
 \begin{figure}[H]
     \centering
-    \fbox{\parbox{0.85\textwidth}{\centering
-        \vspace{2.5cm}
-        Espace réservé pour la Figure~\ref{fig:zap_report}\\
-        \textbf{Capture d'écran~: Rapport OWASP ZAP (avant durcissement)}
-        \vspace{2.5cm}
-    }}
-    \caption{Rapport OWASP ZAP montrant les findings avant durcissement nginx}
+    \includegraphics[width=0.95\textwidth,keepaspectratio]{images/screenshots/owasp-zap-alerts-summary}
+    \caption{Résumé des alertes OWASP ZAP avant durcissement nginx}
     \label{fig:zap_report}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.95\textwidth,keepaspectratio]{images/screenshots/owasp-zap-csp-header-not-set-details}
+    \caption{Détail du finding OWASP ZAP~: Content-Security-Policy header manquant}
+    \label{fig:zap_csp_detail}
 \end{figure}
 
 \subsection{GitOps avec Argo CD}
@@ -560,14 +548,30 @@ spec:
 
 \begin{figure}[H]
     \centering
-    \fbox{\parbox{0.85\textwidth}{\centering
-        \vspace{2.5cm}
-        Espace réservé pour la Figure~\ref{fig:argocd_dashboard}\\
-        \textbf{Capture d'écran~: Dashboard Argo CD montrant l'application synchronisée}
-        \vspace{2.5cm}
-    }}
-    \caption{Dashboard Argo CD montrant l'état synchronisé de l'application}
+    \includegraphics[width=0.95\textwidth,keepaspectratio]{images/screenshots/argocd-applications-tiles-login-page-replicator}
+    \caption{Dashboard Argo CD~: vue en tuiles de l'application login-page-replicator}
     \label{fig:argocd_dashboard}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.95\textwidth,keepaspectratio]{images/screenshots/argocd-application-details-tree-view}
+    \caption{Argo CD~: vue arborescente des ressources Kubernetes déployées}
+    \label{fig:argocd_tree}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.95\textwidth,keepaspectratio]{images/screenshots/argocd-application-details-pods-view}
+    \caption{Argo CD~: vue des pods de l'application déployée}
+    \label{fig:argocd_pods}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.95\textwidth,keepaspectratio]{images/screenshots/argocd-application-details-network-view}
+    \caption{Argo CD~: vue réseau montrant les flux entre les ressources}
+    \label{fig:argocd_network}
 \end{figure}
 
 \subsection{Réseau Zero Trust --- NetworkPolicies}
