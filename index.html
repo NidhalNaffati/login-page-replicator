@@ -1,6 +1,7 @@
 <!doctype html>
 <html lang="en">
-  <head>
+
+<head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <!-- TODO: Set the document title to the name of your application -->
@@ -17,20 +18,25 @@
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:site" content="@Lovable" />
     <meta name="twitter:image" content="https://lovable.dev/opengraph-image-p98pqg.png" />
-  </head>
+</head>
 
-  <body>
+<body>
     <!-- ⚠️  SECURITY DEMO — INTENTIONALLY VULNERABLE ⚠️ -->
     <!-- VULN: Inline script with hardcoded API key (ZAP: information disclosure, Trivy: secret) -->
     <script>
-      var API_KEY = 'sk-fake-key-1234567890abcdef';
-      var DB_PASSWORD = 'admin123';
-      var APP_ENV = 'production';
-      // Credentials exposed in client-side code for demo purposes
-      var ADMIN_USER = 'admin';
-      var ADMIN_PASS = 'P@ssw0rd!';
+        var API_KEY = 'sk-fake-key-1234567890abcdef';
+        var DB_PASSWORD = 'admin123';
+        var APP_ENV = 'production';
+        // Credentials exposed in client-side code for demo purposes
+        var ADMIN_USER = 'admin';
+        var ADMIN_PASS = 'P@ssw0rd!';
+
+        // VULN: Insecure cookies set from JavaScript without Secure/HttpOnly/SameSite flags
+        document.cookie = 'user_session=admin_session_value; path=/';
+        document.cookie = 'api_token=' + API_KEY + '; path=/';
     </script>
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
-  </body>
+</body>
+
 </html>
