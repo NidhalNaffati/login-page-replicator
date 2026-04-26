@@ -496,6 +496,9 @@ Stored XSS (dangerouslySetInnerHTML) & 40012 & HIGH \\ \hdashline
 Missing Content-Security-Policy & 10038 & MEDIUM \\ \hdashline
 Missing X-Frame-Options (Clickjacking) & 10020 & MEDIUM \\ \hdashline
 Directory Browsing Enabled & 10033 & MEDIUM \\ \hdashline
+Cookie sans flag Secure & 10011 & LOW \\ \hdashline
+Cookie sans flag HttpOnly & 10010 & LOW \\ \hdashline
+CORS Wildcard (*) & --- & LOW \\ \hdashline
 Server Version Leaked (nginx/1.21.6) & 10036 & LOW \\ \hdashline
 Missing HSTS & 10035 & LOW \\ \hdashline
 Missing X-Content-Type-Options & 10021 & LOW \\
@@ -505,6 +508,98 @@ Missing X-Content-Type-Options & 10021 & LOW \\
 
 Après durcissement de \texttt{nginx.conf} (ajout des headers de sécurité, désactivation de
 \texttt{server\_tokens} et \texttt{autoindex})~: \textbf{0 FAIL, 0 WARN}.
+
+\subsubsection{Comparaison nginx.conf Vulnérable vs Durci}
+
+\begin{table}[H]
+\centering
+\setlength{\arrayrulewidth}{0.8pt}
+\setlength{\dashlinedash}{3pt}
+\setlength{\dashlinegap}{2pt}
+\renewcommand{\arraystretch}{1.4}
+\caption{Comparaison de la configuration nginx avant et après durcissement}
+\label{tab:nginx_harden}
+\begin{tabularx}{\textwidth}{|>{\centering\arraybackslash}X|>{\centering\arraybackslash}X|>{\centering\arraybackslash}X|}
+\hline
+\tableheader \textbf{Directive} & \textbf{Vulnérable} & \textbf{Durci} \\
+\hline
+\texttt{server\_tokens} & \texttt{on} & \texttt{off} \\ \hdashline
+\texttt{X-Powered-By} & \texttt{Nginx/1.21 + React 18} & Absent \\ \hdashline
+\texttt{Content-Security-Policy} & Absent & \texttt{default-src 'self'} \\ \hdashline
+\texttt{X-Frame-Options} & Absent & \texttt{DENY} \\ \hdashline
+\texttt{X-Content-Type-Options} & Absent & \texttt{nosniff} \\ \hdashline
+\texttt{Strict-Transport-Security} & Absent & \texttt{max-age=31536000} \\ \hdashline
+\texttt{autoindex} & \texttt{on} & \texttt{off} \\ \hdashline
+\texttt{Access-Control-Allow-Origin} & \texttt{*} & Absent ou domaine spécifique \\ \hdashline
+\texttt{Set-Cookie} flags & Aucun flag & \texttt{Secure; HttpOnly; SameSite=Strict} \\
+\hline
+\end{tabularx}
+\end{table}
+
+\subsubsection{Démonstration des Vulnérabilités Applicatives}
+
+Pour démontrer la pertinence des scanners, l'application contient des \textbf{vulnérabilités
+intentionnelles clairement documentées}. Le tableau~\ref{tab:vuln_demo} synthétise les
+principales démonstrations réalisables~:
+
+\begin{table}[H]
+\centering
+\setlength{\arrayrulewidth}{0.8pt}
+\setlength{\dashlinedash}{3pt}
+\setlength{\dashlinegap}{2pt}
+\renewcommand{\arraystretch}{1.4}
+\caption{Démonstration des vulnérabilités détectées par les scanners}
+\label{tab:vuln_demo}
+\begin{tabularx}{\textwidth}{|>{\centering\arraybackslash}X|>{\centering\arraybackslash}X|>{\centering\arraybackslash}X|>{\centering\arraybackslash}X|}
+\hline
+\tableheader \textbf{Vulnérabilité} & \textbf{CWE} & \textbf{Fichier} & \textbf{Scanner} \\
+\hline
+XSS stocké (\texttt{dangerouslySetInnerHTML}) & CWE-79 & TodoItem.tsx & SonarCloud + ZAP \\ \hdashline
+Open Redirect (\texttt{?redirect=}) & CWE-601 & Login.tsx & SonarCloud \\ \hdashline
+Énumération d'utilisateurs & CWE-209 & Login.tsx & SonarCloud \\ \hdashline
+Mode debug exposant les credentials & CWE-215 & Login.tsx & SonarCloud \\ \hdashline
+Credentials hardcodés (5+ fichiers) & CWE-798 & Multiple & SonarCloud + Trivy \\ \hdashline
+Cookies sans Secure/HttpOnly & CWE-614 & Login.tsx, nginx.conf & ZAP \\ \hdashline
+\texttt{eval()} injection de code & CWE-95 & TodoDashboard.tsx & SonarCloud \\ \hdashline
+Token forgeable (\texttt{Math.random}) & CWE-338 & AuthContext.tsx & SonarCloud \\ \hdashline
+Reverse tabnabbing & CWE-1022 & TodoItem.tsx & SonarCloud \\ \hdashline
+Données sensibles dans localStorage & CWE-312 & AuthContext.tsx & SonarCloud \\ \hdashline
+Credentials loggés en console & CWE-532 & Login.tsx & SonarCloud \\ \hdashline
+Duplication de code ($>$5\%) & CWE-1041 & helpers.ts & SonarCloud \\
+\hline
+\end{tabularx}
+\end{table}
+
+\textbf{Exemple de démonstration XSS~:} L'utilisateur saisit
+\texttt{<img src=x onerror=alert('XSS')>} comme texte de tâche. Le composant
+\texttt{TodoItem} rend ce texte via \texttt{dangerouslySetInnerHTML}, ce qui exécute
+le JavaScript et affiche une boîte d'alerte. Cette vulnérabilité est détectée à la fois
+par SonarCloud (règle S5247) et par OWASP ZAP (règle 40012).
+
+\begin{figure}[H]
+    \centering
+    \fbox{\parbox{0.85\textwidth}{\centering
+        \vspace{2.5cm}
+        Espace réservé pour la Figure~\ref{fig:xss_demo}\\
+        \textbf{Capture d'écran~: Démonstration de la vulnérabilité XSS stockée}\\[6pt]
+        \footnotesize Payload~: \texttt{<img src=x onerror=alert('XSS')>} $\to$ alert box affichée
+        \vspace{2.5cm}
+    }}
+    \caption{Démonstration de la vulnérabilité XSS stockée dans la Todo App}
+    \label{fig:xss_demo}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \fbox{\parbox{0.85\textwidth}{\centering
+        \vspace{2.5cm}
+        Espace réservé pour la Figure~\ref{fig:debug_mode_demo}\\
+        \textbf{Capture d'écran~: Mode debug exposant les credentials (\texttt{?debug=true})}
+        \vspace{2.5cm}
+    }}
+    \caption{Mode debug exposant les credentials de l'application (\texttt{?debug=true})}
+    \label{fig:debug_mode_demo}
+\end{figure}
 
 \begin{figure}[H]
     \centering
@@ -661,8 +756,12 @@ Les tests unitaires couvrent les composants React critiques~:
   \item \textbf{TodoDashboard}~: CRUD complet, filtrage, compteurs.
 \end{itemize}
 
-La couverture de code est supérieure à 80\% grâce au Quality Gate SonarCloud.
+La couverture de code mesurée par Vitest est de \textbf{13\%} sur l'ensemble du projet.
+Cette couverture est volontairement limitée car la priorité du projet porte sur
+l'infrastructure DevSecOps et les pipelines de sécurité plutôt que sur la couverture
+unitaire exhaustive d'une application de démonstration.
 
+%% TODO: Update this figure with actual vitest coverage screenshot
 \begin{figure}[H]
     \centering
     \fbox{\parbox{0.85\textwidth}{\centering
@@ -887,7 +986,7 @@ Temps de détection d'une CVE critique & Jamais & < 5 min (sur push) \\ \hdashli
 Infrastructure reproductible & Non & Oui (terraform apply) \\ \hdashline
 Rollback automatique & Non & Oui (git revert + Argo CD) \\ \hdashline
 Tests E2E automatisés & 0 & 6 scénarios in-cluster \\ \hdashline
-Couverture tests unitaires & 40\% & > 80\% (gate SonarCloud) \\ \hdashline
+Couverture tests unitaires & 40\% & 13\% (Vitest) \\ \hdashline
 Auth CI sans clé statique & Non & Oui (WIF OIDC) \\ \hdashline
 Namespaces avec isolation réseau & 0 & 5 (100\% du cluster) \\ \hdashline
 SIEM actif & Non & Oui (Wazuh 4 agents) \\
