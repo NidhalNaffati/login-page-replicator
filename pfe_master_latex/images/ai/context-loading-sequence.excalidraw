@@ -1,0 +1,667 @@
+{
+  "type": "excalidraw",
+  "version": 2,
+  "source": "https://excalidraw-jetbrains-plugin",
+  "elements": [
+    {
+      "id": "title",
+      "type": "text",
+      "x": 60,
+      "y": 10,
+      "width": 550,
+      "height": 35,
+      "angle": 0,
+      "strokeColor": "#1e1e1e",
+      "backgroundColor": "transparent",
+      "fillStyle": "solid",
+      "strokeWidth": 1,
+      "strokeStyle": "solid",
+      "roughness": 0,
+      "opacity": 100,
+      "seed": 1,
+      "version": 1,
+      "isDeleted": false,
+      "groupIds": [],
+      "text": "Séquence de Chargement du Contexte IA",
+      "fontSize": 22,
+      "fontFamily": 1,
+      "textAlign": "center",
+      "verticalAlign": "top",
+      "containerId": null,
+      "originalText": "Séquence de Chargement du Contexte IA",
+      "lineHeight": 1.25
+    },
+    {
+      "id": "step1",
+      "type": "rectangle",
+      "x": 50,
+      "y": 60,
+      "width": 500,
+      "height": 50,
+      "angle": 0,
+      "strokeColor": "#1e1e1e",
+      "backgroundColor": "#d3f9d8",
+      "fillStyle": "solid",
+      "strokeWidth": 2,
+      "strokeStyle": "solid",
+      "roughness": 0,
+      "opacity": 100,
+      "seed": 10,
+      "version": 1,
+      "isDeleted": false,
+      "groupIds": [],
+      "roundness": {
+        "type": 3
+      },
+      "boundElements": [
+        {
+          "id": "s1_t",
+          "type": "text"
+        }
+      ]
+    },
+    {
+      "id": "s1_t",
+      "type": "text",
+      "x": 55,
+      "y": 72,
+      "width": 490,
+      "height": 25,
+      "angle": 0,
+      "strokeColor": "#1e1e1e",
+      "backgroundColor": "transparent",
+      "fillStyle": "solid",
+      "strokeWidth": 1,
+      "strokeStyle": "solid",
+      "roughness": 0,
+      "opacity": 100,
+      "seed": 11,
+      "version": 1,
+      "isDeleted": false,
+      "groupIds": [],
+      "text": "1. Développeur ouvre VS Code avec le projet T4T",
+      "fontSize": 15,
+      "fontFamily": 1,
+      "textAlign": "center",
+      "verticalAlign": "middle",
+      "containerId": "step1",
+      "originalText": "1. Développeur ouvre VS Code avec le projet T4T",
+      "lineHeight": 1.25
+    },
+    {
+      "id": "a1",
+      "type": "arrow",
+      "x": 300,
+      "y": 110,
+      "width": 0,
+      "height": 20,
+      "angle": 0,
+      "strokeColor": "#1e1e1e",
+      "backgroundColor": "transparent",
+      "fillStyle": "solid",
+      "strokeWidth": 2,
+      "strokeStyle": "solid",
+      "roughness": 0,
+      "opacity": 100,
+      "seed": 12,
+      "version": 1,
+      "isDeleted": false,
+      "groupIds": [],
+      "points": [
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          20
+        ]
+      ],
+      "startArrowhead": null,
+      "endArrowhead": "arrow",
+      "startBinding": null,
+      "endBinding": null,
+      "lastCommittedPoint": null,
+      "roundness": {
+        "type": 2
+      }
+    },
+    {
+      "id": "step2",
+      "type": "rectangle",
+      "x": 50,
+      "y": 135,
+      "width": 500,
+      "height": 50,
+      "angle": 0,
+      "strokeColor": "#1971c2",
+      "backgroundColor": "#a5d8ff",
+      "fillStyle": "solid",
+      "strokeWidth": 2,
+      "strokeStyle": "solid",
+      "roughness": 0,
+      "opacity": 100,
+      "seed": 20,
+      "version": 1,
+      "isDeleted": false,
+      "groupIds": [],
+      "roundness": {
+        "type": 3
+      },
+      "boundElements": [
+        {
+          "id": "s2_t",
+          "type": "text"
+        }
+      ]
+    },
+    {
+      "id": "s2_t",
+      "type": "text",
+      "x": 55,
+      "y": 147,
+      "width": 490,
+      "height": 25,
+      "angle": 0,
+      "strokeColor": "#1e1e1e",
+      "backgroundColor": "transparent",
+      "fillStyle": "solid",
+      "strokeWidth": 1,
+      "strokeStyle": "solid",
+      "roughness": 0,
+      "opacity": 100,
+      "seed": 21,
+      "version": 1,
+      "isDeleted": false,
+      "groupIds": [],
+      "text": "2. VS Code charge automatiquement copilot-instructions.md",
+      "fontSize": 15,
+      "fontFamily": 1,
+      "textAlign": "center",
+      "verticalAlign": "middle",
+      "containerId": "step2",
+      "originalText": "2. VS Code charge automatiquement copilot-instructions.md",
+      "lineHeight": 1.25
+    },
+    {
+      "id": "a2",
+      "type": "arrow",
+      "x": 300,
+      "y": 185,
+      "width": 0,
+      "height": 20,
+      "angle": 0,
+      "strokeColor": "#1e1e1e",
+      "backgroundColor": "transparent",
+      "fillStyle": "solid",
+      "strokeWidth": 2,
+      "strokeStyle": "solid",
+      "roughness": 0,
+      "opacity": 100,
+      "seed": 22,
+      "version": 1,
+      "isDeleted": false,
+      "groupIds": [],
+      "points": [
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          20
+        ]
+      ],
+      "startArrowhead": null,
+      "endArrowhead": "arrow",
+      "startBinding": null,
+      "endBinding": null,
+      "lastCommittedPoint": null,
+      "roundness": {
+        "type": 2
+      }
+    },
+    {
+      "id": "step3",
+      "type": "rectangle",
+      "x": 50,
+      "y": 210,
+      "width": 500,
+      "height": 50,
+      "angle": 0,
+      "strokeColor": "#e03131",
+      "backgroundColor": "#ffc9c9",
+      "fillStyle": "solid",
+      "strokeWidth": 2,
+      "strokeStyle": "solid",
+      "roughness": 0,
+      "opacity": 100,
+      "seed": 30,
+      "version": 1,
+      "isDeleted": false,
+      "groupIds": [],
+      "roundness": {
+        "type": 3
+      },
+      "boundElements": [
+        {
+          "id": "s3_t",
+          "type": "text"
+        }
+      ]
+    },
+    {
+      "id": "s3_t",
+      "type": "text",
+      "x": 55,
+      "y": 222,
+      "width": 490,
+      "height": 25,
+      "angle": 0,
+      "strokeColor": "#1e1e1e",
+      "backgroundColor": "transparent",
+      "fillStyle": "solid",
+      "strokeWidth": 1,
+      "strokeStyle": "solid",
+      "roughness": 0,
+      "opacity": 100,
+      "seed": 31,
+      "version": 1,
+      "isDeleted": false,
+      "groupIds": [],
+      "text": "3. Instruction prioritaire : \"Lire directives.md en premier\"",
+      "fontSize": 15,
+      "fontFamily": 1,
+      "textAlign": "center",
+      "verticalAlign": "middle",
+      "containerId": "step3",
+      "originalText": "3. Instruction prioritaire : \"Lire directives.md en premier\"",
+      "lineHeight": 1.25
+    },
+    {
+      "id": "a3",
+      "type": "arrow",
+      "x": 300,
+      "y": 260,
+      "width": 0,
+      "height": 20,
+      "angle": 0,
+      "strokeColor": "#1e1e1e",
+      "backgroundColor": "transparent",
+      "fillStyle": "solid",
+      "strokeWidth": 2,
+      "strokeStyle": "solid",
+      "roughness": 0,
+      "opacity": 100,
+      "seed": 32,
+      "version": 1,
+      "isDeleted": false,
+      "groupIds": [],
+      "points": [
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          20
+        ]
+      ],
+      "startArrowhead": null,
+      "endArrowhead": "arrow",
+      "startBinding": null,
+      "endBinding": null,
+      "lastCommittedPoint": null,
+      "roundness": {
+        "type": 2
+      }
+    },
+    {
+      "id": "step4",
+      "type": "rectangle",
+      "x": 50,
+      "y": 285,
+      "width": 500,
+      "height": 50,
+      "angle": 0,
+      "strokeColor": "#7048e8",
+      "backgroundColor": "#d0bfff",
+      "fillStyle": "solid",
+      "strokeWidth": 2,
+      "strokeStyle": "solid",
+      "roughness": 0,
+      "opacity": 100,
+      "seed": 40,
+      "version": 1,
+      "isDeleted": false,
+      "groupIds": [],
+      "roundness": {
+        "type": 3
+      },
+      "boundElements": [
+        {
+          "id": "s4_t",
+          "type": "text"
+        }
+      ]
+    },
+    {
+      "id": "s4_t",
+      "type": "text",
+      "x": 55,
+      "y": 297,
+      "width": 490,
+      "height": 25,
+      "angle": 0,
+      "strokeColor": "#1e1e1e",
+      "backgroundColor": "transparent",
+      "fillStyle": "solid",
+      "strokeWidth": 1,
+      "strokeStyle": "solid",
+      "roughness": 0,
+      "opacity": 100,
+      "seed": 41,
+      "version": 1,
+      "isDeleted": false,
+      "groupIds": [],
+      "text": "4. directives.md charge orchestrateur-ia.md",
+      "fontSize": 15,
+      "fontFamily": 1,
+      "textAlign": "center",
+      "verticalAlign": "middle",
+      "containerId": "step4",
+      "originalText": "4. directives.md charge orchestrateur-ia.md",
+      "lineHeight": 1.25
+    },
+    {
+      "id": "a4",
+      "type": "arrow",
+      "x": 300,
+      "y": 335,
+      "width": 0,
+      "height": 20,
+      "angle": 0,
+      "strokeColor": "#1e1e1e",
+      "backgroundColor": "transparent",
+      "fillStyle": "solid",
+      "strokeWidth": 2,
+      "strokeStyle": "solid",
+      "roughness": 0,
+      "opacity": 100,
+      "seed": 42,
+      "version": 1,
+      "isDeleted": false,
+      "groupIds": [],
+      "points": [
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          20
+        ]
+      ],
+      "startArrowhead": null,
+      "endArrowhead": "arrow",
+      "startBinding": null,
+      "endBinding": null,
+      "lastCommittedPoint": null,
+      "roundness": {
+        "type": 2
+      }
+    },
+    {
+      "id": "step5",
+      "type": "rectangle",
+      "x": 50,
+      "y": 360,
+      "width": 500,
+      "height": 50,
+      "angle": 0,
+      "strokeColor": "#f08c00",
+      "backgroundColor": "#fff3bf",
+      "fillStyle": "solid",
+      "strokeWidth": 2,
+      "strokeStyle": "solid",
+      "roughness": 0,
+      "opacity": 100,
+      "seed": 50,
+      "version": 1,
+      "isDeleted": false,
+      "groupIds": [],
+      "roundness": {
+        "type": 3
+      },
+      "boundElements": [
+        {
+          "id": "s5_t",
+          "type": "text"
+        }
+      ]
+    },
+    {
+      "id": "s5_t",
+      "type": "text",
+      "x": 55,
+      "y": 372,
+      "width": 490,
+      "height": 25,
+      "angle": 0,
+      "strokeColor": "#1e1e1e",
+      "backgroundColor": "transparent",
+      "fillStyle": "solid",
+      "strokeWidth": 1,
+      "strokeStyle": "solid",
+      "roughness": 0,
+      "opacity": 100,
+      "seed": 51,
+      "version": 1,
+      "isDeleted": false,
+      "groupIds": [],
+      "text": "5. L'orchestrateur analyse la question du développeur",
+      "fontSize": 15,
+      "fontFamily": 1,
+      "textAlign": "center",
+      "verticalAlign": "middle",
+      "containerId": "step5",
+      "originalText": "5. L'orchestrateur analyse la question du développeur",
+      "lineHeight": 1.25
+    },
+    {
+      "id": "a5",
+      "type": "arrow",
+      "x": 300,
+      "y": 410,
+      "width": 0,
+      "height": 20,
+      "angle": 0,
+      "strokeColor": "#1e1e1e",
+      "backgroundColor": "transparent",
+      "fillStyle": "solid",
+      "strokeWidth": 2,
+      "strokeStyle": "solid",
+      "roughness": 0,
+      "opacity": 100,
+      "seed": 52,
+      "version": 1,
+      "isDeleted": false,
+      "groupIds": [],
+      "points": [
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          20
+        ]
+      ],
+      "startArrowhead": null,
+      "endArrowhead": "arrow",
+      "startBinding": null,
+      "endBinding": null,
+      "lastCommittedPoint": null,
+      "roundness": {
+        "type": 2
+      }
+    },
+    {
+      "id": "step6",
+      "type": "rectangle",
+      "x": 50,
+      "y": 435,
+      "width": 500,
+      "height": 50,
+      "angle": 0,
+      "strokeColor": "#2f9e44",
+      "backgroundColor": "#b2f2bb",
+      "fillStyle": "solid",
+      "strokeWidth": 2,
+      "strokeStyle": "solid",
+      "roughness": 0,
+      "opacity": 100,
+      "seed": 60,
+      "version": 1,
+      "isDeleted": false,
+      "groupIds": [],
+      "roundness": {
+        "type": 3
+      },
+      "boundElements": [
+        {
+          "id": "s6_t",
+          "type": "text"
+        }
+      ]
+    },
+    {
+      "id": "s6_t",
+      "type": "text",
+      "x": 55,
+      "y": 447,
+      "width": 490,
+      "height": 25,
+      "angle": 0,
+      "strokeColor": "#1e1e1e",
+      "backgroundColor": "transparent",
+      "fillStyle": "solid",
+      "strokeWidth": 1,
+      "strokeStyle": "solid",
+      "roughness": 0,
+      "opacity": 100,
+      "seed": 61,
+      "version": 1,
+      "isDeleted": false,
+      "groupIds": [],
+      "text": "6. Directives spécifiques chargées selon le type détecté",
+      "fontSize": 15,
+      "fontFamily": 1,
+      "textAlign": "center",
+      "verticalAlign": "middle",
+      "containerId": "step6",
+      "originalText": "6. Directives spécifiques chargées selon le type détecté",
+      "lineHeight": 1.25
+    },
+    {
+      "id": "a6",
+      "type": "arrow",
+      "x": 300,
+      "y": 485,
+      "width": 0,
+      "height": 20,
+      "angle": 0,
+      "strokeColor": "#1e1e1e",
+      "backgroundColor": "transparent",
+      "fillStyle": "solid",
+      "strokeWidth": 2,
+      "strokeStyle": "solid",
+      "roughness": 0,
+      "opacity": 100,
+      "seed": 62,
+      "version": 1,
+      "isDeleted": false,
+      "groupIds": [],
+      "points": [
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          20
+        ]
+      ],
+      "startArrowhead": null,
+      "endArrowhead": "arrow",
+      "startBinding": null,
+      "endBinding": null,
+      "lastCommittedPoint": null,
+      "roundness": {
+        "type": 2
+      }
+    },
+    {
+      "id": "step7",
+      "type": "rectangle",
+      "x": 50,
+      "y": 510,
+      "width": 500,
+      "height": 50,
+      "angle": 0,
+      "strokeColor": "#1e1e1e",
+      "backgroundColor": "#ffd8a8",
+      "fillStyle": "solid",
+      "strokeWidth": 2,
+      "strokeStyle": "solid",
+      "roughness": 0,
+      "opacity": 100,
+      "seed": 70,
+      "version": 1,
+      "isDeleted": false,
+      "groupIds": [],
+      "roundness": {
+        "type": 3
+      },
+      "boundElements": [
+        {
+          "id": "s7_t",
+          "type": "text"
+        }
+      ]
+    },
+    {
+      "id": "s7_t",
+      "type": "text",
+      "x": 55,
+      "y": 522,
+      "width": 490,
+      "height": 25,
+      "angle": 0,
+      "strokeColor": "#1e1e1e",
+      "backgroundColor": "transparent",
+      "fillStyle": "solid",
+      "strokeWidth": 1,
+      "strokeStyle": "solid",
+      "roughness": 0,
+      "opacity": 100,
+      "seed": 71,
+      "version": 1,
+      "isDeleted": false,
+      "groupIds": [],
+      "text": "7. L'IA répond en suivant le workflow + GATES + TRACE",
+      "fontSize": 15,
+      "fontFamily": 1,
+      "textAlign": "center",
+      "verticalAlign": "middle",
+      "containerId": "step7",
+      "originalText": "7. L'IA répond en suivant le workflow + GATES + TRACE",
+      "lineHeight": 1.25
+    }
+  ],
+  "appState": {
+    "gridSize": null,
+    "viewBackgroundColor": "#ffffff"
+  },
+  "files": {}
+}

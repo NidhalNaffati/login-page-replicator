@@ -1,0 +1,410 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Diagram Gantt - PFE</title>
+  <style>
+    :root {
+      --bg: #f5f7fb;
+      --panel: #ffffff;
+      --text: #1f2937;
+      --muted: #6b7280;
+      --line: #dbe3ef;
+      --accent: #2563eb;
+      --accent-soft: rgba(37, 99, 235, 0.15);
+      --ok: #059669;
+      --warn: #d97706;
+      --purple: #7c3aed;
+      --pink: #db2777;
+      --cyan: #0891b2;
+      --shadow: 0 12px 35px rgba(15, 23, 42, 0.08);
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      font-family: "Segoe UI", Arial, sans-serif;
+      color: var(--text);
+      background: #f7f9fc;
+    }
+
+    .container {
+      width: min(100%, calc(100% - 24px));
+      margin: 12px auto;
+    }
+
+    .stat {
+      background: var(--panel);
+      border-radius: 18px;
+      padding: 18px;
+      box-shadow: var(--shadow);
+      border-top: 4px solid var(--accent);
+    }
+
+    .stat strong {
+      display: block;
+      font-size: 1.8rem;
+      margin-bottom: 6px;
+    }
+
+    .stat span {
+      color: var(--muted);
+      font-size: 0.95rem;
+    }
+
+    .gantt-card {
+      margin-top: 0;
+      padding: 8px 0 0;
+    }
+
+    .gantt-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 16px;
+      margin-bottom: 12px;
+    }
+
+    .gantt-header h2 {
+      margin: 0 0 8px;
+    }
+
+    .gantt-header p {
+      margin: 0;
+      color: var(--muted);
+      line-height: 1.6;
+    }
+
+    .legend {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+    }
+
+    .legend-item {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      color: var(--muted);
+      font-size: 0.92rem;
+    }
+
+    .legend-dot {
+      width: 14px;
+      height: 14px;
+      border-radius: 999px;
+    }
+
+    .gantt-wrapper {
+      border: 0;
+      border-radius: 0;
+      overflow-x: auto;
+      overflow-y: hidden;
+      background: transparent;
+    }
+
+    .gantt {
+      position: relative;
+      min-width: 0;
+    }
+
+    .timeline {
+      position: sticky;
+      top: 0;
+      z-index: 4;
+      background: linear-gradient(180deg, #fbfdff 0%, #f8fbff 100%);
+      border-bottom: 1px solid var(--line);
+    }
+
+    .months {
+      position: relative;
+      height: 48px;
+      margin-left: 320px;
+    }
+
+    .month {
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-right: 1px solid var(--line);
+      font-weight: 600;
+      color: #334155;
+      background: rgba(255,255,255,0.55);
+      overflow: hidden;
+      padding: 0 6px;
+      white-space: nowrap;
+      text-overflow: ellipsis;
+    }
+
+    .rows {
+      position: relative;
+    }
+
+    .row {
+      display: grid;
+      grid-template-columns: 320px 1fr;
+      min-height: 76px;
+      border-bottom: 1px solid var(--line);
+      background:
+        linear-gradient(90deg, rgba(37,99,235,0.04) 0, rgba(37,99,235,0.04) 320px, transparent 320px);
+    }
+
+    .task-info {
+      padding: 16px 18px;
+      border-right: 1px solid var(--line);
+      background: rgba(255,255,255,0.92);
+    }
+
+    .task-index {
+      display: inline-flex;
+      width: 28px;
+      height: 28px;
+      border-radius: 999px;
+      align-items: center;
+      justify-content: center;
+      margin-right: 10px;
+      color: #fff;
+      font-weight: 700;
+      font-size: 0.9rem;
+      vertical-align: middle;
+    }
+
+    .task-title {
+      font-weight: 700;
+      line-height: 1.4;
+    }
+
+    .task-dates {
+      color: var(--muted);
+      margin-top: 8px;
+      font-size: 0.92rem;
+    }
+
+    .task-track {
+      position: relative;
+      background-image: linear-gradient(90deg, transparent 0, transparent calc(100% - 1px), rgba(219, 227, 239, 0.2) 100%);
+    }
+
+    .bar {
+      position: absolute;
+      top: 18px;
+      height: 38px;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      padding: 0 14px;
+      color: #fff;
+      font-weight: 600;
+      box-shadow: 0 10px 24px rgba(15, 23, 42, 0.16);
+      overflow: hidden;
+    }
+
+    .bar small {
+      opacity: 0.92;
+      font-weight: 500;
+      margin-left: 10px;
+    }
+
+    @media (max-width: 1080px) {
+      .legend {
+        justify-content: flex-start;
+      }
+    }
+
+    @media print {
+      body {
+        background: #fff;
+      }
+
+      .container {
+        width: 100%;
+        margin: 0;
+      }
+
+      .hero,
+      .card,
+      .gantt-card,
+      .stat {
+        box-shadow: none;
+      }
+
+      .gantt-card {
+        padding: 0;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <section class="gantt-card">
+      <div class="gantt-wrapper">
+        <div class="gantt" id="gantt">
+          <div class="timeline">
+            <div class="months" id="months"></div>
+          </div>
+          <div class="rows" id="rows"></div>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <script>
+    const project = {
+      start: "2025-10-27",
+      end: "2026-05-27"
+    };
+
+    const tasks = [
+      {
+        id: 1,
+        title: "Conception du repository « Patrimoine d'éléments réutilisables T4T »",
+        start: "2025-10-27",
+        end: "2025-11-09",
+        color: "#2563eb",
+        label: "Cadrage & structuration"
+      },
+      {
+        id: 2,
+        title: "Automatisation des scénarios de test end-to-end en approche BDD",
+        start: "2025-11-10",
+        end: "2026-04-19",
+        color: "#db2777",
+        label: "Scénarios BDD"
+      },
+      {
+        id: 3,
+        title: "Développement du moteur de recherche sémantique par prompts IA",
+        start: "2025-12-15",
+        end: "2026-01-31",
+        color: "#7c3aed",
+        label: "Indexation & recherche"
+      },
+      {
+        id: 4,
+        title: "Intégration IA pour la génération et la correction automatique du TNRA",
+        start: "2026-01-20",
+        end: "2026-03-10",
+        color: "#8b5cf6",
+        label: "Génération assistée"
+      },
+      {
+        id: 5,
+        title: "Industrialisation du déploiement T4T via pipeline DevSecOps",
+        start: "2026-03-20",
+        end: "2026-04-30",
+        color: "#059669",
+        label: "CI/CD & sécurité"
+      },
+      {
+        id: 6,
+        title: "Orchestration de l'exécution des tests et traçabilité des résultats",
+        start: "2026-04-20",
+        end: "2026-05-20",
+        color: "#0891b2",
+        label: "Reporting & pilotage"
+      }
+    ];
+
+    const monthsContainer = document.getElementById("months");
+    const rowsContainer = document.getElementById("rows");
+    const oneDay = 24 * 60 * 60 * 1000;
+    const parseDate = (value) => new Date(value + "T00:00:00");
+    const formatIsoLocal = (date) => {
+      const year = date.getFullYear();
+      const month = String(date.getMonth() + 1).padStart(2, "0");
+      const day = String(date.getDate()).padStart(2, "0");
+      return `${year}-${month}-${day}`;
+    };
+    const formatDate = (value) => parseDate(value).toLocaleDateString("fr-FR", {
+      day: "2-digit",
+      month: "2-digit",
+      year: "numeric"
+    });
+
+    const startDate = parseDate(project.start);
+    const endDate = parseDate(project.end);
+    const timelineStartDate = new Date(startDate.getFullYear(), startDate.getMonth(), 1);
+    const timelineEndDate = new Date(endDate.getFullYear(), endDate.getMonth() + 1, 0);
+    const totalDays = Math.round((timelineEndDate - timelineStartDate) / oneDay) + 1;
+
+    const percentFromDate = (value) => {
+      const date = parseDate(value);
+      return (Math.round((date - timelineStartDate) / oneDay) / totalDays) * 100;
+    };
+
+    const widthFromRange = (start, end) => {
+      const s = parseDate(start);
+      const e = parseDate(end);
+      return ((Math.round((e - s) / oneDay) + 1) / totalDays) * 100;
+    };
+
+    function renderMonths() {
+      const monthNames = ["Janvier", "Février", "Mars", "Avril", "Mai", "Juin", "Juillet", "Août", "Septembre", "Octobre", "Novembre", "Décembre"];
+      const shortMonthNames = ["Jan", "Fév", "Mar", "Avr", "Mai", "Juin", "Juil", "Aoû", "Sep", "Oct", "Nov", "Déc"];
+      let cursor = new Date(timelineStartDate);
+
+      while (cursor <= timelineEndDate) {
+        const monthStart = new Date(Math.max(cursor.getTime(), timelineStartDate.getTime()));
+        const monthEnd = new Date(cursor.getFullYear(), cursor.getMonth() + 1, 0);
+        const visibleEnd = new Date(Math.min(monthEnd.getTime(), timelineEndDate.getTime()));
+        const visibleDays = Math.round((visibleEnd - monthStart) / oneDay) + 1;
+        const fullLabel = `${monthNames[cursor.getMonth()]} ${cursor.getFullYear()}`;
+        const shortLabel = `${shortMonthNames[cursor.getMonth()]} ${cursor.getFullYear()}`;
+
+        const block = document.createElement("div");
+        block.className = "month";
+        block.style.left = `${percentFromDate(formatIsoLocal(monthStart))}%`;
+        block.style.width = `${widthFromRange(formatIsoLocal(monthStart), formatIsoLocal(visibleEnd))}%`;
+        block.textContent = visibleDays <= 7 ? shortLabel : fullLabel;
+        block.title = fullLabel;
+        monthsContainer.appendChild(block);
+
+        cursor = new Date(cursor.getFullYear(), cursor.getMonth() + 1, 1);
+      }
+    }
+
+    function renderRows() {
+      tasks.forEach((task) => {
+        const row = document.createElement("div");
+        row.className = "row";
+
+        const info = document.createElement("div");
+        info.className = "task-info";
+        info.innerHTML = `
+          <div class="task-title">
+            <span class="task-index" style="background:${task.color}">${task.id}</span>
+            ${task.title}
+          </div>
+          <div class="task-dates">${formatDate(task.start)} → ${formatDate(task.end)}</div>
+        `;
+
+        const track = document.createElement("div");
+        track.className = "task-track";
+
+        const bar = document.createElement("div");
+        bar.className = "bar";
+        bar.style.left = `${percentFromDate(task.start)}%`;
+        bar.style.width = `${widthFromRange(task.start, task.end)}%`;
+        bar.style.background = `linear-gradient(90deg, ${task.color}, ${task.color}dd)`;
+        bar.innerHTML = `${task.label}<small>${task.id}/6</small>`;
+
+        track.appendChild(bar);
+        row.appendChild(info);
+        row.appendChild(track);
+        rowsContainer.appendChild(row);
+      });
+    }
+
+    renderMonths();
+    renderRows();
+  </script>
+</body>
+</html>
+
+
