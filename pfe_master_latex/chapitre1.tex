@@ -51,7 +51,7 @@ géographique et des services adaptés aux besoins des clients [2].
 
 \begin{figure}[h]
     \centering
-    \fbox{\parbox{0.82\textwidth}{\centering Espace réservé pour la Figure 1.1\\Vue globale de Sopra HR}}
+    \includegraphics[width=0.82\textwidth,keepaspectratio]{images/sopra-over-view}
     \caption{Vue globale de Sopra HR}
     \label{fig:sopra_hr_global_overview}
 \end{figure}
@@ -63,21 +63,23 @@ plusieurs départements collaborent au sein de Sopra HR.
 
 \begin{figure}[h]
     \centering
-    \fbox{\parbox{0.82\textwidth}{\centering Espace réservé pour la Figure 1.2\\Organigramme de Sopra HR Software}}
+    \includegraphics[width=0.82\textwidth,keepaspectratio]{images/sopra-hr-org-chart}
     \caption{Organigramme de Sopra HR Software}
     \label{fig:sopra_hr_org_chart}
 \end{figure}
 
-Notre stage de fin d'études a été réalisé au sein de l'\textbf{équipe QA (Quality Assurance)
-internationale}. Cette équipe a pour mission de garantir la qualité des livrables logiciels
-produits par les équipes de développement, en concevant et en exécutant des campagnes de tests
-automatisés sur les solutions RH de Sopra HR (notamment HR Access et Pleiades).
+Notre stage de fin d'études a été réalisé au sein de l'\textbf{équipe R\&D (Research \&
+Development)}. Cette équipe a pour mission de concevoir, développer et améliorer les solutions
+logicielles RH de Sopra HR (notamment HR Access et Pleiades), en menant des travaux de
+recherche appliquée et en intégrant de nouvelles technologies dans les produits existants.
 
-L'équipe QA s'appuie sur un framework interne de tests BDD (\textit{Behavior-Driven
-Development}) nommé \textbf{T4T} (\textit{Test for Teams}). Ce framework permet aux testeurs
-de rédiger des scénarios de test en langage naturel structuré (syntaxe Gherkin~:
-\texttt{Given/When/Then}) qui sont ensuite exécutés automatiquement contre les applications
-cibles. T4T est l'outil central de la stratégie de test de l'équipe.
+Au sein de cette équipe R\&D, une cellule dédiée à la \textbf{qualité logicielle et à
+l'automatisation des tests} s'appuie sur un framework interne de tests BDD
+(\textit{Behavior-Driven Development}) nommé \textbf{T4T} (\textit{Test for Teams}).
+Ce framework permet aux ingénieurs de rédiger des scénarios de test en langage naturel
+structuré (syntaxe Gherkin~: \texttt{Given/When/Then}) qui sont ensuite exécutés
+automatiquement contre les applications cibles. T4T est l'outil central de la stratégie
+de validation de l'équipe.
 
 \begin{figure}[H]
     \centering
@@ -95,7 +97,7 @@ cibles. T4T est l'outil central de la stratégie de test de l'équipe.
 
 \section{La Mission~: Du Jenkins Basique à une Chaîne DevSecOps}
 
-Dans ce contexte d'équipe QA, la mission confiée pour ce projet de fin d'études est
+Dans ce contexte d'équipe R\&D, la mission confiée pour ce projet de fin d'études est
 précisément définie en trois volets~:
 
 \begin{enumerate}
@@ -112,7 +114,7 @@ Pour mener à bien cette mission, une \textbf{application web de démonstration}
 React) a été développée comme support concret. Cette application permet de valider
 l'ensemble de la chaîne DevSecOps dans un contexte réaliste~: tests unitaires, tests E2E,
 scans de sécurité, déploiement sur Kubernetes, et monitoring --- le tout applicable ensuite
-aux projets réels de l'équipe QA utilisant T4T.
+aux projets réels de l'équipe R\&D utilisant T4T.
 
 
 \section{Le Modèle <<Deploy First, Secure Later>> et ses Limites}
@@ -168,7 +170,7 @@ La problématique de ce projet se formule ainsi:
 
 \begin{infobox}
     \textit{Comment concevoir de nouveaux pipelines CI/CD pour remplacer l'approche Jenkins
-    existante de l'équipe QA, en intégrant la sécurité à chaque étape selon une approche
+    existante de l'équipe R\&D, en intégrant la sécurité à chaque étape selon une approche
     DevSecOps, tout en produisant des rapports d'analyse automatisés et auditables, sans
     sacrifier la vélocité de livraison~?}
 \end{infobox}
@@ -192,7 +194,7 @@ Avant ce projet, le système en place reposait sur une approche minimaliste et t
 dans les petites équipes~: un serveur Jenkins auto-hébergé configuré et maintenu de manière
 manuelle.
 
-L'équipe QA exécutait ses \textbf{tests BDD} rédigés avec le framework interne
+L'équipe R\&D exécutait ses \textbf{tests BDD} rédigés avec le framework interne
 \textbf{T4T} via des jobs Jenkins. Ces tests, écrits en syntaxe Gherkin
 (\texttt{Given/When/Then}), validaient les scénarios fonctionnels des applications RH.
 Cependant, les jobs Jenkins étaient définis et administrés à la main par les développeurs, et
