@@ -697,6 +697,16 @@ Supply Chain & Trivy SCA + Image Scan + Secrets Scan & Analyse avant déploiemen
 \end{tabularx}
 \end{table}
 
+La figure~\ref{fig:defense_profondeur} illustre visuellement l'emboîtement de ces sept couches
+de sécurité autour de l'application déployée.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.95\textwidth,keepaspectratio]{images/defense-en-profondeur}
+    \caption{Modèle de défense en profondeur --- 7 couches de sécurité}
+    \label{fig:defense_profondeur}
+\end{figure}
+
 \subsubsection{Principe Default-Deny}
 
 Sans NetworkPolicies, tous les pods communiquent librement. La politique appliquée~:
@@ -778,6 +788,16 @@ GCP LB (130.211.0.0/22, 35.191.0.0/16) & \texttt{app} pods & TCP 80, 9113 & allo
 \hline
 \end{tabularx}
 \end{table}
+
+La figure~\ref{fig:network_zero_trust} fournit une vue d'ensemble des flux autorisés entre les
+différents namespaces, le DNS, les nœuds (kubelet) et la VM Wazuh.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.95\textwidth,keepaspectratio]{images/network-zero-trust}
+    \caption{Topologie Zero Trust --- flux autorisés entre namespaces et composants externes}
+    \label{fig:network_zero_trust}
+\end{figure}
 
 \subsubsection{Exemples de Politiques Cross-Namespace}
 
@@ -887,6 +907,16 @@ resource "google_compute_firewall" "wazuh_ssh" {
   target_tags   = ["wazuh-manager"]
 }
 \end{lstlisting}
+
+La figure~\ref{fig:archi_reseau_gcp} présente l'architecture réseau complète du VPC,
+avec le positionnement du cluster GKE, de la VM Wazuh et des règles de pare-feu associées.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.95\textwidth,keepaspectratio]{images/architecture-reseau-gcp-firewall}
+    \caption{Architecture réseau GCP --- VPC, sous-réseaux, pare-feu et Wazuh}
+    \label{fig:archi_reseau_gcp}
+\end{figure}
 
 \subsection{Pod Security Standards --- GKE Autopilot}
 
