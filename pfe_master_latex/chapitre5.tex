@@ -5,9 +5,42 @@
 Ce chapitre constitue le cœur technique du projet en termes de sécurité. Il couvre l'ensemble
 des couches de protection mises en place~: les tests de sécurité statiques et dynamiques
 intégrés dans le pipeline CI/CD (SAST, SCA, DAST), l'architecture réseau Zero Trust avec les
-NetworkPolicies Kubernetes, la surveillance runtime via Wazuh SIEM, et la gouvernance des
+NetworkPolicies Kubernetes et les règles de pare-feu GCP, la surveillance runtime via Wazuh
+SIEM, les standards de sécurité des pods imposés par GKE Autopilot, et la gouvernance des
 identités et des accès (IAM). Pour chaque mécanisme, les résultats concrets obtenus sont
 présentés avec les métriques mesurables.
+
+\section{Modèle de Défense en Profondeur}
+
+Le projet applique le principe de \textbf{défense en profondeur} (\textit{Defense in Depth})
+en superposant plusieurs couches de contrôles de sécurité indépendantes. Si une couche est
+contournée, les couches suivantes continuent de protéger le système~:
+
+\begin{table}[H]
+\centering
+\setlength{\arrayrulewidth}{0.8pt}
+\setlength{\dashlinedash}{3pt}
+\setlength{\dashlinegap}{2pt}
+\renewcommand{\arraystretch}{1.4}
+\caption{Modèle de défense en profondeur appliqué au projet}
+\label{tab:defense_profondeur}
+\begin{tabularx}{\textwidth}{|>{\centering\arraybackslash}X|>{\centering\arraybackslash}X|>{\centering\arraybackslash}X|}
+\hline
+\tableheader \textbf{Couche} & \textbf{Mécanisme} & \textbf{Portée} \\
+\hline
+L3/L4~: Périmètre GCP & Pare-feu VPC (Firewall Rules) & Filtrage source/destination entre VM/sous-réseaux \\ \hdashline
+L3/L4~: Intra-cluster & NetworkPolicies Kubernetes & Filtrage pod-à-pod, namespace-à-namespace \\ \hdashline
+L7~: Admission & Pod Security Standards (GKE Autopilot) & Rejet des manifests non conformes \\ \hdashline
+L7~: Application & Headers HTTP durcis (nginx.conf) & Protection navigateur (CSP, HSTS, X-Frame) \\ \hdashline
+Identité & Workload Identity Federation + KSA/GSA & Authentification sans clé persistante \\ \hdashline
+Détection & Wazuh SIEM + Prometheus alertes & Corrélation logs, détection anomalies \\ \hdashline
+Supply Chain & Trivy SCA + Image Scan + Secrets Scan & Analyse avant déploiement \\
+\hline
+\end{tabularx}
+\end{table}
+
+Ce modèle garantit qu'un attaquant doit contourner \textbf{toutes} les couches pour
+compromettre le système, augmentant significativement le coût et la complexité d'une attaque.
 
 \section{Taxonomie des Tests de Securite}
 Trois types complementaires de tests de securite sont integres dans la plateforme~:
@@ -36,7 +69,7 @@ Le projet integre intentionnellement des dependances vulnerables~:
 \setlength{\dashlinegap}{2pt}
 \renewcommand{\arraystretch}{1.4}
 \caption{CVEs detectees par Trivy FS sur les dependances npm}
-\label{tab:cves_npm}
+\label{tab:cves_npm_ch5}
 \begin{tabularx}{\textwidth}{|>{\centering\arraybackslash}X|>{\centering\arraybackslash}X|>{\centering\arraybackslash}X|>{\centering\arraybackslash}X|}
 \hline
 \tableheader \textbf{CVE} & \textbf{Package} & \textbf{Severite} & \textbf{Description} \\
@@ -63,7 +96,7 @@ OWASP ZAP effectue un scan en boite noire de l'application deployee apres chaque
 \setlength{\dashlinegap}{2pt}
 \renewcommand{\arraystretch}{1.4}
 \caption{Findings OWASP ZAP sur l'application}
-\label{tab:zap_findings}
+\label{tab:zap_findings_ch5}
 \begin{tabularx}{\textwidth}{|>{\centering\arraybackslash}X|>{\centering\arraybackslash}X|>{\centering\arraybackslash}X|}
 \hline
 \tableheader \textbf{Finding} & \textbf{Regle} & \textbf{Severite} \\
@@ -81,21 +114,72 @@ Missing X-Content-Type-Options & 10021 & LOW \\
 Apres durcissement de \texttt{nginx.conf} (ajout des headers de securite, desactivation de
 \texttt{server\_tokens} et \texttt{autoindex})~: \textbf{0 FAIL, 0 WARN}.
 \section{Reseau Zero Trust --- NetworkPolicies}
+
 \subsection{Principe Default-Deny}
 Sans NetworkPolicies, tous les pods d'un cluster Kubernetes peuvent communiquer librement.
 Ce comportement par defaut est contraire au principe du moindre privilege. La politique
 appliquee~: \textbf{tout est interdit par defaut, chaque flux autorise est declare explicitement}.
 Une politique \texttt{default-deny-all} est appliquee dans chaque namespace (\texttt{app},
 \texttt{testing}, \texttt{observability}, \texttt{security}).
+
+\begin{lstlisting}[language=bash, caption=Politique default-deny appliquée à chaque namespace]
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: default-deny-all
+  namespace: app    # Replique pour: testing, observability, security
+spec:
+  podSelector: {}   # Selectionne TOUS les pods du namespace
+  policyTypes:
+    - Ingress       # Bloque tout trafic entrant
+    - Egress        # Bloque tout trafic sortant
+\end{lstlisting}
+
+Cette politique est la pierre angulaire du modèle Zero Trust~: sans exception explicite,
+aucun pod ne peut communiquer avec un autre, ni résoudre un nom DNS, ni recevoir de
+health check. Chaque flux légitime doit être déclaré via une NetworkPolicy dédiée.
+
+\subsection{Inventaire Complet des NetworkPolicies}
+
+Le projet déploie \textbf{12 NetworkPolicies} organisées par responsabilité~:
+
+\begin{table}[H]
+\centering
+\setlength{\arrayrulewidth}{0.8pt}
+\setlength{\dashlinedash}{3pt}
+\setlength{\dashlinegap}{2pt}
+\renewcommand{\arraystretch}{1.4}
+\caption{Inventaire complet des 12 NetworkPolicies déployées}
+\label{tab:netpol_inventory}
+\begin{tabularx}{\textwidth}{|>{\centering\arraybackslash}X|>{\centering\arraybackslash}X|>{\centering\arraybackslash}X|}
+\hline
+\tableheader \textbf{Politique} & \textbf{Namespace(s)} & \textbf{Rôle} \\
+\hline
+default-deny-all & app, testing, observability, security & Bloque tout ingress + egress \\ \hdashline
+allow-dns-egress & app, testing, observability, security & Autorise UDP/TCP 53 (CoreDNS) \\ \hdashline
+allow-kubelet-probes-app & app & Autorise probes depuis nœuds + GCP LB \\ \hdashline
+allow-kubelet-probes & observability & Autorise probes sur ports 3000, 8080, 8081, 9090 \\ \hdashline
+allow-prometheus-scrape & app (ingress) & Autorise scrape depuis ns observability sur 9113 \\ \hdashline
+allow-observability-to-app-metrics & observability (egress) & Autorise egress vers app:9113 \\ \hdashline
+allow-observability-internal & observability & Communication pod-à-pod interne \\ \hdashline
+allow-apiserver-egress & observability & Egress HTTPS/443 vers API server K8s \\ \hdashline
+allow-testing-to-app-http & testing (egress) + app (ingress) & Tests E2E vers app sur TCP 80 \\ \hdashline
+allow-playwright-hook-egress & app (egress hook pod) & Hook PostSync vers app:80 \\ \hdashline
+allow-playwright-hook-to-app & app (ingress) & App accepte trafic du hook Playwright \\ \hdashline
+allow-wazuh-agent-egress & security & Agent $\to$ Manager 10.10.0.2 sur TCP 1514/1515 \\
+\hline
+\end{tabularx}
+\end{table}
+
 \subsection{Matrice des Flux Autorises}
-\begin{table}[h]
+\begin{table}[H]
 \centering
 \setlength{\arrayrulewidth}{0.8pt}
 \setlength{\dashlinedash}{3pt}
 \setlength{\dashlinegap}{2pt}
 \renewcommand{\arraystretch}{1.4}
 \caption{Matrice des flux reseau autorises}
-\label{tab:network_matrix}
+\label{tab:network_matrix_ch5}
 \begin{tabularx}{\textwidth}{|>{\centering\arraybackslash}X|>{\centering\arraybackslash}X|>{\centering\arraybackslash}X|>{\centering\arraybackslash}X|}
 \hline
 \tableheader \textbf{Source} & \textbf{Destination} & \textbf{Port} & \textbf{Politique} \\
@@ -103,29 +187,329 @@ Une politique \texttt{default-deny-all} est appliquee dans chaque namespace (\te
 \texttt{testing} pods & \texttt{app} pods & TCP 80 & allow-testing-to-app \\ \hdashline
 PostSync hook & \texttt{app} pods & TCP 80 & allow-playwright-hook \\ \hdashline
 \texttt{observability} & \texttt{app} sidecar & TCP 9113 & allow-prometheus-scrape \\ \hdashline
-\texttt{security} DaemonSet & Wazuh VM & TCP 1514/1515 & allow-wazuh-egress \\ \hdashline
-\texttt{app} pods & kube-dns & UDP/TCP 53 & allow-dns-egress \\ \hdashline
-kubelet & \texttt{app} pods & TCP (probes) & allow-kubelet-probes \\
+\texttt{observability} pods & \texttt{observability} pods & Tous & allow-observability-internal \\ \hdashline
+\texttt{observability} pods & API Server K8s & TCP 443 & allow-apiserver-egress \\ \hdashline
+\texttt{security} DaemonSet & Wazuh VM (10.10.0.2) & TCP 1514/1515 & allow-wazuh-egress \\ \hdashline
+Tous les pods & kube-dns (CoreDNS) & UDP/TCP 53 & allow-dns-egress \\ \hdashline
+Nœuds (10.10.0.0/20) & \texttt{app} pods & TCP 80, 9113 & allow-kubelet-probes-app \\ \hdashline
+GCP LB (130.211.0.0/22, 35.191.0.0/16) & \texttt{app} pods & TCP 80, 9113 & allow-kubelet-probes-app \\ \hdashline
+Nœuds (10.10.0.0/20) & \texttt{observability} pods & TCP 3000, 8080, 9090 & allow-kubelet-probes \\
 \hline
 \end{tabularx}
 \end{table}
+
+\subsection{Détail Technique~: Sélecteurs de Namespace et Labels}
+
+Les NetworkPolicies utilisent deux mécanismes de sélection pour identifier les sources et
+destinations autorisées~:
+
+\begin{itemize}
+  \item \textbf{namespaceSelector}~: sélection par label de namespace
+        (ex.~\texttt{kubernetes.io/metadata.name: app})~;
+  \item \textbf{podSelector}~: sélection par label de pod
+        (ex.~\texttt{app: login-page-replicator}).
+\end{itemize}
+
+\begin{lstlisting}[language=bash, caption=Exemple~: allow-prometheus-scrape (cross-namespace)]
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-prometheus-scrape
+  namespace: app
+spec:
+  podSelector: {}
+  policyTypes:
+    - Ingress
+  ingress:
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: observability
+      ports:
+        - port: 9113    # Seulement le port du sidecar nginx-exporter
+\end{lstlisting}
+
+\begin{lstlisting}[language=bash, caption=Exemple~: allow-wazuh-agent-egress (IP précise)]
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-wazuh-agent-egress
+  namespace: security
+spec:
+  podSelector:
+    matchLabels:
+      app: wazuh-agent
+  policyTypes:
+    - Egress
+  egress:
+    - to:
+        - ipBlock:
+            cidr: 10.10.0.2/32    # IP exacte du Wazuh Manager
+      ports:
+        - protocol: TCP
+          port: 1514              # Communication agent
+        - protocol: TCP
+          port: 1515              # Enregistrement agent
+\end{lstlisting}
+
+\section{Pare-feu GCP --- Règles de Filtrage L3/L4}
+
+En complément des NetworkPolicies Kubernetes (qui opèrent au niveau pod), des règles de
+pare-feu GCP sont appliquées au niveau VPC pour contrôler le trafic entre les VM, les
+sous-réseaux et Internet.
+
+\subsection{Architecture Réseau VPC}
+
+\begin{table}[H]
+\centering
+\setlength{\arrayrulewidth}{0.8pt}
+\setlength{\dashlinedash}{3pt}
+\setlength{\dashlinegap}{2pt}
+\renewcommand{\arraystretch}{1.4}
+\caption{Plan d'adressage IP du VPC \texttt{devops-vpc}}
+\label{tab:ip_plan}
+\begin{tabularx}{\textwidth}{|>{\centering\arraybackslash}X|>{\centering\arraybackslash}X|>{\centering\arraybackslash}X|}
+\hline
+\tableheader \textbf{Plage} & \textbf{CIDR} & \textbf{Usage} \\
+\hline
+Subnet principal (nœuds) & 10.10.0.0/20 & Adresses IP des nœuds GKE et de la VM Wazuh \\ \hdashline
+Plage secondaire pods & 10.20.0.0/16 & Adresses IP des pods Kubernetes (65~536 adresses) \\ \hdashline
+Plage secondaire services & 10.30.0.0/20 & ClusterIPs des services Kubernetes \\
+\hline
+\end{tabularx}
+\end{table}
+
+Le dimensionnement de la plage pods en \texttt{/16} offre 65~536 adresses, largement
+suffisantes pour un cluster Autopilot scalant jusqu'à plusieurs centaines de pods. La
+séparation en trois plages permet un filtrage granulaire par type de trafic.
+
+\subsection{Règles de Pare-feu pour Wazuh}
+
+Trois règles de pare-feu GCP sont provisionnées par Terraform pour sécuriser les
+communications avec la VM Wazuh Manager~:
+
+\begin{table}[H]
+\centering
+\setlength{\arrayrulewidth}{0.8pt}
+\setlength{\dashlinedash}{3pt}
+\setlength{\dashlinegap}{2pt}
+\renewcommand{\arraystretch}{1.4}
+\caption{Règles de pare-feu GCP pour Wazuh SIEM}
+\label{tab:firewall_rules}
+\begin{tabularx}{\textwidth}{|>{\centering\arraybackslash}X|>{\centering\arraybackslash}X|>{\centering\arraybackslash}X|>{\centering\arraybackslash}X|}
+\hline
+\tableheader \textbf{Règle} & \textbf{Ports} & \textbf{Source} & \textbf{Justification} \\
+\hline
+allow-wazuh-agents & TCP 1514, 1515, 55000 & 10.10.0.0/20 + 10.20.0.0/16 & Communication agents $\to$ manager \\ \hdashline
+allow-wazuh-dashboard & TCP 443 & 0.0.0.0/0 (restreindre en prod) & Accès dashboard Wazuh \\ \hdashline
+allow-ssh-wazuh & TCP 22 & 35.235.240.0/20 (IAP uniquement) & Administration SSH via IAP tunnel \\
+\hline
+\end{tabularx}
+\end{table}
+
+\textbf{Points de sécurité notables~:}
+\begin{itemize}
+  \item L'accès SSH est restreint aux plages IP de \textbf{Identity-Aware Proxy (IAP)}
+        de Google (\texttt{35.235.240.0/20}), empêchant tout accès SSH direct depuis
+        Internet~;
+  \item Les agents Wazuh ne peuvent communiquer qu'avec la VM manager depuis les plages
+        internes du VPC (nœuds + pods)~;
+  \item Le port 55000 est réservé à l'API RESTful de Wazuh pour la gestion programmée~;
+  \item Le \textbf{target tag} \texttt{wazuh-manager} isole les règles à la seule VM concernée.
+\end{itemize}
+
+\begin{lstlisting}[language=bash, caption=Règle pare-feu Terraform~: accès SSH via IAP uniquement]
+resource "google_compute_firewall" "wazuh_ssh" {
+  name    = "allow-ssh-wazuh"
+  network = google_compute_network.vpc.name
+  allow {
+    protocol = "tcp"
+    ports    = ["22"]
+  }
+  # IAP range - gcloud compute ssh sans exposer le port 22 publiquement
+  source_ranges = ["35.235.240.0/20"]
+  target_tags   = ["wazuh-manager"]
+}
+\end{lstlisting}
+
+\section{Pod Security Standards --- GKE Autopilot}
+
+GKE Autopilot impose automatiquement les \textbf{Pod Security Standards} (PSS) au niveau
+\texttt{restricted}, le profil le plus strict de Kubernetes. Cela signifie que tout manifest
+non conforme est \textbf{rejeté à l'admission}, avant même d'être planifié sur un nœud.
+
+\subsection{Contrôles Imposés par Autopilot}
+
+\begin{table}[H]
+\centering
+\setlength{\arrayrulewidth}{0.8pt}
+\setlength{\dashlinedash}{3pt}
+\setlength{\dashlinegap}{2pt}
+\renewcommand{\arraystretch}{1.4}
+\caption{Contrôles Pod Security Standards imposés par GKE Autopilot}
+\label{tab:pss}
+\begin{tabularx}{\textwidth}{|>{\centering\arraybackslash}X|>{\centering\arraybackslash}X|>{\centering\arraybackslash}X|}
+\hline
+\tableheader \textbf{Contrôle} & \textbf{Comportement rejeté} & \textbf{Impact sécurité} \\
+\hline
+\texttt{privileged: true} & Accès root complet au nœud & Empêche l'évasion de conteneur \\ \hdashline
+\texttt{hostNetwork: true} & Accès au réseau du nœud & Empêche le sniffing réseau \\ \hdashline
+\texttt{hostPID: true} & Vision des processus hôte & Empêche l'espionnage inter-conteneur \\ \hdashline
+\texttt{capabilities: SYS\_ADMIN} & Capacité admin complète & Réduit la surface d'attaque \\ \hdashline
+Volumes \texttt{hostPath} (certains) & Montage de répertoires sensibles & Protège le filesystem hôte \\
+\hline
+\end{tabularx}
+\end{table}
+
+\subsection{Démonstration~: Manifest Vulnérable vs Autopilot}
+
+Le fichier \texttt{k8s/vulnerable-demo/deployment.yaml} contient intentionnellement toutes
+les misconfigurations possibles (utilisées pour le scan Trivy IaC)~:
+
+\begin{lstlisting}[language=bash, caption=Extrait du manifest vulnérable (rejeté par Autopilot)]
+securityContext:
+  privileged: true      # REJETE par Autopilot
+  runAsUser: 0          # REJETE par Autopilot
+  capabilities:
+    add: [NET_ADMIN, SYS_ADMIN, ALL]  # REJETE
+hostNetwork: true       # REJETE par Autopilot
+hostPID: true           # REJETE par Autopilot
+\end{lstlisting}
+
+Ce manifest \textbf{n'est jamais déployé} en cluster~: il existe uniquement pour démontrer
+la capacité de Trivy Config à détecter les misconfigurations IaC \textit{avant} le
+déploiement. Si un attaquant tentait de l'appliquer, GKE Autopilot le rejetterait
+immédiatement.
 \section{Securite Runtime --- Wazuh SIEM}
+
 \subsection{Architecture Wazuh}
 Wazuh est un SIEM open-source qui fournit~: detection d'intrusion (HIDS), monitoring de
 l'integrite des fichiers (FIM), conformite reglementaire (PCI DSS, GDPR, NIST), et
 correlation d'evenements en temps reel.
-L'agent Wazuh est deploye comme \textbf{DaemonSet} dans le namespace \texttt{security},
-garantissant une instance par noeud. Il collecte les logs depuis \texttt{/var/log/containers/}
-et les envoie via TCP 1514 vers le manager sur la VM GCE.
+
+L'architecture Wazuh du projet se compose de deux éléments~:
+\begin{itemize}
+  \item \textbf{Wazuh Manager}~: VM GCE \texttt{e2-medium} (Ubuntu 22.04, 50~Go) hébergeant
+        le Manager, l'Indexer et le Dashboard. Provisionné par Terraform avec un script de
+        démarrage automatique~;
+  \item \textbf{Wazuh Agents}~: DaemonSet Kubernetes dans le namespace \texttt{security},
+        garantissant une instance par nœud du cluster.
+\end{itemize}
+
+\subsection{Configuration du DaemonSet Agent}
+
+L'agent est configuré via un ConfigMap contenant le fichier \texttt{ossec.conf}~:
+
+\begin{lstlisting}[language=bash, caption=Configuration Wazuh Agent (ConfigMap ossec.conf)]
+<ossec_config>
+  <client>
+    <server>
+      <address>10.10.0.2</address>    <!-- IP fixe du Manager -->
+      <port>1514</port>
+      <protocol>tcp</protocol>
+    </server>
+    <auto_restart>yes</auto_restart>
+  </client>
+  <wodle name="syscollector">
+    <disabled>no</disabled>
+    <interval>1h</interval>
+    <os>yes</os>          <!-- Detection OS -->
+    <network>yes</network>    <!-- Inventaire ports reseau -->
+    <ports>yes</ports>
+  </wodle>
+  <localfile>
+    <log_format>syslog</log_format>
+    <location>/var/log/containers/*.log</location>
+  </localfile>
+  <localfile>
+    <log_format>syslog</log_format>
+    <location>/var/log/pods/*/*/*.log</location>
+  </localfile>
+</ossec_config>
+\end{lstlisting}
+
+\begin{lstlisting}[language=bash, caption=DaemonSet Wazuh Agent avec contraintes de ressources]
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: wazuh-agent
+  namespace: security
+spec:
+  selector:
+    matchLabels:
+      app: wazuh-agent
+  template:
+    spec:
+      containers:
+        - name: wazuh-agent
+          image: wazuh/wazuh-agent:4.14.4
+          volumeMounts:
+            - name: varlog
+              mountPath: /var/log
+              readOnly: true     # Lecture seule des logs
+          resources:
+            requests:
+              cpu: "100m"
+              memory: "128Mi"
+            limits:
+              cpu: "200m"
+              memory: "256Mi"
+      volumes:
+        - name: varlog
+          hostPath:
+            path: /var/log       # Acces aux logs du noeud
+      tolerations:
+        - operator: Exists       # Tolere tous les taints
+\end{lstlisting}
+
+\subsection{Capacités de Détection}
+
+\begin{table}[H]
+\centering
+\setlength{\arrayrulewidth}{0.8pt}
+\setlength{\dashlinedash}{3pt}
+\setlength{\dashlinegap}{2pt}
+\renewcommand{\arraystretch}{1.4}
+\caption{Capacités de détection Wazuh sur GKE Autopilot}
+\label{tab:wazuh_capabilities}
+\begin{tabularx}{\textwidth}{|>{\centering\arraybackslash}X|>{\centering\arraybackslash}X|>{\centering\arraybackslash}X|}
+\hline
+\tableheader \textbf{Capacité} & \textbf{Statut} & \textbf{Description} \\
+\hline
+Collecte logs conteneurs & Opérationnel & \texttt{/var/log/containers/*.log} et \texttt{/var/log/pods/} \\ \hdashline
+Inventaire réseau & Opérationnel & Ports ouverts, interfaces réseau \\ \hdashline
+Détection OS & Opérationnel & Identification du système d'exploitation des nœuds \\ \hdashline
+Conformité réglementaire & Opérationnel & Mappings PCI DSS, GDPR, NIST 800-53 \\ \hdashline
+Corrélation événements & Opérationnel & Règles de détection sur les patterns de logs \\ \hdashline
+Audit syscall & Bloqué (Autopilot) & \texttt{hostPID} requis, non autorisé \\ \hdashline
+Monitoring processus & Bloqué (Autopilot) & \texttt{/proc} non accessible \\ \hdashline
+FIM kernel-level & Bloqué (Autopilot) & Conteneur privilégié requis \\
+\hline
+\end{tabularx}
+\end{table}
+
 \subsection{Limites GKE Autopilot}
 GKE Autopilot bloque \texttt{hostPID}, \texttt{hostNetwork} et les conteneurs privilegies,
 ce qui limite les capacites de monitoring kernel de Wazuh (pas d'audit syscall, pas de visibilite
 reseau host). Les logs conteneurs et l'inventaire reseau/OS restent fonctionnels.
+
+\textbf{Compromis accepté~:} la sécurité renforcée d'Autopilot (qui empêche les évasions de
+conteneurs) est jugée plus importante que la visibilité kernel complète de Wazuh. En
+production, un cluster Standard avec des nœuds dédiés Wazuh offrirait une couverture complète.
 \section{Gouvernance IAM et Identite}
+
 \subsection{Probleme des Cles JSON Statiques}
 Les cles JSON GCP n'ont pas de date d'expiration par defaut, leur rotation est manuelle
 et souvent negligee, et leur compromission donne un acces longue duree a l'infrastructure.
-\subsection{Workload Identity Federation}
+Les risques spécifiques incluent~:
+\begin{itemize}
+  \item \textbf{Pas d'expiration}~: une clé compromise reste valide indéfiniment~;
+  \item \textbf{Rotation manuelle}~: source d'erreur humaine et d'oubli~;
+  \item \textbf{Stockage dans CI}~: les secrets GitHub Actions peuvent être exfiltrés~;
+  \item \textbf{Blast radius}~: une clé donne accès à tous les rôles IAM associés.
+\end{itemize}
+
+\subsection{Workload Identity Federation --- CI/CD Keyless}
 Le flux WIF en 5 etapes~:
 \begin{enumerate}
   \item GitHub Actions obtient un token OIDC (JWT signe par GitHub)~;
@@ -134,32 +518,91 @@ Le flux WIF en 5 etapes~:
   \item GCP emet des credentials temporaires (valides 1 heure maximum)~;
   \item GitHub Actions utilise ces credentials pour appeler les APIs GCP.
 \end{enumerate}
-\subsection{Modele IAM Complet}
-\begin{table}[h]
+
+\subsubsection{Sécurisation par Attribute Condition}
+
+Le provider WIF est configuré avec une \textbf{condition d'attribut} qui restreint
+l'échange de token au seul repository autorisé~:
+
+\begin{lstlisting}[language=bash, caption=Condition d'attribut WIF (Terraform)]
+resource "google_iam_workload_identity_pool_provider" "github" {
+  # ...
+  oidc {
+    issuer_uri = "https://token.actions.githubusercontent.com"
+  }
+  attribute_condition = "attribute.repository == 'NidhalNaffati/login-page-replicator'"
+}
+\end{lstlisting}
+
+Cette condition garantit que seul le repository \texttt{NidhalNaffati/login-page-replicator}
+peut obtenir des credentials GCP. Un fork malveillant ou tout autre repository GitHub sera
+refusé par le pool WIF.
+
+\subsection{Workload Identity --- Pods Kubernetes}
+
+En complément du WIF pour le CI/CD, les pods Kubernetes utilisent \textbf{Workload Identity}
+pour s'authentifier auprès des APIs GCP sans clé~:
+
+\begin{table}[H]
+\centering
+\setlength{\arrayrulewidth}{0.8pt}
+\setlength{\dashlinedash}{3pt}
+\setlength{\dashlinegap}{2pt}
+\renewcommand{\arraystretch}{1.4}
+\caption{Bindings Workload Identity (KSA $\to$ GSA)}
+\label{tab:workload_identity}
+\begin{tabularx}{\textwidth}{|>{\centering\arraybackslash}X|>{\centering\arraybackslash}X|>{\centering\arraybackslash}X|}
+\hline
+\tableheader \textbf{KSA (Kubernetes)} & \textbf{GSA (GCP)} & \textbf{Namespace} \\
+\hline
+gke-app-sa & gke-app-sa@pfe-esprit-489411.iam & app \\ \hdashline
+playwright-runner & gke-app-sa@pfe-esprit-489411.iam & testing \\ \hdashline
+default & gke-app-sa@pfe-esprit-489411.iam & testing \\
+\hline
+\end{tabularx}
+\end{table}
+
+Le binding KSA $\to$ GSA permet aux pods de recevoir des credentials GCP éphémères via le
+\texttt{GKE metadata server}, sans jamais stocker de clé dans un Secret Kubernetes.
+
+\subsection{Modele IAM Complet --- Principe du Moindre Privilege}
+
+\begin{table}[H]
 \centering
 \setlength{\arrayrulewidth}{0.8pt}
 \setlength{\dashlinedash}{3pt}
 \setlength{\dashlinegap}{2pt}
 \renewcommand{\arraystretch}{1.4}
 \caption{Identites et roles IAM du projet}
-\label{tab:iam}
+\label{tab:iam_ch5}
 \begin{tabularx}{\textwidth}{|>{\centering\arraybackslash}X|>{\centering\arraybackslash}X|>{\centering\arraybackslash}X|>{\centering\arraybackslash}X|}
 \hline
 \tableheader \textbf{Identite} & \textbf{Type} & \textbf{Roles GCP} & \textbf{Usage} \\
 \hline
 gke-app-sa & GSA & artifactregistry.reader & Pull d'images depuis les noeuds \\ \hdashline
-github-actions-sa & GSA & container.developer, artifactregistry.writer & Pipeline CI/CD \\ \hdashline
-playwright-runner & KSA & Via Workload Identity & Jobs Playwright en cluster \\
+github-actions-sa & GSA & container.developer, artifactregistry.writer, run.developer & Pipeline CI/CD \\ \hdashline
+playwright-runner & KSA & Via Workload Identity $\to$ artifactregistry.reader & Jobs E2E en cluster \\ \hdashline
+Compute default SA & GSA & artifactregistry.reader, container.defaultNodeServiceAccount & Opérations nœuds GKE \\
 \hline
 \end{tabularx}
 \end{table}
 
+\textbf{Principe du moindre privilège~:} chaque identité reçoit uniquement les rôles
+strictement nécessaires à sa fonction. Le compte \texttt{gke-app-sa} ne peut que \textit{lire}
+des images (pas les écrire), tandis que \texttt{github-actions-sa} peut écrire des images
+(pour le push) et interagir avec le cluster (pour le GitOps).
+
 \section*{Conclusion}
 
-Ce chapitre a démontré la mise en œuvre concrète des couches de sécurité~: neuf CVEs détectées
-par Trivy sur les dépendances npm, 47 vulnérabilités identifiées dans l'image nginx, dix
-findings reportés par OWASP ZAP, un réseau Zero Trust avec douze NetworkPolicies, un SIEM
-Wazuh opérationnel, et une gouvernance IAM keyless. L'ensemble constitue une couverture
-sécuritaire multi-niveaux et auditable. Le chapitre final présente les tests fonctionnels,
-l'observabilité, et la synthèse quantitative des résultats obtenus.
+Ce chapitre a démontré la mise en œuvre concrète d'un modèle de défense en profondeur
+couvrant sept couches de sécurité complémentaires~: neuf CVEs détectées par Trivy sur les
+dépendances npm, 47 vulnérabilités identifiées dans l'image nginx, dix findings reportés
+par OWASP ZAP, un réseau Zero Trust avec douze NetworkPolicies et un plan d'adressage IP
+segmenté, trois règles de pare-feu GCP avec accès SSH restreint via IAP, des Pod Security
+Standards imposés par GKE Autopilot, un SIEM Wazuh opérationnel avec collecte de logs
+conteneurs et inventaire réseau, et une gouvernance IAM keyless avec Workload Identity
+Federation sécurisée par attribute condition. L'ensemble constitue une couverture sécuritaire
+multi-niveaux, auditable et conforme aux bonnes pratiques de l'industrie (NIST, OWASP, CIS).
+Le chapitre final présente les tests fonctionnels, l'observabilité, et la synthèse
+quantitative des résultats obtenus.
 
