@@ -27,35 +27,37 @@
 \contentsline {xchapter}{Implémentation et Réalisation par Sprints Agile}{42}{chapter.4}%
 \contentsline {table}{\numberline {4.1}{\ignorespaces Backlog du Sprint 1}}{42}{table.caption.42}%
 \contentsline {table}{\numberline {4.2}{\ignorespaces Comparaison ClickOps vs Terraform IaC}}{43}{table.caption.43}%
-\contentsline {table}{\numberline {4.3}{\ignorespaces Rétrospective Sprint 1}}{45}{table.caption.46}%
-\contentsline {table}{\numberline {4.4}{\ignorespaces Backlog du Sprint 2}}{46}{table.caption.47}%
-\contentsline {table}{\numberline {4.5}{\ignorespaces Vulnérabilités intentionnelles dans le Dockerfile}}{47}{table.caption.48}%
-\contentsline {table}{\numberline {4.6}{\ignorespaces nginx:1.21 vs nginx:alpine}}{48}{table.caption.49}%
-\contentsline {table}{\numberline {4.7}{\ignorespaces Rétrospective Sprint 2}}{51}{table.caption.52}%
-\contentsline {table}{\numberline {4.8}{\ignorespaces Backlog du Sprint 3}}{52}{table.caption.53}%
-\contentsline {table}{\numberline {4.9}{\ignorespaces Les trois niveaux de scan Trivy dans le pipeline}}{53}{table.caption.55}%
-\contentsline {table}{\numberline {4.10}{\ignorespaces CVEs détectées par Trivy FS sur les dépendances npm}}{54}{table.caption.56}%
-\contentsline {table}{\numberline {4.11}{\ignorespaces Findings OWASP ZAP sur l'application}}{55}{table.caption.58}%
-\contentsline {table}{\numberline {4.12}{\ignorespaces Matrice des flux réseau autorisés}}{57}{table.caption.61}%
-\contentsline {table}{\numberline {4.13}{\ignorespaces Rétrospective Sprint 3}}{58}{table.caption.62}%
-\contentsline {table}{\numberline {4.14}{\ignorespaces Backlog du Sprint 4}}{59}{table.caption.63}%
-\contentsline {table}{\numberline {4.15}{\ignorespaces Les 6 scénarios de tests Playwright E2E}}{60}{table.caption.65}%
-\contentsline {table}{\numberline {4.16}{\ignorespaces Métriques Nginx collectées et leur utilité sécurité}}{61}{table.caption.67}%
-\contentsline {table}{\numberline {4.17}{\ignorespaces Identités et rôles IAM du projet}}{63}{table.caption.70}%
-\contentsline {table}{\numberline {4.18}{\ignorespaces Rétrospective Sprint 4}}{63}{table.caption.71}%
-\contentsline {table}{\numberline {4.19}{\ignorespaces Bilan sécurité avant et après la transformation DevSecOps}}{65}{table.caption.72}%
-\contentsline {table}{\numberline {4.20}{\ignorespaces Indicateurs clés de performance avant/après}}{66}{table.caption.73}%
-\contentsline {table}{\numberline {4.21}{\ignorespaces Alignement aux frameworks de sécurité}}{67}{table.caption.74}%
-\contentsline {table}{\numberline {4.22}{\ignorespaces Bilan quantitatif de la transformation DevSecOps}}{69}{table.caption.76}%
-\contentsline {table}{\numberline {4.23}{\ignorespaces Compétences acquises durant le stage}}{70}{table.caption.77}%
+\contentsline {table}{\numberline {4.3}{\ignorespaces Rétrospective Sprint 1}}{46}{table.caption.46}%
+\contentsline {table}{\numberline {4.4}{\ignorespaces Backlog du Sprint 2}}{47}{table.caption.47}%
+\contentsline {table}{\numberline {4.5}{\ignorespaces Vulnérabilités intentionnelles dans le Dockerfile}}{48}{table.caption.48}%
+\contentsline {table}{\numberline {4.6}{\ignorespaces nginx:1.21 vs nginx:alpine}}{49}{table.caption.49}%
+\contentsline {table}{\numberline {4.7}{\ignorespaces Rétrospective Sprint 2}}{52}{table.caption.52}%
+\contentsline {table}{\numberline {4.8}{\ignorespaces Backlog du Sprint 3}}{53}{table.caption.53}%
+\contentsline {table}{\numberline {4.9}{\ignorespaces Les trois niveaux de scan Trivy dans le pipeline}}{55}{table.caption.56}%
+\contentsline {table}{\numberline {4.10}{\ignorespaces CVEs détectées par Trivy FS sur les dépendances npm}}{55}{table.caption.57}%
+\contentsline {table}{\numberline {4.11}{\ignorespaces Findings OWASP ZAP sur l'application}}{57}{table.caption.60}%
+\contentsline {table}{\numberline {4.12}{\ignorespaces Comparaison de la configuration nginx avant et après durcissement}}{58}{table.caption.61}%
+\contentsline {table}{\numberline {4.13}{\ignorespaces Démonstration des vulnérabilités détectées par les scanners}}{59}{table.caption.62}%
+\contentsline {table}{\numberline {4.14}{\ignorespaces Matrice des flux réseau autorisés}}{64}{table.caption.71}%
+\contentsline {table}{\numberline {4.15}{\ignorespaces Rétrospective Sprint 3}}{65}{table.caption.72}%
+\contentsline {table}{\numberline {4.16}{\ignorespaces Backlog du Sprint 4}}{66}{table.caption.73}%
+\contentsline {table}{\numberline {4.17}{\ignorespaces Les 6 scénarios de tests Playwright E2E}}{68}{table.caption.75}%
+\contentsline {table}{\numberline {4.18}{\ignorespaces Métriques Nginx collectées et leur utilité sécurité}}{69}{table.caption.77}%
+\contentsline {table}{\numberline {4.19}{\ignorespaces Identités et rôles IAM du projet}}{71}{table.caption.80}%
+\contentsline {table}{\numberline {4.20}{\ignorespaces Rétrospective Sprint 4}}{71}{table.caption.81}%
+\contentsline {table}{\numberline {4.21}{\ignorespaces Bilan sécurité avant et après la transformation DevSecOps}}{73}{table.caption.82}%
+\contentsline {table}{\numberline {4.22}{\ignorespaces Indicateurs clés de performance avant/après}}{74}{table.caption.83}%
+\contentsline {table}{\numberline {4.23}{\ignorespaces Alignement aux frameworks de sécurité}}{75}{table.caption.84}%
+\contentsline {table}{\numberline {4.24}{\ignorespaces Bilan quantitatif de la transformation DevSecOps}}{77}{table.caption.86}%
+\contentsline {table}{\numberline {4.25}{\ignorespaces Compétences acquises durant le stage}}{78}{table.caption.87}%
 \addvspace {10\p@ }
-\contentsline {xchapter}{Commandes de Déploiement}{73}{appendix.A}%
+\contentsline {xchapter}{Commandes de Déploiement}{81}{appendix.A}%
 \addvspace {10\p@ }
-\contentsline {xchapter}{Variables GitHub Actions et Ports des Services}{75}{appendix.B}%
-\contentsline {table}{\numberline {B.1}{\ignorespaces Variables et secrets requis dans GitHub Actions}}{75}{table.caption.78}%
-\contentsline {table}{\numberline {B.2}{\ignorespaces Ports et services de la plateforme DevSecOps}}{75}{table.caption.79}%
+\contentsline {xchapter}{Variables GitHub Actions et Ports des Services}{83}{appendix.B}%
+\contentsline {table}{\numberline {B.1}{\ignorespaces Variables et secrets requis dans GitHub Actions}}{83}{table.caption.88}%
+\contentsline {table}{\numberline {B.2}{\ignorespaces Ports et services de la plateforme DevSecOps}}{83}{table.caption.89}%
 \addvspace {10\p@ }
-\contentsline {xchapter}{Glossaire des Termes Techniques}{77}{appendix.C}%
+\contentsline {xchapter}{Glossaire des Termes Techniques}{85}{appendix.C}%
 \babel@toc {french}{}\relax 
 \babel@toc {english}{}\relax 
 \babel@toc {french}{}\relax 

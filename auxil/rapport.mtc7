@@ -5,37 +5,39 @@
 {\reset@font\mtcSSSfont\mtc@string\contentsline{subsubsection}{\noexpand \leavevmode \numberline {\filterminitoc {4.}1.2.2}Structure des Modules Terraform}{\reset@font\mtcSSSfont 43}{subsubsection.4.1.2.2}}
 {\reset@font\mtcSSSfont\mtc@string\contentsline{subsubsection}{\noexpand \leavevmode \numberline {\filterminitoc {4.}1.2.3}Ressources Clés Provisionnées}{\reset@font\mtcSSSfont 44}{subsubsection.4.1.2.3}}
 {\reset@font\mtcSSSfont\mtc@string\contentsline{subsubsection}{\noexpand \leavevmode \numberline {\filterminitoc {4.}1.2.4}Bonnes Pratiques Terraform Appliquées}{\reset@font\mtcSSSfont 44}{subsubsection.4.1.2.4}}
-{\reset@font\mtcSSfont\mtc@string\contentsline{subsection}{\noexpand \leavevmode \numberline {\filterminitoc {4.}1.3}Rétrospective Sprint 1}{\reset@font\mtcSSfont 45}{subsection.4.1.3}}
-{\reset@font\mtcSfont\mtc@string\contentsline{section}{\noexpand \leavevmode \numberline {\filterminitoc {4.}2}Sprint 2~: Containerisation et Pipeline CI/CD}{\reset@font\mtcSfont 46}{section.4.2}}
-{\reset@font\mtcSSfont\mtc@string\contentsline{subsection}{\noexpand \leavevmode \numberline {\filterminitoc {4.}2.1}Objectif et Backlog du Sprint}{\reset@font\mtcSSfont 46}{subsection.4.2.1}}
-{\reset@font\mtcSSfont\mtc@string\contentsline{subsection}{\noexpand \leavevmode \numberline {\filterminitoc {4.}2.2}Containerisation et Sécurité des Images Docker}{\reset@font\mtcSSfont 46}{subsection.4.2.2}}
-{\reset@font\mtcSSSfont\mtc@string\contentsline{subsubsection}{\noexpand \leavevmode \numberline {\filterminitoc {4.}2.2.1}Build Multi-Étapes}{\reset@font\mtcSSSfont 46}{subsubsection.4.2.2.1}}
-{\reset@font\mtcSSSfont\mtc@string\contentsline{subsubsection}{\noexpand \leavevmode \numberline {\filterminitoc {4.}2.2.2}Vulnérabilités Intentionnelles dans le Dockerfile}{\reset@font\mtcSSSfont 47}{subsubsection.4.2.2.2}}
-{\reset@font\mtcSSSfont\mtc@string\contentsline{subsubsection}{\noexpand \leavevmode \numberline {\filterminitoc {4.}2.2.3}Comparaison Image Vulnérable vs Durcie}{\reset@font\mtcSSSfont 48}{subsubsection.4.2.2.3}}
-{\reset@font\mtcSSfont\mtc@string\contentsline{subsection}{\noexpand \leavevmode \numberline {\filterminitoc {4.}2.3}Pipeline CI/CD avec GitHub Actions}{\reset@font\mtcSSfont 48}{subsection.4.2.3}}
-{\reset@font\mtcSSSfont\mtc@string\contentsline{subsubsection}{\noexpand \leavevmode \numberline {\filterminitoc {4.}2.3.1}Vue Globale du Pipeline}{\reset@font\mtcSSSfont 48}{subsubsection.4.2.3.1}}
-{\reset@font\mtcSSSfont\mtc@string\contentsline{subsubsection}{\noexpand \leavevmode \numberline {\filterminitoc {4.}2.3.2}Job build-test --- Première Ligne de Défense}{\reset@font\mtcSSSfont 49}{subsubsection.4.2.3.2}}
-{\reset@font\mtcSSSfont\mtc@string\contentsline{subsubsection}{\noexpand \leavevmode \numberline {\filterminitoc {4.}2.3.3}Authentification sans Clés Statiques --- Workload Identity Federation}{\reset@font\mtcSSSfont 50}{subsubsection.4.2.3.3}}
-{\reset@font\mtcSSfont\mtc@string\contentsline{subsection}{\noexpand \leavevmode \numberline {\filterminitoc {4.}2.4}Orchestration Kubernetes sur GKE}{\reset@font\mtcSSfont 50}{subsection.4.2.4}}
-{\reset@font\mtcSSfont\mtc@string\contentsline{subsection}{\noexpand \leavevmode \numberline {\filterminitoc {4.}2.5}Rétrospective Sprint 2}{\reset@font\mtcSSfont 51}{subsection.4.2.5}}
-{\reset@font\mtcSfont\mtc@string\contentsline{section}{\noexpand \leavevmode \numberline {\filterminitoc {4.}3}Sprint 3~: Sécurité Intégrée et GitOps}{\reset@font\mtcSfont 52}{section.4.3}}
-{\reset@font\mtcSSfont\mtc@string\contentsline{subsection}{\noexpand \leavevmode \numberline {\filterminitoc {4.}3.1}Objectif et Backlog du Sprint}{\reset@font\mtcSSfont 52}{subsection.4.3.1}}
-{\reset@font\mtcSSfont\mtc@string\contentsline{subsection}{\noexpand \leavevmode \numberline {\filterminitoc {4.}3.2}SAST avec SonarCloud}{\reset@font\mtcSSfont 52}{subsection.4.3.2}}
-{\reset@font\mtcSSfont\mtc@string\contentsline{subsection}{\noexpand \leavevmode \numberline {\filterminitoc {4.}3.3}SCA avec Trivy --- Vulnérabilités Détectées}{\reset@font\mtcSSfont 53}{subsection.4.3.3}}
-{\reset@font\mtcSSfont\mtc@string\contentsline{subsection}{\noexpand \leavevmode \numberline {\filterminitoc {4.}3.4}DAST avec OWASP ZAP}{\reset@font\mtcSSfont 54}{subsection.4.3.4}}
-{\reset@font\mtcSSfont\mtc@string\contentsline{subsection}{\noexpand \leavevmode \numberline {\filterminitoc {4.}3.5}GitOps avec Argo CD}{\reset@font\mtcSSfont 56}{subsection.4.3.5}}
-{\reset@font\mtcSSSfont\mtc@string\contentsline{subsubsection}{\noexpand \leavevmode \numberline {\filterminitoc {4.}3.5.1}Configuration de l'Application Argo CD}{\reset@font\mtcSSSfont 56}{subsubsection.4.3.5.1}}
-{\reset@font\mtcSSfont\mtc@string\contentsline{subsection}{\noexpand \leavevmode \numberline {\filterminitoc {4.}3.6}Réseau Zero Trust --- NetworkPolicies}{\reset@font\mtcSSfont 57}{subsection.4.3.6}}
-{\reset@font\mtcSSfont\mtc@string\contentsline{subsection}{\noexpand \leavevmode \numberline {\filterminitoc {4.}3.7}Rétrospective Sprint 3}{\reset@font\mtcSSfont 58}{subsection.4.3.7}}
-{\reset@font\mtcSfont\mtc@string\contentsline{section}{\noexpand \leavevmode \numberline {\filterminitoc {4.}4}Sprint 4~: Tests E2E, Observabilité, SIEM et Bilan}{\reset@font\mtcSfont 59}{section.4.4}}
-{\reset@font\mtcSSfont\mtc@string\contentsline{subsection}{\noexpand \leavevmode \numberline {\filterminitoc {4.}4.1}Objectif et Backlog du Sprint}{\reset@font\mtcSSfont 59}{subsection.4.4.1}}
-{\reset@font\mtcSSfont\mtc@string\contentsline{subsection}{\noexpand \leavevmode \numberline {\filterminitoc {4.}4.2}Tests Unitaires avec Vitest}{\reset@font\mtcSSfont 59}{subsection.4.4.2}}
-{\reset@font\mtcSSfont\mtc@string\contentsline{subsection}{\noexpand \leavevmode \numberline {\filterminitoc {4.}4.3}Tests E2E Playwright --- 6 Scénarios}{\reset@font\mtcSSfont 60}{subsection.4.4.3}}
-{\reset@font\mtcSSfont\mtc@string\contentsline{subsection}{\noexpand \leavevmode \numberline {\filterminitoc {4.}4.4}Observabilité avec Prometheus et Grafana}{\reset@font\mtcSSfont 61}{subsection.4.4.4}}
-{\reset@font\mtcSSfont\mtc@string\contentsline{subsection}{\noexpand \leavevmode \numberline {\filterminitoc {4.}4.5}Sécurité Runtime --- Wazuh SIEM}{\reset@font\mtcSSfont 62}{subsection.4.4.5}}
-{\reset@font\mtcSSfont\mtc@string\contentsline{subsection}{\noexpand \leavevmode \numberline {\filterminitoc {4.}4.6}Gouvernance IAM et Identité}{\reset@font\mtcSSfont 63}{subsection.4.4.6}}
-{\reset@font\mtcSSfont\mtc@string\contentsline{subsection}{\noexpand \leavevmode \numberline {\filterminitoc {4.}4.7}Rétrospective Sprint 4}{\reset@font\mtcSSfont 63}{subsection.4.4.7}}
-{\reset@font\mtcSfont\mtc@string\contentsline{section}{\noexpand \leavevmode \numberline {\filterminitoc {4.}5}Bilan Global~: Résultats et Comparaison Avant/Après}{\reset@font\mtcSfont 65}{section.4.5}}
-{\reset@font\mtcSSfont\mtc@string\contentsline{subsection}{\noexpand \leavevmode \numberline {\filterminitoc {4.}5.1}Tableau de Bord de Sécurité}{\reset@font\mtcSSfont 65}{subsection.4.5.1}}
-{\reset@font\mtcSSfont\mtc@string\contentsline{subsection}{\noexpand \leavevmode \numberline {\filterminitoc {4.}5.2}KPIs Techniques Mesurés}{\reset@font\mtcSSfont 66}{subsection.4.5.2}}
-{\reset@font\mtcSSfont\mtc@string\contentsline{subsection}{\noexpand \leavevmode \numberline {\filterminitoc {4.}5.3}Alignement aux Frameworks de Sécurité}{\reset@font\mtcSSfont 67}{subsection.4.5.3}}
+{\reset@font\mtcSSfont\mtc@string\contentsline{subsection}{\noexpand \leavevmode \numberline {\filterminitoc {4.}1.3}Rétrospective Sprint 1}{\reset@font\mtcSSfont 46}{subsection.4.1.3}}
+{\reset@font\mtcSfont\mtc@string\contentsline{section}{\noexpand \leavevmode \numberline {\filterminitoc {4.}2}Sprint 2~: Containerisation et Pipeline CI/CD}{\reset@font\mtcSfont 47}{section.4.2}}
+{\reset@font\mtcSSfont\mtc@string\contentsline{subsection}{\noexpand \leavevmode \numberline {\filterminitoc {4.}2.1}Objectif et Backlog du Sprint}{\reset@font\mtcSSfont 47}{subsection.4.2.1}}
+{\reset@font\mtcSSfont\mtc@string\contentsline{subsection}{\noexpand \leavevmode \numberline {\filterminitoc {4.}2.2}Containerisation et Sécurité des Images Docker}{\reset@font\mtcSSfont 47}{subsection.4.2.2}}
+{\reset@font\mtcSSSfont\mtc@string\contentsline{subsubsection}{\noexpand \leavevmode \numberline {\filterminitoc {4.}2.2.1}Build Multi-Étapes}{\reset@font\mtcSSSfont 47}{subsubsection.4.2.2.1}}
+{\reset@font\mtcSSSfont\mtc@string\contentsline{subsubsection}{\noexpand \leavevmode \numberline {\filterminitoc {4.}2.2.2}Vulnérabilités Intentionnelles dans le Dockerfile}{\reset@font\mtcSSSfont 48}{subsubsection.4.2.2.2}}
+{\reset@font\mtcSSSfont\mtc@string\contentsline{subsubsection}{\noexpand \leavevmode \numberline {\filterminitoc {4.}2.2.3}Comparaison Image Vulnérable vs Durcie}{\reset@font\mtcSSSfont 49}{subsubsection.4.2.2.3}}
+{\reset@font\mtcSSfont\mtc@string\contentsline{subsection}{\noexpand \leavevmode \numberline {\filterminitoc {4.}2.3}Pipeline CI/CD avec GitHub Actions}{\reset@font\mtcSSfont 49}{subsection.4.2.3}}
+{\reset@font\mtcSSSfont\mtc@string\contentsline{subsubsection}{\noexpand \leavevmode \numberline {\filterminitoc {4.}2.3.1}Vue Globale du Pipeline}{\reset@font\mtcSSSfont 49}{subsubsection.4.2.3.1}}
+{\reset@font\mtcSSSfont\mtc@string\contentsline{subsubsection}{\noexpand \leavevmode \numberline {\filterminitoc {4.}2.3.2}Job build-test --- Première Ligne de Défense}{\reset@font\mtcSSSfont 50}{subsubsection.4.2.3.2}}
+{\reset@font\mtcSSSfont\mtc@string\contentsline{subsubsection}{\noexpand \leavevmode \numberline {\filterminitoc {4.}2.3.3}Authentification sans Clés Statiques --- Workload Identity Federation}{\reset@font\mtcSSSfont 51}{subsubsection.4.2.3.3}}
+{\reset@font\mtcSSfont\mtc@string\contentsline{subsection}{\noexpand \leavevmode \numberline {\filterminitoc {4.}2.4}Orchestration Kubernetes sur GKE}{\reset@font\mtcSSfont 51}{subsection.4.2.4}}
+{\reset@font\mtcSSfont\mtc@string\contentsline{subsection}{\noexpand \leavevmode \numberline {\filterminitoc {4.}2.5}Rétrospective Sprint 2}{\reset@font\mtcSSfont 52}{subsection.4.2.5}}
+{\reset@font\mtcSfont\mtc@string\contentsline{section}{\noexpand \leavevmode \numberline {\filterminitoc {4.}3}Sprint 3~: Sécurité Intégrée et GitOps}{\reset@font\mtcSfont 53}{section.4.3}}
+{\reset@font\mtcSSfont\mtc@string\contentsline{subsection}{\noexpand \leavevmode \numberline {\filterminitoc {4.}3.1}Objectif et Backlog du Sprint}{\reset@font\mtcSSfont 53}{subsection.4.3.1}}
+{\reset@font\mtcSSfont\mtc@string\contentsline{subsection}{\noexpand \leavevmode \numberline {\filterminitoc {4.}3.2}SAST avec SonarCloud}{\reset@font\mtcSSfont 53}{subsection.4.3.2}}
+{\reset@font\mtcSSfont\mtc@string\contentsline{subsection}{\noexpand \leavevmode \numberline {\filterminitoc {4.}3.3}SCA avec Trivy --- Vulnérabilités Détectées}{\reset@font\mtcSSfont 54}{subsection.4.3.3}}
+{\reset@font\mtcSSfont\mtc@string\contentsline{subsection}{\noexpand \leavevmode \numberline {\filterminitoc {4.}3.4}DAST avec OWASP ZAP}{\reset@font\mtcSSfont 56}{subsection.4.3.4}}
+{\reset@font\mtcSSSfont\mtc@string\contentsline{subsubsection}{\noexpand \leavevmode \numberline {\filterminitoc {4.}3.4.1}Comparaison nginx.conf Vulnérable vs Durci}{\reset@font\mtcSSSfont 58}{subsubsection.4.3.4.1}}
+{\reset@font\mtcSSSfont\mtc@string\contentsline{subsubsection}{\noexpand \leavevmode \numberline {\filterminitoc {4.}3.4.2}Démonstration des Vulnérabilités Applicatives}{\reset@font\mtcSSSfont 58}{subsubsection.4.3.4.2}}
+{\reset@font\mtcSSfont\mtc@string\contentsline{subsection}{\noexpand \leavevmode \numberline {\filterminitoc {4.}3.5}GitOps avec Argo CD}{\reset@font\mtcSSfont 61}{subsection.4.3.5}}
+{\reset@font\mtcSSSfont\mtc@string\contentsline{subsubsection}{\noexpand \leavevmode \numberline {\filterminitoc {4.}3.5.1}Configuration de l'Application Argo CD}{\reset@font\mtcSSSfont 61}{subsubsection.4.3.5.1}}
+{\reset@font\mtcSSfont\mtc@string\contentsline{subsection}{\noexpand \leavevmode \numberline {\filterminitoc {4.}3.6}Réseau Zero Trust --- NetworkPolicies}{\reset@font\mtcSSfont 64}{subsection.4.3.6}}
+{\reset@font\mtcSSfont\mtc@string\contentsline{subsection}{\noexpand \leavevmode \numberline {\filterminitoc {4.}3.7}Rétrospective Sprint 3}{\reset@font\mtcSSfont 65}{subsection.4.3.7}}
+{\reset@font\mtcSfont\mtc@string\contentsline{section}{\noexpand \leavevmode \numberline {\filterminitoc {4.}4}Sprint 4~: Tests E2E, Observabilité, SIEM et Bilan}{\reset@font\mtcSfont 66}{section.4.4}}
+{\reset@font\mtcSSfont\mtc@string\contentsline{subsection}{\noexpand \leavevmode \numberline {\filterminitoc {4.}4.1}Objectif et Backlog du Sprint}{\reset@font\mtcSSfont 66}{subsection.4.4.1}}
+{\reset@font\mtcSSfont\mtc@string\contentsline{subsection}{\noexpand \leavevmode \numberline {\filterminitoc {4.}4.2}Tests Unitaires avec Vitest}{\reset@font\mtcSSfont 66}{subsection.4.4.2}}
+{\reset@font\mtcSSfont\mtc@string\contentsline{subsection}{\noexpand \leavevmode \numberline {\filterminitoc {4.}4.3}Tests E2E Playwright --- 6 Scénarios}{\reset@font\mtcSSfont 68}{subsection.4.4.3}}
+{\reset@font\mtcSSfont\mtc@string\contentsline{subsection}{\noexpand \leavevmode \numberline {\filterminitoc {4.}4.4}Observabilité avec Prometheus et Grafana}{\reset@font\mtcSSfont 69}{subsection.4.4.4}}
+{\reset@font\mtcSSfont\mtc@string\contentsline{subsection}{\noexpand \leavevmode \numberline {\filterminitoc {4.}4.5}Sécurité Runtime --- Wazuh SIEM}{\reset@font\mtcSSfont 70}{subsection.4.4.5}}
+{\reset@font\mtcSSfont\mtc@string\contentsline{subsection}{\noexpand \leavevmode \numberline {\filterminitoc {4.}4.6}Gouvernance IAM et Identité}{\reset@font\mtcSSfont 71}{subsection.4.4.6}}
+{\reset@font\mtcSSfont\mtc@string\contentsline{subsection}{\noexpand \leavevmode \numberline {\filterminitoc {4.}4.7}Rétrospective Sprint 4}{\reset@font\mtcSSfont 71}{subsection.4.4.7}}
+{\reset@font\mtcSfont\mtc@string\contentsline{section}{\noexpand \leavevmode \numberline {\filterminitoc {4.}5}Bilan Global~: Résultats et Comparaison Avant/Après}{\reset@font\mtcSfont 73}{section.4.5}}
+{\reset@font\mtcSSfont\mtc@string\contentsline{subsection}{\noexpand \leavevmode \numberline {\filterminitoc {4.}5.1}Tableau de Bord de Sécurité}{\reset@font\mtcSSfont 73}{subsection.4.5.1}}
+{\reset@font\mtcSSfont\mtc@string\contentsline{subsection}{\noexpand \leavevmode \numberline {\filterminitoc {4.}5.2}KPIs Techniques Mesurés}{\reset@font\mtcSSfont 74}{subsection.4.5.2}}
+{\reset@font\mtcSSfont\mtc@string\contentsline{subsection}{\noexpand \leavevmode \numberline {\filterminitoc {4.}5.3}Alignement aux Frameworks de Sécurité}{\reset@font\mtcSSfont 75}{subsection.4.5.3}}

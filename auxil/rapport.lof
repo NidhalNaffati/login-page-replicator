@@ -26,24 +26,32 @@
 \contentsline {figure}{\numberline {3.11}{\ignorespaces Diagramme de classes de l'application Todo App}}{36}{figure.caption.38}%
 \addvspace {10\p@ }
 \contentsline {xchapter}{Implémentation et Réalisation par Sprints Agile}{42}{chapter.4}%
-\contentsline {figure}{\numberline {4.1}{\ignorespaces Sortie de \texttt {terraform plan} montrant les ressources à créer}}{45}{figure.caption.44}%
-\contentsline {figure}{\numberline {4.2}{\ignorespaces Cluster GKE Autopilot provisionné via Terraform}}{45}{figure.caption.45}%
-\contentsline {figure}{\numberline {4.3}{\ignorespaces Vue globale du pipeline GitHub Actions}}{49}{figure.caption.50}%
-\contentsline {figure}{\numberline {4.4}{\ignorespaces Exécution réussie du job build-test}}{50}{figure.caption.51}%
-\contentsline {figure}{\numberline {4.5}{\ignorespaces Dashboard SonarCloud montrant les résultats d'analyse}}{53}{figure.caption.54}%
-\contentsline {figure}{\numberline {4.6}{\ignorespaces Résultats du scan Trivy montrant les CVEs de l'image nginx:1.21}}{54}{figure.caption.57}%
-\contentsline {figure}{\numberline {4.7}{\ignorespaces Rapport OWASP ZAP montrant les findings avant durcissement nginx}}{55}{figure.caption.59}%
-\contentsline {figure}{\numberline {4.8}{\ignorespaces Dashboard Argo CD montrant l'état synchronisé de l'application}}{56}{figure.caption.60}%
-\contentsline {figure}{\numberline {4.9}{\ignorespaces Rapport de couverture des tests unitaires Vitest}}{60}{figure.caption.64}%
-\contentsline {figure}{\numberline {4.10}{\ignorespaces Résultats des tests Playwright E2E (6/6 passed)}}{61}{figure.caption.66}%
-\contentsline {figure}{\numberline {4.11}{\ignorespaces Dashboard Grafana montrant les métriques Nginx en temps réel}}{62}{figure.caption.68}%
-\contentsline {figure}{\numberline {4.12}{\ignorespaces Dashboard Wazuh avec 4 agents opérationnels}}{62}{figure.caption.69}%
+\contentsline {figure}{\numberline {4.1}{\ignorespaces Sortie de \texttt {terraform plan} montrant les changements sur le service account GKE}}{45}{figure.caption.44}%
+\contentsline {figure}{\numberline {4.2}{\ignorespaces Dashboard du cluster GKE Autopilot dans la console GCP}}{45}{figure.caption.45}%
+\contentsline {figure}{\numberline {4.3}{\ignorespaces Vue globale du pipeline CI/CD dans GitHub Actions}}{50}{figure.caption.50}%
+\contentsline {figure}{\numberline {4.4}{\ignorespaces Exécution réussie du job build-test}}{51}{figure.caption.51}%
+\contentsline {figure}{\numberline {4.5}{\ignorespaces Dashboard SonarCloud montrant la vue d'ensemble du projet}}{54}{figure.caption.54}%
+\contentsline {figure}{\numberline {4.6}{\ignorespaces Liste des issues de sécurité détectées par SonarCloud}}{54}{figure.caption.55}%
+\contentsline {figure}{\numberline {4.7}{\ignorespaces Vue d'ensemble du rapport Trivy sur l'image nginx:1.21 (Debian)}}{56}{figure.caption.58}%
+\contentsline {figure}{\numberline {4.8}{\ignorespaces Détail des vulnérabilités critiques détectées par Trivy (curl/libcurl)}}{56}{figure.caption.59}%
+\contentsline {figure}{\numberline {4.9}{\ignorespaces Démonstration de la vulnérabilité XSS stockée dans la Todo App}}{60}{figure.caption.63}%
+\contentsline {figure}{\numberline {4.10}{\ignorespaces Mode debug exposant les credentials de l'application (\texttt {?debug=true})}}{60}{figure.caption.64}%
+\contentsline {figure}{\numberline {4.11}{\ignorespaces Résumé des alertes OWASP ZAP avant durcissement nginx}}{61}{figure.caption.65}%
+\contentsline {figure}{\numberline {4.12}{\ignorespaces Détail du finding OWASP ZAP~: Content-Security-Policy header manquant}}{61}{figure.caption.66}%
+\contentsline {figure}{\numberline {4.13}{\ignorespaces Dashboard Argo CD~: vue en tuiles de l'application login-page-replicator}}{62}{figure.caption.67}%
+\contentsline {figure}{\numberline {4.14}{\ignorespaces Argo CD~: vue arborescente des ressources Kubernetes déployées}}{63}{figure.caption.68}%
+\contentsline {figure}{\numberline {4.15}{\ignorespaces Argo CD~: vue des pods de l'application déployée}}{63}{figure.caption.69}%
+\contentsline {figure}{\numberline {4.16}{\ignorespaces Argo CD~: vue réseau montrant les flux entre les ressources}}{64}{figure.caption.70}%
+\contentsline {figure}{\numberline {4.17}{\ignorespaces Rapport de couverture des tests unitaires Vitest}}{67}{figure.caption.74}%
+\contentsline {figure}{\numberline {4.18}{\ignorespaces Résultats des tests Playwright E2E (6/6 passed)}}{69}{figure.caption.76}%
+\contentsline {figure}{\numberline {4.19}{\ignorespaces Dashboard Grafana montrant les métriques Nginx en temps réel}}{70}{figure.caption.78}%
+\contentsline {figure}{\numberline {4.20}{\ignorespaces Dashboard Wazuh avec 4 agents opérationnels}}{70}{figure.caption.79}%
 \addvspace {10\p@ }
-\contentsline {xchapter}{Commandes de Déploiement}{73}{appendix.A}%
+\contentsline {xchapter}{Commandes de Déploiement}{81}{appendix.A}%
 \addvspace {10\p@ }
-\contentsline {xchapter}{Variables GitHub Actions et Ports des Services}{75}{appendix.B}%
+\contentsline {xchapter}{Variables GitHub Actions et Ports des Services}{83}{appendix.B}%
 \addvspace {10\p@ }
-\contentsline {xchapter}{Glossaire des Termes Techniques}{77}{appendix.C}%
+\contentsline {xchapter}{Glossaire des Termes Techniques}{85}{appendix.C}%
 \babel@toc {french}{}\relax 
 \babel@toc {english}{}\relax 
 \babel@toc {french}{}\relax 
