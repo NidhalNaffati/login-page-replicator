@@ -77,6 +77,13 @@ resource "google_project_iam_member" "github_ar_writer" {
   member  = "serviceAccount:${google_service_account.github_actions.email}"
 }
 
+# Enable/disable GCP APIs from CI (gcloud services enable)
+resource "google_project_iam_member" "github_service_usage_admin" {
+  project = var.project_id
+  role    = "roles/serviceusage.serviceUsageAdmin"
+  member  = "serviceAccount:${google_service_account.github_actions.email}"
+}
+
 # Get GKE credentials (needed for kubectl / Playwright Job)
 resource "google_project_iam_member" "github_gke_developer" {
   project = var.project_id
