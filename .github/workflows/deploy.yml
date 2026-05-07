@@ -559,6 +559,8 @@ jobs:
         uses: actions/checkout@v4
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
+          ref: master
+          fetch-depth: 0
 
       - name: Compute short SHA
         id: sha
@@ -624,11 +626,17 @@ jobs:
 
       - name: Commit and push updated manifests
         run: |
+          set -e
           git config user.email "ci@github.com"
           git config user.name "GitHub Actions"
           git add k8s/app/deployment.yaml k8s/app/playwright-hook.yaml
-          git diff --cached --quiet || \
-            (git commit -m "ci: update image tags to ${{ steps.sha.outputs.short_sha }}" && git push)
+          if git diff --cached --quiet; then
+            echo "No changes to commit."
+            exit 0
+          fi
+          git commit -m "ci: update image tags to ${{ steps.sha.outputs.short_sha }}"
+          git pull --rebase origin master
+          git push
 
   # ────────────────────────────────────────────────────────────────────────────
   # JOB 5 — Wait for Argo CD PostSync hook jobs (isolated per test) & collect results
