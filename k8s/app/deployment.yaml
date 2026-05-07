@@ -20,6 +20,8 @@ spec:
         prometheus.io/port: "9113"
     spec:
       serviceAccountName: gke-app-sa
+      imagePullSecrets:
+        - name: ar-pull-secret
       # VULN: Automount SA token even though it's not needed (Trivy: KSV036)
       automountServiceAccountToken: true
       containers:
