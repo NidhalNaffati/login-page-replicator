@@ -1,8 +1,0 @@
-# Clear stuck operation on ArgoCD app
-kubectl patch application login-page-replicator -n argocd \
-  --type json -p '[{"op":"remove","path":"/status/operationState"}]'
-
-# Force immediate sync
-kubectl patch application login-page-replicator -n argocd --type merge -p '{
-  "operation": {"initiatedBy": {"username": "manual"}, "sync": {"revision": "HEAD", "prune": true}}
-}'
