@@ -26,7 +26,7 @@ spec:
       automountServiceAccountToken: true
       containers:
         - name: app
-          image: europe-west1-docker.pkg.dev/nidhal-pfe/login-page-replicator-repo/login-page-replicator:7e02a90
+          image: europe-west1-docker.pkg.dev/nidhal-pfe/login-page-replicator-repo/login-page-replicator:f7ca7e4
           ports:
             - containerPort: 80
           # VULN: No resource limits defined (Trivy: KSV011)
