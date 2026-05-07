@@ -60,7 +60,7 @@
 gcloud auth login
 
 # Set your NEW project ID (replace with your actual project ID)
-export PROJECT_ID="your-new-project-id"
+export PROJECT_ID="nidhal-pfe"
 export REGION="europe-west1"
 export ZONE="europe-west1-b"
 
@@ -118,7 +118,7 @@ cp backend.hcl.example backend.hcl
 
 Edit `backend.hcl`:
 ```hcl
-bucket = "your-new-project-id-tfstate"
+bucket = "nidhal-pfe-tfstate"
 prefix = "devops-cluster"
 ```
 
@@ -274,22 +274,6 @@ testing           Active   ...
 
 ```bash
 curl https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 | bash
-```
-
-### Windows (PowerShell)
-
-```powershell
-# Using Chocolatey
-choco install kubernetes-helm
-
-# Or using Scoop
-scoop install helm
-```
-
-### Alternative: gcloud component
-
-```bash
-gcloud components install helm
 ```
 
 ### Verify installation
@@ -476,7 +460,6 @@ echo "Wazuh External IP: ${WAZUH_EXTERNAL_IP}"
 
 # Check VM status
 gcloud compute instances describe wazuh-manager \
-  --zone=${ZONE} \
   --project=${PROJECT_ID} \
   --format='get(status)'
 # Expected: RUNNING
@@ -778,12 +761,12 @@ In `.github/workflows/deploy.yml`, update the `env:` section:
 
 ```yaml
 env:
-  PROJECT_ID:   your-new-project-id          # <-- CHANGE
+  PROJECT_ID:   nidhal-pfe          # <-- CHANGE
   REGION:       europe-west1
   REPO_NAME:    login-page-replicator-repo
   SERVICE_NAME: login-page-replicator
-  IMAGE_BASE:   europe-west1-docker.pkg.dev/your-new-project-id/login-page-replicator-repo/login-page-replicator  # <-- CHANGE
-  PW_IMAGE:     europe-west1-docker.pkg.dev/your-new-project-id/login-page-replicator-repo/playwright-tests       # <-- CHANGE
+  IMAGE_BASE:   europe-west1-docker.pkg.dev/nidhal-pfe/login-page-replicator-repo/login-page-replicator  # <-- CHANGE
+  PW_IMAGE:     europe-west1-docker.pkg.dev/nidhal-pfe/login-page-replicator-repo/playwright-tests       # <-- CHANGE
   CLUSTER_NAME: devops-cluster
 ```
 
@@ -980,7 +963,7 @@ This opens:
 # FULL RECREATION — Copy-paste friendly sequence
 # ═══════════════════════════════════════════════════════
 
-export PROJECT_ID="your-new-project-id"
+export PROJECT_ID="nidhal-pfe"
 export REGION="europe-west1"
 export ZONE="europe-west1-b"
 export TFSTATE_BUCKET="${PROJECT_ID}-tfstate"
