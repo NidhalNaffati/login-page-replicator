@@ -712,10 +712,26 @@ jobs:
       # ── Trigger Argo CD sync (don't wait for 3-min polling interval) ─────
       - name: Trigger Argo CD sync
         run: |
-          # Force Argo CD to refresh and sync immediately
+          # Force Argo CD to refresh from Git immediately
           kubectl patch application login-page-replicator -n argocd \
             --type merge -p '{"metadata":{"annotations":{"argocd.argoproj.io/refresh":"hard"}}}' || true
-          # Give Argo CD a moment to pick up the refresh
+          sleep 5
+
+          # Terminate any stuck sync operation so a new one can start
+          kubectl patch application login-page-replicator -n argocd \
+            --type json -p '[{"op":"remove","path":"/status/operationState"}]' 2>/dev/null || true
+
+          # Force a sync operation via the operation spec
+          kubectl patch application login-page-replicator -n argocd --type merge -p '
+          {
+            "operation": {
+              "initiatedBy": {"username": "github-actions"},
+              "sync": {
+                "revision": "HEAD",
+                "prune": true
+              }
+            }
+          }' || true
           sleep 10
 
       # ── Wait for Argo CD to roll out the new app image ────────────────────

@@ -5,6 +5,8 @@ metadata:
   namespace: app
   labels:
     app: login-page-replicator
+  annotations:
+    cloud.google.com/neg: '{"ingress": true}'
 spec:
   selector:
     app: login-page-replicator
