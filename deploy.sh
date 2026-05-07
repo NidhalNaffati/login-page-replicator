@@ -23,7 +23,7 @@
 set -euo pipefail
 
 # ── Configuration ─────────────────────────────────────────────────────────────
-PROJECT_ID="${PROJECT_ID:-pfe-esprit-489411}"       # GCP project ID
+PROJECT_ID="${PROJECT_ID:-nidhal-pfe}"       # GCP project ID
 REGION="${REGION:-europe-west1}"                   # ← Replace with your preferred region
 REPO_NAME="${REPO_NAME:-login-page-replicator-repo}"  # Artifact Registry repository name
 SERVICE_NAME="${SERVICE_NAME:-login-page-replicator}"  # Cloud Run service name

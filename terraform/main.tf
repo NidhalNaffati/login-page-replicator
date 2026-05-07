@@ -9,8 +9,8 @@ terraform {
   }
 
   backend "gcs" {
-    bucket = "pfe-esprit-489411-tfstate"
-    prefix = "devops-cluster"
+    # Keep this empty and pass settings at init time:
+    #   terraform init -backend-config=backend.hcl
   }
 }
 

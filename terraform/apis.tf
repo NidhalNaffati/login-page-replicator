@@ -1,8 +1,11 @@
 resource "google_project_service" "required" {
   for_each = toset([
+    "serviceusage.googleapis.com",
     "compute.googleapis.com",
     "container.googleapis.com",
     "artifactregistry.googleapis.com",
+    "run.googleapis.com",
+    "cloudbuild.googleapis.com",
     "iam.googleapis.com",
     "iamcredentials.googleapis.com",
     # Required for kube-prometheus-stack / Cloud Monitoring integration

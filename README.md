@@ -219,7 +219,7 @@ sed "s|IMAGE_TAG|${SHORT_SHA}|g" k8s/testing/playwright-job.yaml | kubectl apply
 
 - KSA in `app`: `gke-app-sa`
 - KSA in `testing`: `playwright-runner`
-- Both can be mapped to GSA `gke-app-sa@pfe-esprit-489411.iam.gserviceaccount.com` using Workload Identity.
+- Both can be mapped to GSA `gke-app-sa@nidhal-pfe.iam.gserviceaccount.com` using Workload Identity.
 - GSA must have permissions needed by workload (at minimum Artifact Registry pull for test image path).
 
 ## Cloud Run path
@@ -257,7 +257,7 @@ Verify the pod image tag is real (not `IMAGE_TAG`) and that IAM/Workload Identit
 
 ## Important placeholders to customize
 
-- `pfe-esprit-489411`
+- `nidhal-pfe`
 - `europe-west1`
 - `login-page-replicator-repo`
 - `gke-app-sa@...`

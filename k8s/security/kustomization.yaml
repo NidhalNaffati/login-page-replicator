@@ -1,4 +1,5 @@
-apiVersion: kustomization.yaml
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
 resources:
   - allow-apiserver-egress.yaml
   - allow-dns-egress.yaml

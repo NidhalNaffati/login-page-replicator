@@ -30,4 +30,4 @@ metadata:
   name: default
   namespace: testing
   annotations:
-    iam.gke.io/gcp-service-account: gke-app-sa@pfe-esprit-489411.iam.gserviceaccount.com
+    iam.gke.io/gcp-service-account: gke-app-sa@nidhal-pfe.iam.gserviceaccount.com
