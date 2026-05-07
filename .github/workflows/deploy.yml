@@ -698,8 +698,17 @@ jobs:
         run: |
           kubectl apply -f k8s/namespaces.yaml
           kubectl apply -f k8s/testing/serviceaccount.yaml
-          kubectl apply -f k8s/security/allow-testing-to-app.yaml
-          kubectl apply -f k8s/security/allow-playwright-hook.yaml
+          kubectl apply --server-side --force-conflicts -f k8s/security/allow-testing-to-app.yaml
+          kubectl apply --server-side --force-conflicts -f k8s/security/allow-playwright-hook.yaml
+
+      # ── Trigger Argo CD sync (don't wait for 3-min polling interval) ─────
+      - name: Trigger Argo CD sync
+        run: |
+          # Force Argo CD to refresh and sync immediately
+          kubectl patch application login-page-replicator -n argocd \
+            --type merge -p '{"metadata":{"annotations":{"argocd.argoproj.io/refresh":"hard"}}}' || true
+          # Give Argo CD a moment to pick up the refresh
+          sleep 10
 
       # ── Wait for Argo CD to roll out the new app image ────────────────────
       - name: Wait for Argo CD rollout
