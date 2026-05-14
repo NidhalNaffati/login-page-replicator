@@ -57,3 +57,7 @@ variable "artifact_registry_repo_name" {
   default = "login-page-replicator-repo"
 }
 
+variable "cloud_run_service_name" {
+  type    = string
+  default = "login-page-replicator"
+}
