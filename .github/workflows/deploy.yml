@@ -786,19 +786,31 @@ jobs:
             sleep 5
           done
 
-          kubectl get job "${JOB_NAME}" -n app || \
-            { echo "❌ Job never appeared. Is Argo CD running and syncing?"; exit 1; }
-
           # Poll until job reaches a terminal state (Complete or Failed)
           echo "Waiting for ${JOB_NAME} job to finish..."
           TIMEOUT=600
           ELAPSED=0
           JOB_STATUS=0
           while [ $ELAPSED -lt $TIMEOUT ]; do
+            JOB_EXISTS=true
             COMPLETE=$(kubectl get job "${JOB_NAME}" -n app \
-              -o jsonpath='{.status.conditions[?(@.type=="Complete")].status}' 2>/dev/null || true)
-            FAILED=$(kubectl get job "${JOB_NAME}" -n app \
-              -o jsonpath='{.status.conditions[?(@.type=="Failed")].status}' 2>/dev/null || true)
+              -o jsonpath='{.status.conditions[?(@.type=="Complete")].status}' 2>/dev/null) || JOB_EXISTS=false
+
+            if [ "${JOB_EXISTS}" = "false" ]; then
+              POD_PHASE=$(kubectl get pods -n app -l job-name="${JOB_NAME}" \
+                -o jsonpath='{.items[0].status.phase}' 2>/dev/null || true)
+              if [ "${POD_PHASE}" = "Succeeded" ]; then
+                echo "✅ Job completed successfully (pod already cleaned up)."
+                break
+              elif [ "${POD_PHASE}" = "Failed" ]; then
+                echo "❌ Job failed."
+                JOB_STATUS=1
+                break
+              fi
+              sleep 5
+              ELAPSED=$((ELAPSED + 5))
+              continue
+            fi
 
             if [ "${COMPLETE}" = "True" ]; then
               echo "✅ Job completed successfully."
