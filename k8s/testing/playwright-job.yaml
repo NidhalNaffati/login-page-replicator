@@ -20,7 +20,7 @@ spec:
       containers:
         - name: playwright
           # IMAGE_TAG is replaced by GitHub Actions before kubectl apply
-          image: europe-west1-docker.pkg.dev/nidhal-pfe/login-page-replicator-repo/playwright-tests:IMAGE_TAG
+          image: europe-west9-docker.pkg.dev/nidhal-pfe/login-page-replicator-repo/playwright-tests:IMAGE_TAG
           env:
             - name: BASE_URL
               value: http://login-page-replicator.app.svc.cluster.local

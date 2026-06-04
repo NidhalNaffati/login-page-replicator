@@ -27,7 +27,7 @@ spec:
       automountServiceAccountToken: true
       containers:
         - name: app
-          image: europe-west1-docker.pkg.dev/nidhal-pfe/login-page-replicator-repo/login-page-replicator:latest
+          image: europe-west9-docker.pkg.dev/nidhal-pfe/login-page-replicator-repo/login-page-replicator:latest
           ports:
             - containerPort: 80
           # VULN: Privileged container running as root
