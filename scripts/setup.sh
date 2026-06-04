@@ -19,9 +19,9 @@ set -euo pipefail
 # ═══════════════════════════════════════════════════════════════════════
 
 # ─── Configuration ────────────────────────────────────────────────────
-PROJECT_ID="${PROJECT_ID:-nidhal-pfe}"
-REGION="${REGION:-europe-west1}"
-ZONE="${ZONE:-europe-west1-b}"
+GCP_PROJECT="${GCP_PROJECT:-project-68ed22e3-fde5-4fac-90c}"
+GCP_REGION="${GCP_REGION:-europe-west9}"
+GCP_ZONE="${GCP_ZONE:-europe-west9-a}"
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 TERRAFORM_DIR="${SCRIPT_DIR}/terraform"
 
@@ -82,7 +82,7 @@ header "Phase 1: Connecting to GKE Cluster"
 info "Reading Terraform outputs..."
 cd "${TERRAFORM_DIR}"
 CLUSTER_NAME=$(terraform output -raw cluster_name 2>/dev/null || echo "devops-cluster")
-CLUSTER_LOCATION=$(terraform output -raw cluster_location 2>/dev/null || echo "${REGION}")
+CLUSTER_LOCATION=$(terraform output -raw cluster_location 2>/dev/null || echo "${GCP_REGION}")
 WAZUH_INTERNAL_IP=$(terraform output -raw wazuh_manager_internal_ip 2>/dev/null || echo "10.10.0.2")
 WAZUH_EXTERNAL_IP=$(terraform output -raw wazuh_manager_external_ip 2>/dev/null || echo "")
 cd "${SCRIPT_DIR}"
@@ -90,7 +90,7 @@ cd "${SCRIPT_DIR}"
 info "Connecting to cluster '${CLUSTER_NAME}' in '${CLUSTER_LOCATION}'..."
 gcloud container clusters get-credentials "${CLUSTER_NAME}" \
   --region "${CLUSTER_LOCATION}" \
-  --project "${PROJECT_ID}"
+  --project "${GCP_PROJECT}"
 
 # Verify connection
 if kubectl cluster-info &>/dev/null; then
@@ -202,12 +202,12 @@ kubectl get applications -n argocd --no-headers 2>/dev/null | awk '{print "  " $
 header "Phase 8: Creating Image Pull Secrets"
 
 info "Configuring Docker authentication for Artifact Registry..."
-gcloud auth configure-docker "${REGION}-docker.pkg.dev" --quiet 2>/dev/null || true
+gcloud auth configure-docker "${GCP_REGION}-docker.pkg.dev" --quiet 2>/dev/null || true
 
 info "Creating ar-pull-secret in app and testing namespaces..."
 for NS in app testing; do
   kubectl create secret docker-registry ar-pull-secret \
-    --docker-server="${REGION}-docker.pkg.dev" \
+    --docker-server="${GCP_REGION}-docker.pkg.dev" \
     --docker-username=oauth2accesstoken \
     --docker-password="$(gcloud auth print-access-token)" \
     --namespace="${NS}" \
@@ -291,7 +291,7 @@ echo "  1. Access dashboards locally:"
 echo "     ${GREEN}./port-forward-dashboards.sh${NC}"
 echo ""
 echo "  2. Get Wazuh password (SSH into VM):"
-echo "     ${GREEN}gcloud compute ssh wazuh-manager --zone=${ZONE} --project=${PROJECT_ID} \\${NC}"
+echo "     ${GREEN}gcloud compute ssh wazuh-manager --zone=${GCP_ZONE} --project=${GCP_PROJECT} \\${NC}"
 echo "     ${GREEN}  --tunnel-through-iap --command='cat /etc/motd'${NC}"
 echo ""
 echo "  3. Push a commit to trigger CI/CD pipeline:"

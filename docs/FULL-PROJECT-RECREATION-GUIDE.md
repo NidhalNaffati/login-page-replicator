@@ -2,7 +2,7 @@
 
 > **Target:** Recreate the entire DevSecOps platform from scratch on a **new GCP project**.
 > **Cluster type:** GKE Standard (regional, with Calico NetworkPolicies)
-> **Region:** `europe-west1`
+> **Region:** `europe-west9`
 > **Estimated time:** 45–60 minutes (excluding Terraform provisioning)
 
 ---
@@ -44,7 +44,7 @@
 
 - A new GCP project with **billing enabled**
 - Owner or Editor role on the project
-- Sufficient quotas in `europe-west1`:
+- Sufficient quotas in `europe-west9`:
   - CPUs (all regions): at least 12 vCPUs (3 nodes × e2-standard-4)
   - In-use IP addresses: at least 5
   - Persistent disk (pd-standard): at least 200 GB
@@ -60,22 +60,22 @@
 gcloud auth login
 
 # Set your NEW project ID (replace with your actual project ID)
-export PROJECT_ID="nidhal-pfe"
-export REGION="europe-west1"
-export ZONE="europe-west1-b"
+export GCP_PROJECT="project-68ed22e3-fde5-4fac-90c"
+export GCP_REGION="europe-west9"
+export GCP_ZONE="europe-west9-a"
 
-gcloud config set project ${PROJECT_ID}
-gcloud config set compute/region ${REGION}
-gcloud config set compute/zone ${ZONE}
+gcloud config set project ${GCP_PROJECT}
+gcloud config set compute/region ${GCP_REGION}
+gcloud config set compute/zone ${GCP_ZONE}
 ```
 
 ### 2.2 Verify billing is enabled
 
 ```bash
-gcloud billing projects describe ${PROJECT_ID}
+gcloud billing projects describe ${GCP_PROJECT}
 ```
 
-> If billing is not linked, go to: https://console.cloud.google.com/billing/linkedaccount?project=${PROJECT_ID}
+> If billing is not linked, go to: https://console.cloud.google.com/billing/linkedaccount?project=${GCP_PROJECT}
 
 ### 2.3 Enable base APIs (Terraform will enable the rest, but these are needed to start)
 
@@ -83,7 +83,7 @@ gcloud billing projects describe ${PROJECT_ID}
 gcloud services enable \
   serviceusage.googleapis.com \
   cloudresourcemanager.googleapis.com \
-  --project=${PROJECT_ID}
+  --project=${GCP_PROJECT}
 ```
 
 ---
@@ -95,13 +95,13 @@ Terraform provisions: VPC, subnet, GKE cluster, node pool, Artifact Registry, IA
 ### 3.1 Create the remote state bucket
 
 ```bash
-export TFSTATE_BUCKET="${PROJECT_ID}-tfstate"
+export TFSTATE_BUCKET="${GCP_PROJECT}-tfstate"
 
 # Create the GCS bucket for Terraform state
 gcloud storage buckets create "gs://${TFSTATE_BUCKET}" \
-  --location="${REGION}" \
+  --location="${GCP_REGION}" \
   --uniform-bucket-level-access \
-  --project=${PROJECT_ID}
+  --project=${GCP_PROJECT}
 
 # Enable versioning (state recovery)
 gcloud storage buckets update "gs://${TFSTATE_BUCKET}" --versioning
@@ -118,7 +118,7 @@ cp backend.hcl.example backend.hcl
 
 Edit `backend.hcl`:
 ```hcl
-bucket = "nidhal-pfe-tfstate"
+bucket = "project-68ed22e3-fde5-4fac-90c-tfstate"
 prefix = "devops-cluster"
 ```
 
@@ -128,7 +128,7 @@ Before running Terraform, you need to update the project-specific references:
 
 **Option A (recommended):** Pass variables via CLI:
 ```bash
-terraform plan -var="project_id=${PROJECT_ID}" -var="region=${REGION}"
+terraform plan -var="project_id=${GCP_PROJECT}" -var="region=${GCP_REGION}"
 ```
 
 **Option B:** Edit `variables.tf` default values to match your new project ID.
@@ -156,15 +156,15 @@ The following files reference the GCP project ID. Update them **before** deployi
 | `k8s/namespaces.yaml` | `gke-app-sa@PROJECT_ID.iam.gserviceaccount.com` |
 | `k8s/app/serviceaccount.yaml` | `gke-app-sa@PROJECT_ID.iam.gserviceaccount.com` |
 | `k8s/testing/serviceaccount.yaml` | `gke-app-sa@PROJECT_ID.iam.gserviceaccount.com` |
-| `k8s/app/deployment.yaml` | Image URL `europe-west1-docker.pkg.dev/PROJECT_ID/...` |
-| `k8s/app/playwright-hook.yaml` | Image URL `europe-west1-docker.pkg.dev/PROJECT_ID/...` |
+| `k8s/app/deployment.yaml` | Image URL `europe-west9-docker.pkg.dev/PROJECT_ID/...` |
+| `k8s/app/playwright-hook.yaml` | Image URL `europe-west9-docker.pkg.dev/PROJECT_ID/...` |
 | `.github/workflows/deploy.yml` | `env.PROJECT_ID`, `env.IMAGE_BASE`, `env.PW_IMAGE` |
 
 Quick sed replacement (Linux/macOS):
 ```bash
 # From project root
-OLD_PROJECT="nidhal-pfe"
-NEW_PROJECT="${PROJECT_ID}"
+OLD_PROJECT="project-68ed22e3-fde5-4fac-90c"
+NEW_PROJECT="${GCP_PROJECT}"
 
 find k8s/ .github/ -type f \( -name "*.yaml" -o -name "*.yml" \) \
   -exec sed -i "s/${OLD_PROJECT}/${NEW_PROJECT}/g" {} +
@@ -180,8 +180,8 @@ terraform init -backend-config=backend.hcl
 
 # Preview changes
 terraform plan \
-  -var="project_id=${PROJECT_ID}" \
-  -var="region=${REGION}" \
+  -var="project_id=${GCP_PROJECT}" \
+  -var="region=${GCP_REGION}" \
   -out=tfplan
 
 # Review the plan, then apply
@@ -215,14 +215,14 @@ CLUSTER_LOCATION=$(cd terraform && terraform output -raw cluster_location)
 
 gcloud container clusters get-credentials "${CLUSTER_NAME}" \
   --region "${CLUSTER_LOCATION}" \
-  --project "${PROJECT_ID}"
+  --project "${GCP_PROJECT}"
 ```
 
 ### Verify connection
 
 ```bash
 kubectl get nodes
-# Expected: 3 nodes (1 per zone in europe-west1)
+# Expected: 3 nodes (1 per zone in europe-west9)
 
 kubectl cluster-info
 ```
@@ -460,7 +460,7 @@ echo "Wazuh External IP: ${WAZUH_EXTERNAL_IP}"
 
 # Check VM status
 gcloud compute instances describe wazuh-manager \
-  --project=${PROJECT_ID} \
+  --project=${GCP_PROJECT} \
   --format='get(status)'
 # Expected: RUNNING
 ```
@@ -472,8 +472,8 @@ The Wazuh bootstrap script (`terraform/scripts/wazuh-manager-init.sh`) runs on f
 ```bash
 # SSH into the VM via IAP
 gcloud compute ssh wazuh-manager \
-  --zone=${ZONE} \
-  --project=${PROJECT_ID} \
+  --zone=${GCP_ZONE} \
+  --project=${GCP_PROJECT} \
   --tunnel-through-iap \
   --command='tail -20 /var/log/wazuh-install.log'
 ```
@@ -484,8 +484,8 @@ Wait until you see `Installation finished` or similar success message.
 
 ```bash
 gcloud compute ssh wazuh-manager \
-  --zone=${ZONE} \
-  --project=${PROJECT_ID} \
+  --zone=${GCP_ZONE} \
+  --project=${GCP_PROJECT} \
   --tunnel-through-iap \
   --command='cat /etc/motd'
 ```
@@ -503,8 +503,8 @@ Password:   <auto-generated-password>
 Alternative — extract from the install archive:
 ```bash
 gcloud compute ssh wazuh-manager \
-  --zone=${ZONE} \
-  --project=${PROJECT_ID} \
+  --zone=${GCP_ZONE} \
+  --project=${GCP_PROJECT} \
   --tunnel-through-iap \
   --command='sudo tar -xOf ~/wazuh-install-files.tar wazuh-install-files/wazuh-passwords.txt | grep -A2 "username: .admin."'
 ```
@@ -513,8 +513,8 @@ gcloud compute ssh wazuh-manager \
 
 ```bash
 gcloud compute ssh wazuh-manager \
-  --zone=${ZONE} \
-  --project=${PROJECT_ID} \
+  --zone=${GCP_ZONE} \
+  --project=${GCP_PROJECT} \
   --tunnel-through-iap \
   --command='sudo systemctl status wazuh-manager wazuh-indexer wazuh-dashboard --no-pager'
 ```
@@ -573,8 +573,8 @@ Look for:
 
 ```bash
 gcloud compute ssh wazuh-manager \
-  --zone=${ZONE} \
-  --project=${PROJECT_ID} \
+  --zone=${GCP_ZONE} \
+  --project=${GCP_PROJECT} \
   --tunnel-through-iap \
   --command='sudo /var/ossec/bin/agent_control -l'
 ```
@@ -602,12 +602,12 @@ The cluster needs credentials to pull images from Artifact Registry:
 
 ```bash
 # Authenticate Docker locally
-gcloud auth configure-docker ${REGION}-docker.pkg.dev --quiet
+gcloud auth configure-docker ${GCP_REGION}-docker.pkg.dev --quiet
 
 # Create ar-pull-secret in both namespaces
 for NS in app testing; do
   kubectl create secret docker-registry ar-pull-secret \
-    --docker-server=${REGION}-docker.pkg.dev \
+    --docker-server=${GCP_REGION}-docker.pkg.dev \
     --docker-username=oauth2accesstoken \
     --docker-password="$(gcloud auth print-access-token)" \
     --namespace=${NS} \
@@ -627,8 +627,8 @@ Push a commit to `master` — the workflow will build, push, and deploy automati
 
 ```bash
 export TAG="initial-$(date +%Y%m%d-%H%M%S)"
-export IMAGE_BASE="${REGION}-docker.pkg.dev/${PROJECT_ID}/login-page-replicator-repo/login-page-replicator"
-export PW_IMAGE="${REGION}-docker.pkg.dev/${PROJECT_ID}/login-page-replicator-repo/playwright-tests"
+export IMAGE_BASE="${GCP_REGION}-docker.pkg.dev/${GCP_PROJECT}/login-page-replicator-repo/login-page-replicator"
+export PW_IMAGE="${GCP_REGION}-docker.pkg.dev/${GCP_PROJECT}/login-page-replicator-repo/playwright-tests"
 
 # Build and push app image
 docker build -t ${IMAGE_BASE}:${TAG} -t ${IMAGE_BASE}:latest .
@@ -761,12 +761,12 @@ In `.github/workflows/deploy.yml`, update the `env:` section:
 
 ```yaml
 env:
-  PROJECT_ID:   nidhal-pfe          # <-- CHANGE
-  REGION:       europe-west1
+  PROJECT_ID:   project-68ed22e3-fde5-4fac-90c          # <-- CHANGE
+  REGION:       europe-west9
   REPO_NAME:    login-page-replicator-repo
   SERVICE_NAME: login-page-replicator
-  IMAGE_BASE:   europe-west1-docker.pkg.dev/nidhal-pfe/login-page-replicator-repo/login-page-replicator  # <-- CHANGE
-  PW_IMAGE:     europe-west1-docker.pkg.dev/nidhal-pfe/login-page-replicator-repo/playwright-tests       # <-- CHANGE
+  IMAGE_BASE:   europe-west9-docker.pkg.dev/project-68ed22e3-fde5-4fac-90c/login-page-replicator-repo/login-page-replicator  # <-- CHANGE
+  PW_IMAGE:     europe-west9-docker.pkg.dev/project-68ed22e3-fde5-4fac-90c/login-page-replicator-repo/playwright-tests       # <-- CHANGE
   CLUSTER_NAME: devops-cluster
 ```
 
@@ -856,7 +856,7 @@ kubectl port-forward svc/kube-prom-grafana -n observability 3000:80 &
 kubectl get ds wazuh-agent -n security
 # DESIRED = CURRENT = READY = 3 (one per node)
 
-gcloud compute ssh wazuh-manager --zone=${ZONE} --project=${PROJECT_ID} \
+gcloud compute ssh wazuh-manager --zone=${GCP_ZONE} --project=${GCP_PROJECT} \
   --tunnel-through-iap \
   --command='sudo /var/ossec/bin/agent_control -l'
 ```
@@ -943,7 +943,7 @@ This opens:
 | Agents stuck `Disconnected` | Remove stale agents: `sudo /var/ossec/bin/manage_agents -r <ID>` on the VM |
 | `Unable to connect to enrollment service` (port 1515) | Check firewall source includes `10.20.0.0/16` (pods CIDR) |
 | Dashboard shows 500 error | Restart services in order: indexer → wait 45s → manager + filebeat → dashboard |
-| VM not responding | Check VM status: `gcloud compute instances describe wazuh-manager --zone=${ZONE}` |
+| VM not responding | Check VM status: `gcloud compute instances describe wazuh-manager --zone=${GCP_ZONE}` |
 
 ### GitHub Actions errors
 
@@ -963,32 +963,32 @@ This opens:
 # FULL RECREATION — Copy-paste friendly sequence
 # ═══════════════════════════════════════════════════════
 
-export PROJECT_ID="nidhal-pfe"
-export REGION="europe-west1"
-export ZONE="europe-west1-b"
-export TFSTATE_BUCKET="${PROJECT_ID}-tfstate"
+export GCP_PROJECT="project-68ed22e3-fde5-4fac-90c"
+export GCP_REGION="europe-west9"
+export GCP_ZONE="europe-west9-a"
+export TFSTATE_BUCKET="${GCP_PROJECT}-tfstate"
 
 # ── 1. GCP Setup ──
 gcloud auth login
-gcloud config set project ${PROJECT_ID}
+gcloud config set project ${GCP_PROJECT}
 gcloud services enable serviceusage.googleapis.com cloudresourcemanager.googleapis.com
 
 # ── 2. Terraform ──
-gcloud storage buckets create "gs://${TFSTATE_BUCKET}" --location="${REGION}" --uniform-bucket-level-access
+gcloud storage buckets create "gs://${TFSTATE_BUCKET}" --location="${GCP_REGION}" --uniform-bucket-level-access
 gcloud storage buckets update "gs://${TFSTATE_BUCKET}" --versioning
 
 cd terraform
 cp backend.hcl.example backend.hcl
 sed -i "s/nidhal-pfe-tfstate-CHANGE-ME/${TFSTATE_BUCKET}/" backend.hcl
 terraform init -backend-config=backend.hcl
-terraform plan -var="project_id=${PROJECT_ID}" -var="region=${REGION}" -out=tfplan
+terraform plan -var="project_id=${GCP_PROJECT}" -var="region=${GCP_REGION}" -out=tfplan
 terraform apply tfplan
 
 # ── 3. Connect to cluster ──
 CLUSTER_NAME=$(terraform output -raw cluster_name)
 CLUSTER_LOCATION=$(terraform output -raw cluster_location)
 cd ..
-gcloud container clusters get-credentials "${CLUSTER_NAME}" --region "${CLUSTER_LOCATION}" --project "${PROJECT_ID}"
+gcloud container clusters get-credentials "${CLUSTER_NAME}" --region "${CLUSTER_LOCATION}" --project "${GCP_PROJECT}"
 
 # ── 4. Namespaces ──
 kubectl apply -f k8s/namespaces.yaml
@@ -1020,10 +1020,10 @@ kubectl rollout status daemonset/wazuh-agent -n security --timeout=180s
 kubectl apply -f k8s/argocd/app-application.yaml
 kubectl apply -f k8s/argocd/testing-application.yaml
 
-gcloud auth configure-docker ${REGION}-docker.pkg.dev --quiet
+gcloud auth configure-docker ${GCP_REGION}-docker.pkg.dev --quiet
 for NS in app testing; do
   kubectl create secret docker-registry ar-pull-secret \
-    --docker-server=${REGION}-docker.pkg.dev \
+    --docker-server=${GCP_REGION}-docker.pkg.dev \
     --docker-username=oauth2accesstoken \
     --docker-password="$(gcloud auth print-access-token)" \
     --namespace=${NS} --dry-run=client -o yaml | kubectl apply -f -
