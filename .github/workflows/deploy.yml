@@ -834,25 +834,31 @@ jobs:
           # trailing newlines which would corrupt the base64 tarball.
           echo "=== Fetching pod logs ==="
           mkdir -p artifacts
-          kubectl logs -l job-name="${JOB_NAME}" -n app \
-            --prefix=false 2>/dev/null > /tmp/pod-logs.txt || true
+          POD=$(kubectl get pods -n app -l job-name="${JOB_NAME}" \
+            -o jsonpath='{.items[0].metadata.name}' 2>/dev/null || true)
 
-          # Print readable portion (before the artifact sentinel line)
-          sed '/---PLAYWRIGHT-ARTIFACTS-START---/,$d' /tmp/pod-logs.txt
+          if [ -n "${POD}" ]; then
+            kubectl logs "${POD}" -n app --prefix=false 2>/dev/null > /tmp/pod-logs.txt || true
 
-          # Extract the base64 block between the sentinel markers into its own file
-          sed -n '/---PLAYWRIGHT-ARTIFACTS-START---/,/---PLAYWRIGHT-ARTIFACTS-END---/p' \
-            /tmp/pod-logs.txt \
-            | grep -v '^---PLAYWRIGHT-ARTIFACTS' \
-            > /tmp/artifacts.b64
+            # Print readable portion (before the artifact sentinel line)
+            sed '/---PLAYWRIGHT-ARTIFACTS-START---/,$d' /tmp/pod-logs.txt 2>/dev/null || true
 
-          if [ -s /tmp/artifacts.b64 ]; then
-            echo "Extracting artifact tarball..."
-            base64 -d /tmp/artifacts.b64 | tar -xzf - -C artifacts/ || true
-            echo "Artifact contents:"
-            find artifacts/ -type f | head -40
+            # Extract the base64 block between the sentinel markers into its own file
+            sed -n '/---PLAYWRIGHT-ARTIFACTS-START---/,/---PLAYWRIGHT-ARTIFACTS-END---/p' \
+              /tmp/pod-logs.txt 2>/dev/null \
+              | grep -v '^---PLAYWRIGHT-ARTIFACTS' \
+              > /tmp/artifacts.b64 || true
+
+            if [ -s /tmp/artifacts.b64 ]; then
+              echo "Extracting artifact tarball..."
+              base64 -d /tmp/artifacts.b64 | tar -xzf - -C artifacts/ || true
+              echo "Artifact contents:"
+              find artifacts/ -type f | head -40
+            else
+              echo "⚠️  No artifact tarball found in pod logs."
+            fi
           else
-            echo "⚠️  No artifact tarball found in pod logs."
+            echo "⚠️  Pod for ${JOB_NAME} already cleaned up — no logs available."
           fi
 
           [ "${JOB_STATUS}" -ne 0 ] && exit 1 || true
