@@ -421,6 +421,14 @@ jobs:
             --max-instances=10 \
             --quiet
 
+      - name: Make Cloud Run publicly accessible
+        run: |
+          gcloud run services add-iam-policy-binding "${{ env.SERVICE_NAME }}" \
+            --region="${{ env.REGION }}" \
+            --member=allUsers \
+            --role=roles/run.invoker \
+            --quiet
+
       - name: Get Cloud Run URL
         id: url
         run: |
