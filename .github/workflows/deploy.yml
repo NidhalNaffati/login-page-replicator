@@ -20,11 +20,11 @@ on:
 
 env:
   PROJECT_ID:   nidhal-pfe
-  REGION:       europe-west1
+  REGION:       europe-west9
   REPO_NAME:    login-page-replicator-repo
   SERVICE_NAME: login-page-replicator
-  IMAGE_BASE:   europe-west1-docker.pkg.dev/nidhal-pfe/login-page-replicator-repo/login-page-replicator
-  PW_IMAGE:     europe-west1-docker.pkg.dev/nidhal-pfe/login-page-replicator-repo/playwright-tests
+  IMAGE_BASE:   europe-west9-docker.pkg.dev/nidhal-pfe/login-page-replicator-repo/login-page-replicator
+  PW_IMAGE:     europe-west9-docker.pkg.dev/nidhal-pfe/login-page-replicator-repo/playwright-tests
   CLUSTER_NAME: devops-cluster
 
 jobs:
@@ -596,7 +596,7 @@ jobs:
           # pod can pull the Playwright image from Artifact Registry
           for NS in app testing; do
             kubectl create secret docker-registry ar-pull-secret \
-              --docker-server=europe-west1-docker.pkg.dev \
+              --docker-server=${{ env.REGION }}-docker.pkg.dev \
               --docker-username=oauth2accesstoken \
               --docker-password="$(gcloud auth print-access-token)" \
               --namespace=${NS} \
