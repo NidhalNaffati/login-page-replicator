@@ -2,7 +2,7 @@
 
 This repository contains a React + Vite Todo app (with a login gate), plus deployment assets for Docker, GKE, Cloud Run, Playwright e2e tests, Terraform, and Kubernetes security policies.
 
-## What is in this project
+## What is in this pfe project
 
 - Frontend: React 18 + TypeScript + Vite + Tailwind + shadcn/ui.
 - Unit tests: Vitest.
