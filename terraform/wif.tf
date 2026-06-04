@@ -5,7 +5,7 @@
 
 # 1. WIF Pool
 resource "google_iam_workload_identity_pool" "github" {
-  workload_identity_pool_id = "github"
+  workload_identity_pool_id = "github-actions"
   display_name              = "GitHub Actions"
   description               = "WIF pool for GitHub Actions CI/CD"
 

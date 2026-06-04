@@ -92,9 +92,9 @@ resource "google_project_iam_member" "github_gke_developer" {
 }
 
 # Deploy to Cloud Run
-resource "google_project_iam_member" "github_run_developer" {
+resource "google_project_iam_member" "github_run_admin" {
   project = var.project_id
-  role    = "roles/run.developer"
+  role    = "roles/run.admin"
   member  = "serviceAccount:${google_service_account.github_actions.email}"
 }
 
