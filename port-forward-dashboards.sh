@@ -1,5 +1,6 @@
 #!/bin/bash
 
+SONARCLOUD_URL="${SONARCLOUD_URL:-https://sonarcloud.io/project/overview?id=NidhalNaffati_login-page-replicator}"
 WAZUH_URL="${WAZUH_URL:-https://34.163.192.117}"
 WAZUH_USERNAME="${WAZUH_USERNAME:-admin}"
 WAZUH_PASSWORD="${WAZUH_PASSWORD:-o1UVwmliV8m8llD9d.g41QX1bBxMPZdY}"
@@ -57,6 +58,11 @@ echo "Password: $ARGO_PASS"
 echo -e "==========================================\n"
 
 echo -e "\n=========================================="
+echo "🔍 SonarCloud"
+echo "URL:      $SONARCLOUD_URL"
+echo -e "==========================================\n"
+
+echo -e "\n=========================================="
 echo "🛡️  Wazuh Dashboard"
 echo "URL:      $WAZUH_URL"
 echo "Username: $WAZUH_USERNAME"
@@ -76,17 +82,20 @@ echo "Opening browsers..."
 if command -v xdg-open &> /dev/null; then
     xdg-open "http://localhost:3000"
     xdg-open "https://localhost:8081"
+    xdg-open "$SONARCLOUD_URL"
     xdg-open "$WAZUH_URL"
     xdg-open "http://localhost:8080"
 elif command -v open &> /dev/null; then
     open "http://localhost:3000"
     open "https://localhost:8081"
+    open "$SONARCLOUD_URL"
     open "$WAZUH_URL"
     open "http://localhost:8080"
 elif command -v cmd.exe &> /dev/null; then
     # Git Bash on Windows fallback
     cmd.exe /c start "http://localhost:3000"
     cmd.exe /c start "https://localhost:8081"
+    cmd.exe /c start "$SONARCLOUD_URL"
     cmd.exe /c start "$WAZUH_URL"
     cmd.exe /c start "http://localhost:8080"
 else
