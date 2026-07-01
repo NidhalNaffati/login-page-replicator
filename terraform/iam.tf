@@ -114,11 +114,12 @@ resource "google_service_account_iam_member" "github_actas_compute_sa" {
 
 # Allow unauthenticated access to Cloud Run (public URL)
 # Note: apply after the service exists, or Terraform will error if the service is missing.
-resource "google_cloud_run_service_iam_member" "cloud_run_public_invoker" {
-  project  = var.project_id
-  location = var.region
-  service  = var.cloud_run_service_name
+# TODO: Uncomment after first Cloud Run deploy via GitHub Actions
+# resource "google_cloud_run_service_iam_member" "cloud_run_public_invoker" {
+#   project  = var.project_id
+#   location = var.region
+#   service  = var.cloud_run_service_name
 
-  role   = "roles/run.invoker"
-  member = "allUsers"
-}
+#   role   = "roles/run.invoker"
+#   member = "allUsers"
+# }

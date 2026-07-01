@@ -1,6 +1,6 @@
 #!/bin/bash
 
-WAZUH_URL="${WAZUH_URL:-https://34.155.28.140}"
+WAZUH_URL="${WAZUH_URL:-https://34.163.192.117}"
 WAZUH_USERNAME="${WAZUH_USERNAME:-admin}"
 WAZUH_PASSWORD="${WAZUH_PASSWORD:-Xo7v1Di1VyFrsndeEngzKpleQ+p*Tm?F}"
 

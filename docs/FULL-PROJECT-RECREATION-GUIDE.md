@@ -60,7 +60,7 @@
 gcloud auth login
 
 # Set your NEW project ID (replace with your actual project ID)
-export GCP_PROJECT="project-68ed22e3-fde5-4fac-90c"
+export GCP_PROJECT="nidhal-pfe"
 export GCP_REGION="europe-west9"
 export GCP_ZONE="europe-west9-a"
 
@@ -118,7 +118,7 @@ cp backend.hcl.example backend.hcl
 
 Edit `backend.hcl`:
 ```hcl
-bucket = "project-68ed22e3-fde5-4fac-90c-tfstate"
+bucket = "nidhal-pfe-tfstate"
 prefix = "devops-cluster"
 ```
 
@@ -163,7 +163,7 @@ The following files reference the GCP project ID. Update them **before** deployi
 Quick sed replacement (Linux/macOS):
 ```bash
 # From project root
-OLD_PROJECT="project-68ed22e3-fde5-4fac-90c"
+OLD_PROJECT="nidhal-pfe"
 NEW_PROJECT="${GCP_PROJECT}"
 
 find k8s/ .github/ -type f \( -name "*.yaml" -o -name "*.yml" \) \
@@ -761,12 +761,12 @@ In `.github/workflows/deploy.yml`, update the `env:` section:
 
 ```yaml
 env:
-  PROJECT_ID:   project-68ed22e3-fde5-4fac-90c          # <-- CHANGE
+  PROJECT_ID:   nidhal-pfe          # <-- CHANGE
   REGION:       europe-west9
   REPO_NAME:    login-page-replicator-repo
   SERVICE_NAME: login-page-replicator
-  IMAGE_BASE:   europe-west9-docker.pkg.dev/project-68ed22e3-fde5-4fac-90c/login-page-replicator-repo/login-page-replicator  # <-- CHANGE
-  PW_IMAGE:     europe-west9-docker.pkg.dev/project-68ed22e3-fde5-4fac-90c/login-page-replicator-repo/playwright-tests       # <-- CHANGE
+  IMAGE_BASE:   europe-west9-docker.pkg.dev/nidhal-pfe/login-page-replicator-repo/login-page-replicator  # <-- CHANGE
+  PW_IMAGE:     europe-west9-docker.pkg.dev/nidhal-pfe/login-page-replicator-repo/playwright-tests       # <-- CHANGE
   CLUSTER_NAME: devops-cluster
 ```
 
@@ -794,18 +794,18 @@ Or trigger manually:
 
 ### 12.6 Workflow jobs overview
 
-| Job | Purpose | Blocking? |
-|-----|---------|-----------|
-| `build-test` | Install deps, lint, build | Yes |
-| `prepare-release-infra` | Enable APIs, ensure Artifact Registry exists | Yes |
-| `app-image-release` | Build + push app Docker image | Yes |
-| `trivy-image-app` | Scan app image for vulnerabilities | Yes (blocks deploy on CRITICAL) |
-| `playwright-release` | Build + push Playwright test image | Yes |
-| `trivy-image-playwright` | Scan test image (informational) | No |
-| `cloud-run-deploy` | Deploy to Cloud Run (staging) | No (parallel) |
-| `zap-baseline` | OWASP ZAP DAST scan on Cloud Run | No |
-| `update-k8s-tags` | Update K8s manifests + Git push → triggers Argo CD | Yes |
-| `e2e-tests` (×6) | Wait for Argo CD PostSync hooks, collect results | No |
+| Job                      | Purpose                                            | Blocking?                       |
+|--------------------------|----------------------------------------------------|---------------------------------|
+| `build-test`             | Install deps, lint, build                          | Yes                             |
+| `prepare-release-infra`  | Enable APIs, ensure Artifact Registry exists       | Yes                             |
+| `app-image-release`      | Build + push app Docker image                      | Yes                             |
+| `trivy-image-app`        | Scan app image for vulnerabilities                 | Yes (blocks deploy on CRITICAL) |
+| `playwright-release`     | Build + push Playwright test image                 | Yes                             |
+| `trivy-image-playwright` | Scan test image (informational)                    | No                              |
+| `cloud-run-deploy`       | Deploy to Cloud Run (staging)                      | No (parallel)                   |
+| `zap-baseline`           | OWASP ZAP DAST scan on Cloud Run                   | No                              |
+| `update-k8s-tags`        | Update K8s manifests + Git push → triggers Argo CD | Yes                             |
+| `e2e-tests` (×6)         | Wait for Argo CD PostSync hooks, collect results   | No                              |
 
 ---
 
@@ -885,34 +885,34 @@ This opens:
 
 ### Security improvements
 
-| # | Improvement | Priority | Description |
-|---|------------|----------|-------------|
-| 1 | **Restrict Wazuh Dashboard firewall** | 🔴 High | Change `allow-wazuh-dashboard` source from `0.0.0.0/0` to your IP `/32` in `terraform/wazuh.tf` |
-| 2 | **Rotate Wazuh admin password** | 🔴 High | The auto-generated password should be changed. Use the Wazuh API or dashboard settings |
+| # | Improvement                                  | Priority  | Description                                                                                                                     |
+|---|----------------------------------------------|-----------|---------------------------------------------------------------------------------------------------------------------------------|
+| 1 | **Restrict Wazuh Dashboard firewall**        | 🔴 High   | Change `allow-wazuh-dashboard` source from `0.0.0.0/0` to your IP `/32` in `terraform/wazuh.tf`                                 |
+| 2 | **Rotate Wazuh admin password**              | 🔴 High   | The auto-generated password should be changed. Use the Wazuh API or dashboard settings                                          |
 | 3 | **Remove hardcoded secrets from Dockerfile** | 🟡 Medium | The `APP_SECRET`, `DB_PASSWORD`, `JWT_SECRET` ENV vars are intentional vulnerabilities — document clearly they're for demo only |
-| 4 | **Add SONAR_TOKEN to GitHub Secrets** | 🟡 Medium | Required for the SonarCloud workflow to pass |
-| 5 | **Pin Argo CD version** | 🟡 Medium | Instead of `stable/manifests/install.yaml`, pin a specific version like `v2.13.0` for reproducibility |
-| 6 | **Use sealed-secrets or External Secrets** | 🟡 Medium | Replace `ar-pull-secret` (short-lived token) with a proper secret management solution |
-| 7 | **Enable Trivy exit-code 1** | 🟢 Low | Currently the Trivy scan is non-blocking (`exit-code: 0`). For production, gate deploys on HIGH+ vulns |
+| 4 | **Add SONAR_TOKEN to GitHub Secrets**        | 🟡 Medium | Required for the SonarCloud workflow to pass                                                                                    |
+| 5 | **Pin Argo CD version**                      | 🟡 Medium | Instead of `stable/manifests/install.yaml`, pin a specific version like `v2.13.0` for reproducibility                           |
+| 6 | **Use sealed-secrets or External Secrets**   | 🟡 Medium | Replace `ar-pull-secret` (short-lived token) with a proper secret management solution                                           |
+| 7 | **Enable Trivy exit-code 1**                 | 🟢 Low    | Currently the Trivy scan is non-blocking (`exit-code: 0`). For production, gate deploys on HIGH+ vulns                          |
 
 ### Infrastructure improvements
 
-| # | Improvement | Priority | Description |
-|---|------------|----------|-------------|
-| 1 | **Add `terraform.tfvars`** | 🟡 Medium | Create a `.tfvars` file (gitignored) to avoid passing `-var` every time |
-| 2 | **Separate Wazuh into its own Terraform module** | 🟢 Low | Better separation of concerns |
-| 3 | **Add node auto-scaling** | 🟢 Low | Add `autoscaling` block to the node pool (min 1, max 5 per zone) |
-| 4 | **Use private GKE cluster** | 🟢 Low | Disable public endpoint for production |
-| 5 | **Add Cloud Armor WAF** | 🟢 Low | In front of the GCE Ingress for DDoS protection |
+| # | Improvement                                      | Priority  | Description                                                             |
+|---|--------------------------------------------------|-----------|-------------------------------------------------------------------------|
+| 1 | **Add `terraform.tfvars`**                       | 🟡 Medium | Create a `.tfvars` file (gitignored) to avoid passing `-var` every time |
+| 2 | **Separate Wazuh into its own Terraform module** | 🟢 Low    | Better separation of concerns                                           |
+| 3 | **Add node auto-scaling**                        | 🟢 Low    | Add `autoscaling` block to the node pool (min 1, max 5 per zone)        |
+| 4 | **Use private GKE cluster**                      | 🟢 Low    | Disable public endpoint for production                                  |
+| 5 | **Add Cloud Armor WAF**                          | 🟢 Low    | In front of the GCE Ingress for DDoS protection                         |
 
 ### CI/CD improvements
 
-| # | Improvement | Priority | Description |
-|---|------------|----------|-------------|
-| 1 | **ar-pull-secret expiration** | 🔴 High | `gcloud auth print-access-token` expires in 1h. Consider using a cronjob or Workload Identity for image pulls instead |
-| 2 | **Add branch protection rules** | 🟡 Medium | Require PR reviews + passing checks before merge to master |
-| 3 | **Cache Docker layers in CI** | 🟢 Low | Use `actions/cache` or registry-based caching for faster builds |
-| 4 | **Add Slack/Discord notifications** | 🟢 Low | Notify on pipeline failures |
+| # | Improvement                         | Priority  | Description                                                                                                           |
+|---|-------------------------------------|-----------|-----------------------------------------------------------------------------------------------------------------------|
+| 1 | **ar-pull-secret expiration**       | 🔴 High   | `gcloud auth print-access-token` expires in 1h. Consider using a cronjob or Workload Identity for image pulls instead |
+| 2 | **Add branch protection rules**     | 🟡 Medium | Require PR reviews + passing checks before merge to master                                                            |
+| 3 | **Cache Docker layers in CI**       | 🟢 Low    | Use `actions/cache` or registry-based caching for faster builds                                                       |
+| 4 | **Add Slack/Discord notifications** | 🟢 Low    | Notify on pipeline failures                                                                                           |
 
 ---
 
@@ -920,39 +920,39 @@ This opens:
 
 ### Terraform errors
 
-| Error | Solution |
-|-------|----------|
-| `Error 403: The caller does not have permission` | Run `gcloud auth application-default login` |
-| `Error creating WIF pool: already exists` | Import it: `terraform import google_iam_workload_identity_pool.github projects/PROJECT_ID/locations/global/workloadIdentityPools/github` |
-| `Quota CPUS_ALL_REGIONS exceeded` | Request quota increase or use smaller machine type: `-var="gke_machine_type=e2-standard-2"` |
-| `Error creating GCS bucket: 409 conflict` | Bucket name is globally unique — change `TFSTATE_BUCKET` |
+| Error                                            | Solution                                                                                                                                 |
+|--------------------------------------------------|------------------------------------------------------------------------------------------------------------------------------------------|
+| `Error 403: The caller does not have permission` | Run `gcloud auth application-default login`                                                                                              |
+| `Error creating WIF pool: already exists`        | Import it: `terraform import google_iam_workload_identity_pool.github projects/PROJECT_ID/locations/global/workloadIdentityPools/github` |
+| `Quota CPUS_ALL_REGIONS exceeded`                | Request quota increase or use smaller machine type: `-var="gke_machine_type=e2-standard-2"`                                              |
+| `Error creating GCS bucket: 409 conflict`        | Bucket name is globally unique — change `TFSTATE_BUCKET`                                                                                 |
 
 ### GKE / Kubernetes errors
 
-| Error | Solution |
-|-------|----------|
-| Pods stuck in `ImagePullBackOff` | Refresh `ar-pull-secret` (see Phase 9.1) or check Workload Identity bindings |
-| `networkpolicy blocking traffic` | Temporarily delete: `kubectl delete -k k8s/security` then reapply one by one |
-| Argo CD app shows `OutOfSync` | Check the repoURL in Application CRs matches your fork |
-| HPA not scaling | Verify metrics-server is running: `kubectl get deploy metrics-server -n kube-system` |
+| Error                            | Solution                                                                             |
+|----------------------------------|--------------------------------------------------------------------------------------|
+| Pods stuck in `ImagePullBackOff` | Refresh `ar-pull-secret` (see Phase 9.1) or check Workload Identity bindings         |
+| `networkpolicy blocking traffic` | Temporarily delete: `kubectl delete -k k8s/security` then reapply one by one         |
+| Argo CD app shows `OutOfSync`    | Check the repoURL in Application CRs matches your fork                               |
+| HPA not scaling                  | Verify metrics-server is running: `kubectl get deploy metrics-server -n kube-system` |
 
 ### Wazuh errors
 
-| Error | Solution |
-|-------|----------|
-| Agents stuck `Disconnected` | Remove stale agents: `sudo /var/ossec/bin/manage_agents -r <ID>` on the VM |
-| `Unable to connect to enrollment service` (port 1515) | Check firewall source includes `10.20.0.0/16` (pods CIDR) |
-| Dashboard shows 500 error | Restart services in order: indexer → wait 45s → manager + filebeat → dashboard |
-| VM not responding | Check VM status: `gcloud compute instances describe wazuh-manager --zone=${GCP_ZONE}` |
+| Error                                                 | Solution                                                                              |
+|-------------------------------------------------------|---------------------------------------------------------------------------------------|
+| Agents stuck `Disconnected`                           | Remove stale agents: `sudo /var/ossec/bin/manage_agents -r <ID>` on the VM            |
+| `Unable to connect to enrollment service` (port 1515) | Check firewall source includes `10.20.0.0/16` (pods CIDR)                             |
+| Dashboard shows 500 error                             | Restart services in order: indexer → wait 45s → manager + filebeat → dashboard        |
+| VM not responding                                     | Check VM status: `gcloud compute instances describe wazuh-manager --zone=${GCP_ZONE}` |
 
 ### GitHub Actions errors
 
-| Error | Solution |
-|-------|----------|
-| `GCP_WORKLOAD_IDENTITY_PROVIDER is EMPTY` | Add the secret in GitHub repo settings |
-| `Error: google-github-actions/auth failed` | Verify WIF attribute_condition matches your repo name exactly |
-| `Permission denied on Artifact Registry` | Check `github-actions-sa` has `artifactregistry.writer` role |
-| `e2e-tests: Job never appeared` | Argo CD may not be syncing — check `kubectl get applications -n argocd` |
+| Error                                      | Solution                                                                |
+|--------------------------------------------|-------------------------------------------------------------------------|
+| `GCP_WORKLOAD_IDENTITY_PROVIDER is EMPTY`  | Add the secret in GitHub repo settings                                  |
+| `Error: google-github-actions/auth failed` | Verify WIF attribute_condition matches your repo name exactly           |
+| `Permission denied on Artifact Registry`   | Check `github-actions-sa` has `artifactregistry.writer` role            |
+| `e2e-tests: Job never appeared`            | Argo CD may not be syncing — check `kubectl get applications -n argocd` |
 
 ---
 
@@ -963,7 +963,7 @@ This opens:
 # FULL RECREATION — Copy-paste friendly sequence
 # ═══════════════════════════════════════════════════════
 
-export GCP_PROJECT="project-68ed22e3-fde5-4fac-90c"
+export GCP_PROJECT="nidhal-pfe"
 export GCP_REGION="europe-west9"
 export GCP_ZONE="europe-west9-a"
 export TFSTATE_BUCKET="${GCP_PROJECT}-tfstate"
@@ -1049,51 +1049,51 @@ git push origin master
 
 ```
 ┌─────────────────────────────────────────────────────────────────────┐
-│                        GCP Project                                   │
+│                        GCP Project                                  │
 │                                                                     │
 │  ┌──────────────────────────────────────────────────────────────┐  │
 │  │  VPC: devops-vpc (10.10.0.0/20)                              │  │
 │  │                                                              │  │
-│  │  ┌─────────────────────────────────────────────────────┐    │  │
-│  │  │  GKE Standard Cluster (3 nodes, e2-standard-4)      │    │  │
-│  │  │                                                     │    │  │
-│  │  │  ┌─────────┐ ┌───────────┐ ┌─────────┐ ┌───────┐ │    │  │
-│  │  │  │   app   │ │  testing  │ │observ.  │ │securi.│ │    │  │
-│  │  │  │ ns      │ │  ns       │ │ ns      │ │ ns    │ │    │  │
-│  │  │  │         │ │           │ │         │ │       │ │    │  │
-│  │  │  │ Nginx   │ │Playwright │ │Prometheus│ │Wazuh │ │    │  │
-│  │  │  │ App     │ │  Jobs     │ │Grafana  │ │Agents │ │    │  │
-│  │  │  │ HPA 2-8 │ │ (hooks)   │ │         │ │(DS)  │ │    │  │
-│  │  │  └────┬────┘ └───────────┘ └─────────┘ └───┬──┘ │    │  │
+│  │  ┌────────────────────────────────────────────────────┐    │  │
+│  │  │  GKE Standard Cluster (3 nodes, e2-standard-4)     │    │  │
+│  │  │                                                    │    │  │
+│  │  │  ┌─────────┐ ┌───────────┐ ┌──────────┐ ┌───────┐  │   │
+│  │  │  │   app   │ │  testing  │ │observ.   │ │securi.│  │   │
+│  │  │  │ ns      │ │  ns       │ │ ns       │ │ ns    │  │   │
+│  │  │  │         │ │           │ │          │ │       │  │   │
+│  │  │  │ Nginx   │ │Playwright │ │Prometheus│ │Wazuh  │  │   │
+│  │  │  │ App     │ │  Jobs     │ │Grafana   │ │Agents │  │   │
+│  │  │  │ HPA 2-8 │ │ (hooks)   │ │          │ │(DS)   │  │   │
+│  │  │  └────┬────┘ └───────────┘ └──────────┘ └───┬───┘  │    │  │
 │  │  │       │                                      │     │    │  │
 │  │  └───────┼──────────────────────────────────────┼─────┘    │  │
-│  │          │                                      │           │  │
-│  │          ▼                                      ▼           │  │
+│  │          │                                      │          │  │
+│  │          ▼                                      ▼          │  │
 │  │  ┌──────────────┐                    ┌──────────────────┐  │  │
 │  │  │  GCE L7 LB   │                    │  Wazuh VM        │  │  │
-│  │  │  (Ingress)    │                    │  e2-medium       │  │  │
+│  │  │  (Ingress)   │                    │  e2-medium       │  │  │
 │  │  └──────────────┘                    │  10.10.0.2       │  │  │
-│  │                                      │  Manager+Indexer  │  │  │
-│  │  ┌──────────────┐                    │  +Dashboard       │  │  │
-│  │  │ Artifact Reg │                    └──────────────────┘  │  │
-│  │  │ Docker repo  │                                          │  │
-│  │  └──────────────┘                                          │  │
-│  └──────────────────────────────────────────────────────────────┘  │
+│  │                                      │  Manager+Indexer │  │  │
+│  │  ┌──────────────┐                    │  +Dashboard      │  │ │
+│  │  │ Artifact Reg │                    └──────────────────┘  │ │
+│  │  │ Docker repo  │                                          │ │
+│  │  └──────────────┘                                          │ │
+│  └──────────────────────────────────────────────────────────────┘   │
 │                                                                     │
-│  ┌─────────────────────────────────────┐                           │
-│  │  Cloud Run (staging/DAST target)    │                           │
-│  └─────────────────────────────────────┘                           │
+│  ┌─────────────────────────────────────┐                            │
+│  │  Cloud Run (staging/DAST target)    │                            │
+│  └─────────────────────────────────────┘                            │
 └─────────────────────────────────────────────────────────────────────┘
 
          ▲                    ▲
          │ WIF (OIDC)        │ GitOps (auto-sync)
          │                    │
-┌────────┴────────┐  ┌───────┴───────┐
+┌────────┴─────────┐  ┌───────┴───────┐
 │  GitHub Actions  │  │   Argo CD     │
 │  (CI/CD)         │  │   (in-cluster)│
 │                  │  │               │
-│  Build/Push      │──►  Sync K8s    │
-│  Trivy/ZAP       │  │  manifests   │
+│  Build/Push      │──►  Sync K8s     │
+│  Trivy/ZAP       │  │  manifests    │
 │  SonarCloud      │  └───────────────┘
 └──────────────────┘
 ```

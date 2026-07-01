@@ -19,7 +19,7 @@ set -euo pipefail
 # ═══════════════════════════════════════════════════════════════════════
 
 # ─── Configuration ────────────────────────────────────────────────────
-GCP_PROJECT="${GCP_PROJECT:-project-68ed22e3-fde5-4fac-90c}"
+GCP_PROJECT="${GCP_PROJECT:-nidhal-pfe}"
 GCP_REGION="${GCP_REGION:-europe-west9}"
 GCP_ZONE="${GCP_ZONE:-europe-west9-a}"
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
