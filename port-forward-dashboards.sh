@@ -1,9 +1,9 @@
 #!/bin/bash
 
 SONARCLOUD_URL="${SONARCLOUD_URL:-https://sonarcloud.io/project/overview?id=NidhalNaffati_login-page-replicator}"
-WAZUH_URL="${WAZUH_URL:-https://34.163.192.117}"
+WAZUH_URL="${WAZUH_URL:-https://34.155.58.75}"
 WAZUH_USERNAME="${WAZUH_USERNAME:-admin}"
-WAZUH_PASSWORD="${WAZUH_PASSWORD:-o1UVwmliV8m8llD9d.g41QX1bBxMPZdY}"
+WAZUH_PASSWORD="${WAZUH_PASSWORD:-4Pa15wrtdJssLze2AxAULPG8uP5O?a.K}"
 
 APP_USERNAME="${APP_USERNAME:-TNEEIN01}"
 APP_PASSWORD="${APP_PASSWORD:-4YOU}"
