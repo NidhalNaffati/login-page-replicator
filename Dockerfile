@@ -1,43 +1,29 @@
-# ⚠️  SECURITY DEMO — INTENTIONALLY VULNERABLE (for Trivy scan showcase) ⚠️
-
 # Stage 1: Build
-FROM oven/bun:1 AS builder
+FROM node:20-alpine AS build
+
 WORKDIR /app
 
-# Copy dependency files first for better layer caching
-COPY package.json bun.lock ./
+COPY package.json package-lock.json* bun.lockb* ./
 
-# Install dependencies (uses bun.lockb lockfile)
-RUN bun install
+RUN npm install
 
-# Copy the rest of the source code
 COPY . .
 
-# Build the app for production
-RUN bun run build
+
+RUN npm run build
 
 # Stage 2: Serve with Nginx
-# VULN: Using an outdated nginx base image with known CVEs (instead of nginx:alpine)
-FROM nginx:1.21 AS runner
+FROM nginx:stable-alpine
 
-# VULN: Hardcoded secrets baked into the image layer (Trivy secret scan)
-ENV APP_SECRET=supersecretpassword123
-ENV DB_PASSWORD=admin123
-ENV JWT_SECRET=mysupersecretjwtkey2024
+# Fix CVE-2026-22184: upgrade zlib to patched version 1.3.2-r0
+# Fix CVE-2026-40200: upgrade musl to patched version 1.2.5-r23
+RUN apk add --no-cache zlib=1.3.2-r0 musl=1.2.5-r23 musl-utils=1.2.5-r23
 
-# VULN: Copying .env file with secrets into the image (Trivy secret scan)
-COPY .env /app/.env
+COPY --from=build /app/dist /usr/share/nginx/html
+COPY nginx.conf /etc/nginx/conf.d/default.conf
 
-# Copy built assets from the builder stage
-COPY --from=builder /app/dist /usr/share/nginx/html
+EXPOSE 8080
 
-# Use our custom nginx config (supports React Router client-side routing)
-COPY ./nginx.conf /etc/nginx/conf.d/default.conf
-
-# VULN: No USER directive — container runs as root (Trivy misconfig DS002)
-# VULN: No HEALTHCHECK defined (Trivy misconfig DS026)
-
-EXPOSE 80
 CMD ["nginx", "-g", "daemon off;"]
 
 

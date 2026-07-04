@@ -1,11 +1,12 @@
 import { defineConfig, devices } from '@playwright/test';
 
 export default defineConfig({
-  testDir: './tests',
+  testDir: './e2e',
   fullyParallel: true,
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 2 : 0,
   workers: process.env.CI ? 1 : undefined,
+  timeout: process.env.CI ? 60000 : 30000,
   outputDir: 'test-results',
   reporter: process.env.CI
     ? [
@@ -16,10 +17,10 @@ export default defineConfig({
       ]
     : [['html', { outputFolder: 'playwright-report', open: 'never' }]],
   use: {
-    // In CI (Kubernetes Job), BASE_URL points to the ClusterIP service.
-    // Locally, falls back to the vite dev server.
     baseURL: process.env.BASE_URL || 'http://localhost:8080',
     trace: 'on-first-retry',
+    screenshot: 'only-on-failure',
+    actionTimeout: 10000,
   },
   projects: [
     {
@@ -27,14 +28,15 @@ export default defineConfig({
       use: { ...devices['Desktop Chrome'] },
     },
   ],
-  // Spin up the dev server when the target is localhost (local dev OR GitHub Actions runner).
+  // Spin up the dev server when the target is localhost (local dev).
   // Skip it when pointing at a real cluster service (BASE_URL set to a non-localhost address).
   webServer: process.env.BASE_URL && !process.env.BASE_URL.includes('localhost')
     ? undefined
     : {
-        command: 'bun run dev',
+        command: 'npm run dev',
         url: 'http://localhost:8080',
         reuseExistingServer: !process.env.CI,
         timeout: 120 * 1000,
       },
 });
+

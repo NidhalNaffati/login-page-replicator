@@ -1,5 +1,5 @@
 import { defineConfig } from "vitest/config";
-import react from "@vitejs/plugin-react";
+import react from "@vitejs/plugin-react-swc";
 import path from "path";
 
 export default defineConfig({
@@ -11,15 +11,8 @@ export default defineConfig({
     include: ["src/**/*.{test,spec}.{ts,tsx}"],
     coverage: {
       provider: "v8",
-      reporter: ["text", "lcov", "json-summary"],
+      reporter: ["text", "lcov"],
       reportsDirectory: "./coverage",
-      include: ["src/**/*.{ts,tsx}"],
-      exclude: [
-        "src/components/ui/**",   // auto-generated shadcn components
-        "src/test/**",
-        "src/vite-env.d.ts",
-        "src/main.tsx",
-      ],
     },
   },
   resolve: {
